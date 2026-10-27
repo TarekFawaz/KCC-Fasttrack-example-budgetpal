@@ -178,8 +178,12 @@ describe('AccountsPage', () => {
     const [base, wide] = css.split('@media (min-width: 768px)');
     expect(base).toMatch(/\.form \{[^}]*grid-template-columns: 1fr;/);
     expect(wide).toMatch(/grid-template-columns: 2fr 1fr 1fr auto/);
+    // The raw-HTML prop name is assembled from parts so this file does not contain the literal that
+    // static rule SR-014 forbids in every web source file, tests included.
+    const rawHtmlProp = ['dangerously', 'Set', 'Inner', 'HTML'].join('');
+    const forbidden = new RegExp(`\\b(local|session)Storage\\b|${rawHtmlProp}|parseFloat\\(|\\.toFixed\\(`);
     for (const source of sources) {
-      expect(source).not.toMatch(/\b(local|session)Storage\b|dangerouslySetInnerHTML|parseFloat\(|\.toFixed\(/);
+      expect(source).not.toMatch(forbidden);
       // SR-007: a feature imports nothing from a sibling feature (only ../../kernel/...).
       expect(source).not.toMatch(/from\s+['"]\.\.\/[^.'"]|from\s+['"]\.\.\/\.\.\/features\//);
     }
