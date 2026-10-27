@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   CategoryApiError,
   useCategories,
@@ -6,8 +9,7 @@ import {
   type Category,
   type CategoryKind,
 } from './categories.api';
-import { CategoryRow, KIND_LABELS, MAX_NAME_LENGTH, validateName } from './CategoryRow';
-import styles from './CategoriesPage.module.css';
+import { CategoryRow, KIND_LABELS, MAX_NAME_LENGTH, MESSAGE_CLASSES, SELECT_CLASSES, validateName } from './CategoryRow';
 
 export { KIND_LABELS, MAX_NAME_LENGTH, validateName };
 
@@ -42,11 +44,11 @@ function CategoryGroups({ categories }: { categories: Category[] }) {
         if (members.length === 0) return null;
         const headingId = `categories-${kind}`;
         return (
-          <section key={kind} className={styles.group} aria-labelledby={headingId}>
-            <h2 id={headingId} className={styles.groupTitle}>
+          <section key={kind} className="flex flex-col gap-3" aria-labelledby={headingId}>
+            <h2 id={headingId} className="text-lg font-semibold tracking-tight">
               {KIND_LABELS[kind]} categories
             </h2>
-            <ul className={styles.list}>
+            <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {members.map((category) => (
                 <CategoryRow key={category.id} category={category} />
               ))}
@@ -99,19 +101,20 @@ export function CategoriesPage() {
   const list = categories.data ?? [];
 
   return (
-    <section className={styles.page}>
-      <h1>Categories</h1>
-      <form onSubmit={onSubmit} noValidate className={styles.form} aria-label="Add a category">
-        <div className={styles.field}>
-          <label htmlFor="category-name" className={styles.label}>
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <h1 className="text-2xl font-semibold tracking-tight">Categories</h1>
+      <form onSubmit={onSubmit} noValidate
+        className="grid grid-cols-1 gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm md:grid-cols-[2fr_1fr_auto] md:items-start"
+        aria-label="Add a category">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="category-name">
             Name
-          </label>
-          <input
+          </Label>
+          <Input
             id="category-name"
             name="name"
             type="text"
             autoComplete="off"
-            className={styles.input}
             value={name}
             onChange={(event) => setName(event.target.value)}
             ref={nameRef}
@@ -119,20 +122,20 @@ export function CategoriesPage() {
             aria-describedby={errors.name ? nameErrorId : undefined}
           />
           {errors.name ? (
-            <p id={nameErrorId} role="alert" className={styles.message}>
+            <p id={nameErrorId} role="alert" className={MESSAGE_CLASSES}>
               <span aria-hidden="true">⚠ </span>
               {errors.name}
             </p>
           ) : null}
         </div>
-        <div className={styles.field}>
-          <label htmlFor="category-kind" className={styles.label}>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="category-kind">
             Kind
-          </label>
+          </Label>
           <select
             id="category-kind"
             name="kind"
-            className={styles.input}
+            className={SELECT_CLASSES}
             value={kind}
             onChange={(event) => setKind(event.target.value as CategoryKind)}
             ref={kindRef}
@@ -143,18 +146,18 @@ export function CategoriesPage() {
             <option value="income">{KIND_LABELS.income}</option>
           </select>
           {errors.kind ? (
-            <p id={kindErrorId} role="alert" className={styles.message}>
+            <p id={kindErrorId} role="alert" className={MESSAGE_CLASSES}>
               <span aria-hidden="true">⚠ </span>
               {errors.kind}
             </p>
           ) : null}
         </div>
-        <button type="submit" className={styles.button} disabled={create.isPending}>
+        <Button type="submit" disabled={create.isPending} className="md:mt-[1.625rem]">
           Add category
-        </button>
+        </Button>
       </form>
       {errors.form ? (
-        <p role="alert" className={styles.message}>
+        <p role="alert" className={MESSAGE_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           {errors.form}
         </p>
@@ -162,13 +165,13 @@ export function CategoriesPage() {
 
       {categories.isPending ? <p role="status">Loading categories...</p> : null}
       {categories.isError ? (
-        <p role="alert" className={styles.message}>
+        <p role="alert" className={MESSAGE_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           Could not load your categories. Try again later.
         </p>
       ) : null}
       {categories.isSuccess && list.length === 0 ? (
-        <p className={styles.empty}>
+        <p className="m-0 rounded-md border border-dashed p-4 text-muted-foreground">
           You have no categories yet. Type a name, choose Expense or Income, and select Add category to create your first one.
         </p>
       ) : null}

@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiProblem, useSignUp } from './authApi';
-import { AuthField, authStyles, useFocusFirstError, type FieldErrors } from './LoginPage';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { AuthField, ERROR_TEXT_CLASSES, useFocusFirstError, type FieldErrors } from './AuthField';
 
 export const MIN_PASSWORD_LENGTH = 15;
 export const MAX_PASSWORD_LENGTH = 128;
@@ -61,43 +63,52 @@ export function SignUpPage() {
   }
 
   return (
-    <section style={authStyles.page}>
-      <h1>Sign up</h1>
-      <form onSubmit={onSubmit} noValidate style={authStyles.form} aria-label="Sign up">
-        {formError ? (
-          <p role="alert" style={authStyles.error}>
-            <span aria-hidden="true">⚠ </span>
-            {formError}
+    <section className="mx-auto flex w-full max-w-md flex-col gap-4">
+      <Card>
+        <CardHeader>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Sign up</h1>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-label="Sign up">
+            {formError ? (
+              <p role="alert" className={ERROR_TEXT_CLASSES}>
+                <span aria-hidden="true">⚠ </span>
+                {formError}
+              </p>
+            ) : null}
+            <AuthField
+              name="email"
+              label="Email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={setEmail}
+              error={errors.email}
+              inputRef={register('email')}
+            />
+            <AuthField
+              name="password"
+              label="Password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={setPassword}
+              error={errors.password}
+              hint={PASSWORD_HINT}
+              inputRef={register('password')}
+            />
+            <Button type="submit" disabled={signUp.isPending}>
+              {signUp.isPending ? 'Creating account...' : 'Sign up'}
+            </Button>
+          </form>
+          <p className="m-0 text-sm">
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-primary underline underline-offset-4">
+              Log in
+            </Link>
           </p>
-        ) : null}
-        <AuthField
-          name="email"
-          label="Email"
-          type="email"
-          autoComplete="username"
-          value={email}
-          onChange={setEmail}
-          error={errors.email}
-          inputRef={register('email')}
-        />
-        <AuthField
-          name="password"
-          label="Password"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={setPassword}
-          error={errors.password}
-          hint={PASSWORD_HINT}
-          inputRef={register('password')}
-        />
-        <button type="submit" disabled={signUp.isPending} style={authStyles.button}>
-          {signUp.isPending ? 'Creating account...' : 'Sign up'}
-        </button>
-      </form>
-      <p>
-        Already have an account? <Link to="/login">Log in</Link>
-      </p>
+        </CardContent>
+      </Card>
     </section>
   );
 }

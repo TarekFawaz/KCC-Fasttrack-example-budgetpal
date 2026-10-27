@@ -1,96 +1,12 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { AuthField, ERROR_TEXT_CLASSES, useFocusFirstError, type FieldErrors } from './AuthField';
 import { ApiProblem, useLogIn, useLogOut } from './authApi';
 
-export type FieldErrors = Partial<Record<'email' | 'password', string>>;
-
-/** Layout uses the shell's CSS-variable tokens only; one column, fine down to 360 px. */
-export const authStyles = {
-  page: { maxWidth: '28rem', width: '100%', margin: '0 auto' } satisfies CSSProperties,
-  form: { display: 'flex', flexDirection: 'column', gap: 'var(--space)' } satisfies CSSProperties,
-  field: { display: 'flex', flexDirection: 'column', gap: '0.25rem' } satisfies CSSProperties,
-  input: {
-    font: 'inherit',
-    color: 'var(--text)',
-    background: 'var(--bg)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius)',
-    padding: '0.625rem 0.75rem',
-    minHeight: '2.75rem',
-    width: '100%',
-  } satisfies CSSProperties,
-  hint: { margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem' } satisfies CSSProperties,
-  error: { margin: 0, color: 'var(--warn)', fontWeight: 600 } satisfies CSSProperties,
-  button: {
-    font: 'inherit',
-    fontWeight: 600,
-    color: 'var(--text)',
-    background: 'var(--surface)',
-    border: '2px solid var(--border)',
-    borderRadius: 'var(--radius)',
-    padding: '0.625rem 1rem',
-    minHeight: '2.75rem',
-    cursor: 'pointer',
-  } satisfies CSSProperties,
-};
-
-interface AuthFieldProps {
-  name: 'email' | 'password';
-  label: string;
-  type: 'email' | 'password';
-  autoComplete: string;
-  value: string;
-  onChange: (value: string) => void;
-  error?: string;
-  hint?: string;
-  inputRef: (element: HTMLInputElement | null) => void;
-}
-
-/** A labelled input; its error (text, never colour alone) is tied to it with aria-describedby. */
-export function AuthField({ name, label, type, autoComplete, value, onChange, error, hint, inputRef }: AuthFieldProps) {
-  const id = `auth-${name}`;
-  const describedBy = [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined;
-  return (
-    <div style={authStyles.field}>
-      <label htmlFor={id}>{label}</label>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        ref={inputRef}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        style={authStyles.input}
-      />
-      {hint ? (
-        <p id={`${id}-hint`} style={authStyles.hint}>
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={`${id}-error`} style={authStyles.error}>
-          <span aria-hidden="true">⚠ </span>
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-/** Moves focus to the first field (in `order`) that has an error each time the error set is replaced. */
-export function useFocusFirstError(errors: FieldErrors, order: readonly (keyof FieldErrors)[]) {
-  const refs = useRef<Partial<Record<keyof FieldErrors, HTMLInputElement | null>>>({});
-  useEffect(() => {
-    const first = order.find((name) => errors[name]);
-    if (first) refs.current[first]?.focus();
-  }, [errors, order]);
-  return (name: keyof FieldErrors) => (element: HTMLInputElement | null) => {
-    refs.current[name] = element;
-  };
-}
+/** Centred single-column page frame, fine down to 360 px. */
+const PAGE_CLASSES = 'mx-auto flex w-full max-w-md flex-col gap-4';
 
 export const LOGIN_FAILED_MESSAGE = 'Email or password is incorrect.';
 const FIELD_ORDER = ['email', 'password'] as const;
@@ -130,42 +46,51 @@ export function LoginPage() {
   }
 
   return (
-    <section style={authStyles.page}>
-      <h1>Log in</h1>
-      <form onSubmit={onSubmit} noValidate style={authStyles.form} aria-label="Log in">
-        {formError ? (
-          <p role="alert" tabIndex={-1} ref={alertRef} style={authStyles.error}>
-            <span aria-hidden="true">⚠ </span>
-            {formError}
+    <section className={PAGE_CLASSES}>
+      <Card>
+        <CardHeader>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Log in</h1>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-label="Log in">
+            {formError ? (
+              <p role="alert" tabIndex={-1} ref={alertRef} className={ERROR_TEXT_CLASSES}>
+                <span aria-hidden="true">⚠ </span>
+                {formError}
+              </p>
+            ) : null}
+            <AuthField
+              name="email"
+              label="Email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={setEmail}
+              error={errors.email}
+              inputRef={register('email')}
+            />
+            <AuthField
+              name="password"
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              error={errors.password}
+              inputRef={register('password')}
+            />
+            <Button type="submit" disabled={logIn.isPending}>
+              {logIn.isPending ? 'Logging in...' : 'Log in'}
+            </Button>
+          </form>
+          <p className="m-0 text-sm">
+            New here?{' '}
+            <Link to="/signup" className="font-medium text-primary underline underline-offset-4">
+              Create an account
+            </Link>
           </p>
-        ) : null}
-        <AuthField
-          name="email"
-          label="Email"
-          type="email"
-          autoComplete="username"
-          value={email}
-          onChange={setEmail}
-          error={errors.email}
-          inputRef={register('email')}
-        />
-        <AuthField
-          name="password"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={setPassword}
-          error={errors.password}
-          inputRef={register('password')}
-        />
-        <button type="submit" disabled={logIn.isPending} style={authStyles.button}>
-          {logIn.isPending ? 'Logging in...' : 'Log in'}
-        </button>
-      </form>
-      <p>
-        New here? <Link to="/signup">Create an account</Link>
-      </p>
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -196,20 +121,20 @@ export function LogOutPage() {
 
   if (failed) {
     return (
-      <section style={authStyles.page}>
-        <p role="alert" style={authStyles.error}>
+      <section className={PAGE_CLASSES}>
+        <p role="alert" className={ERROR_TEXT_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           Log out failed. Try again.
         </p>
-        <button type="button" onClick={run} style={authStyles.button}>
+        <Button type="button" onClick={run} className="self-start">
           Try again
-        </button>
+        </Button>
       </section>
     );
   }
 
   return (
-    <section style={authStyles.page}>
+    <section className={PAGE_CLASSES}>
       <p role="status">Logging out...</p>
     </section>
   );

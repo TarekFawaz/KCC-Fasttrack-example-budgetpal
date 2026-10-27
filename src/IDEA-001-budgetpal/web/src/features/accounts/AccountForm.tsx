@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   ACCOUNT_TYPES,
   ACCOUNT_TYPE_LABELS,
@@ -9,8 +12,14 @@ import {
   type AccountType,
   type FieldProblem,
 } from './accounts.api';
-import styles from './accounts.module.css';
 import { fromMinorUnits, minorDigits, toMinorUnits } from './money';
+
+/** The one look of an inline error: text with an icon, never colour alone. */
+const ERROR_CLASSES = 'm-0 text-sm font-semibold text-destructive';
+
+/** The native type select keeps its role, label and keyboard behaviour; it is dressed like the kit Input. */
+const SELECT_CLASSES =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive md:text-sm';
 
 type FieldName = 'name' | 'type' | 'openingBalance';
 export type FieldErrors = Partial<Record<FieldName, string>>;
@@ -46,16 +55,16 @@ function Field({ name, label, error, hint, idPrefix, children }: FieldProps) {
   const id = `${idPrefix}-${name}`;
   const describedBy = [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined;
   return (
-    <div className={styles.field}>
-      <label htmlFor={id}>{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
       {children({ id, describedBy, invalid: error ? true : undefined })}
       {hint ? (
-        <p id={`${id}-hint`} className={styles.hint}>
+        <p id={`${id}-hint`} className="m-0 text-sm text-muted-foreground">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={`${id}-error`} className={styles.error}>
+        <p id={`${id}-error`} className={ERROR_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           {error}
         </p>
@@ -148,16 +157,18 @@ export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {
   const pending = create.isPending || update.isPending;
 
   return (
-    <form onSubmit={onSubmit} noValidate className={styles.form} aria-label={editing ? `Edit account ${account.name}` : 'Add an account'}>
+    <form onSubmit={onSubmit} noValidate
+      className="grid grid-cols-1 gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm md:grid-cols-[2fr_1fr_1fr_auto] md:items-start"
+      aria-label={editing ? `Edit account ${account.name}` : 'Add an account'}>
       {formError ? (
-        <p role="alert" tabIndex={-1} ref={alertRef} className={styles.error}>
+        <p role="alert" tabIndex={-1} ref={alertRef} className={ERROR_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           {formError}
         </p>
       ) : null}
       <Field idPrefix={idPrefix} name="name" label="Name" error={errors.name}>
         {({ id, describedBy, invalid }) => (
-          <input
+          <Input
             id={id}
             name="name"
             type="text"
@@ -170,7 +181,6 @@ export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {
             }}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
           />
         )}
       </Field>
@@ -186,7 +196,7 @@ export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {
             }}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
+            className={SELECT_CLASSES}
           >
             {ACCOUNT_TYPES.map((option) => (
               <option key={option} value={option}>
@@ -204,7 +214,7 @@ export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {
         hint="Optional. Leave blank for 0."
       >
         {({ id, describedBy, invalid }) => (
-          <input
+          <Input
             id={id}
             name="openingBalance"
             type="text"
@@ -217,17 +227,16 @@ export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {
             }}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
           />
         )}
       </Field>
-      <button type="submit" disabled={pending} className={styles.button}>
+      <Button type="submit" disabled={pending} className="md:mt-[1.625rem]">
         {editing ? (pending ? 'Saving...' : 'Save changes') : pending ? 'Adding...' : 'Add account'}
-      </button>
+      </Button>
       {editing ? (
-        <button type="button" onClick={onCancel} className={styles.button}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       ) : null}
     </form>
   );

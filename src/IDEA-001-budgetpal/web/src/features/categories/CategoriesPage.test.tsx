@@ -97,8 +97,9 @@ describe('categories list (Story-003 AC-2)', () => {
     const expenses = await screen.findByRole('region', { name: 'Expense categories' });
     const income = screen.getByRole('region', { name: 'Income categories' });
     const expenseItems = within(expenses).getAllByRole('listitem');
-    expect(expenseItems.map((item) => item.textContent)).toEqual(['FoodExpenseEditDelete', 'RentExpenseEditDelete']);
-    expect(within(income).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['SalaryIncomeEditDelete']);
+    // The kind is a Badge: an icon (decorative) plus the word.
+    expect(expenseItems.map((item) => item.textContent)).toEqual(['Food↓ExpenseEditDelete', 'Rent↓ExpenseEditDelete']);
+    expect(within(income).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Salary↑IncomeEditDelete']);
     expect(screen.queryByText(/no categories yet/i)).not.toBeInTheDocument();
   });
 });

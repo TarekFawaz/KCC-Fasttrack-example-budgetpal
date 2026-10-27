@@ -226,8 +226,8 @@ describe('accessibility and tokens', () => {
     expect(results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id)).toEqual([]);
   });
 
-  it('T-034 styles use CSS variables only and the feature touches no browser storage', () => {
-    const sources = ['LoginPage.tsx', 'SignUpPage.tsx', 'authApi.ts', 'feature.ts'].map((file) =>
+  it('T-034 no hard-coded colour, no inline style and no browser storage in the feature', () => {
+    const sources = ['LoginPage.tsx', 'SignUpPage.tsx', 'AuthField.tsx', 'authApi.ts', 'feature.ts'].map((file) =>
       readFileSync(resolve(here, file), 'utf8'),
     );
     const hardCodedColour = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/;
@@ -235,9 +235,9 @@ describe('accessibility and tokens', () => {
     const storage = new RegExp(`\\b(${['local', 'session'].join('|')})Storage\\b`);
     for (const text of sources) {
       expect(text).not.toMatch(hardCodedColour);
+      expect(text).not.toMatch(/style=\{\{/);
       expect(text).not.toMatch(storage);
     }
-    expect(sources.join('\n')).toContain('var(--');
   });
 });
 

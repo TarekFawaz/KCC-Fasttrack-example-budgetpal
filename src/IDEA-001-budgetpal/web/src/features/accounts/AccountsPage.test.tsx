@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -167,17 +167,18 @@ describe('AccountsPage', () => {
     expect(await serious(container)).toEqual([]);
   });
 
-  it('T-023 styles use CSS variables only, the layout is one column below 768 px, and no browser storage is used', () => {
-    const css = readFileSync(resolve(here, 'accounts.module.css'), 'utf8');
+  it('T-023 styles use the kit and tokens only, there is no CSS module, and no browser storage is used', () => {
+    expect(existsSync(resolve(here, 'accounts.module.css'))).toBe(false);
     const sources = ['AccountsPage.tsx', 'AccountForm.tsx', 'accounts.api.ts', 'money.ts', 'feature.ts'].map((file) =>
       readFileSync(resolve(here, file), 'utf8'),
     );
-    expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/);
-    expect(css).toMatch(/:focus-visible|var\(--/);
-    // The base .form is a single column; columns appear only inside the min-width: 768px query.
-    const [base, wide] = css.split('@media (min-width: 768px)');
-    expect(base).toMatch(/\.form \{[^}]*grid-template-columns: 1fr;/);
-    expect(wide).toMatch(/grid-template-columns: 2fr 1fr 1fr auto/);
+    for (const source of sources) {
+      expect(source).not.toMatch(/\.module\.css/);
+      expect(source).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/);
+      expect(source).not.toMatch(/style=\{\{/);
+    }
+    // The form is one column and gains columns only from the md breakpoint.
+    expect(sources[1]).toMatch(/grid-cols-1[^'"`]*md:grid-cols-\[/);
     // The raw-HTML prop name is assembled from parts so this file does not contain the literal that
     // static rule SR-014 forbids in every web source file, tests included.
     const rawHtmlProp = ['dangerously', 'Set', 'Inner', 'HTML'].join('');
@@ -303,12 +304,12 @@ describe('AccountsPage edit and delete', () => {
     renderPage();
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Delete Card' }));
-    const dialog = screen.getByRole('dialog', { name: 'Delete Card?' });
+    const dialog = screen.getByRole('alertdialog', { name: 'Delete Card?' });
     expect(dialog).toHaveAccessibleDescription(/cannot be undone/);
     expect(within(dialog).getByRole('button', { name: 'Cancel' })).toHaveFocus();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Delete account' }));
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
     expect(calls).toContainEqual({ method: 'DELETE', url: '/api/accounts/2', body: undefined });
     await waitFor(() => expect(screen.queryByRole('rowheader', { name: 'Card' })).not.toBeInTheDocument());
     expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
@@ -319,11 +320,11 @@ describe('AccountsPage edit and delete', () => {
     renderPage();
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
-    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('alertdialog'), { key: 'Escape' });
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(calls.filter((call) => call.method === 'DELETE')).toHaveLength(0);
   });
 
@@ -334,10 +335,10 @@ describe('AccountsPage edit and delete', () => {
     renderPage();
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete account' }));
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Delete account' }));
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Main is in use by transactions and cannot be deleted.');
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
     expect(alert).toHaveFocus();
   });
@@ -347,7 +348,7 @@ describe('AccountsPage edit and delete', () => {
     renderPage();
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete account' }));
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Delete account' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not delete Main right now. Try again.');
     expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
   });
