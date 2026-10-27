@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
  *  - `docker compose up` creates a project network, so the daemon must still be able to allocate one (a host that
  *    has accumulated many stacks runs out of address pools: "all predefined address pools have been fully subnetted").
  * When either is missing, the suite is skipped with a reason and reported as deferred, never as passed.
+ * The suite also needs an explicit opt-in (`liveStackDeferral`), because its fixed host ports collide across lanes.
  */
 
 export interface RunResult {
@@ -66,6 +67,22 @@ function networkFailure(run: Runner): string | null {
   if (created.status !== 0) return detail(created);
   run('docker', ['network', 'rm', name], 30_000);
   return null;
+}
+
+/** Environment variable that opts in to the Docker live-stack tests (T-031, T-034, T-035). */
+export const LIVE_STACK_OPT_IN = 'BUDGETPAL_LIVE_STACK';
+
+/**
+ * The live stack publishes fixed host ports (127.0.0.1:3000 and :8080) under a compose project named after the
+ * workspace folder, so two lanes or two test runs on one host tear down and starve each other (ECONNREFUSED on
+ * :8080). Human decision H-001: compose up, container and smoke checks are accepted-deferred, never a pass. They run
+ * only when asked for with `BUDGETPAL_LIVE_STACK=1` on a host that owns those ports. Returns the deferral reason,
+ * or null when the run opted in.
+ */
+export function liveStackDeferral(env: Record<string, string | undefined> = process.env): string | null {
+  return env[LIVE_STACK_OPT_IN] === '1'
+    ? null
+    : `accepted-deferred by human decision H-001 (set ${LIVE_STACK_OPT_IN}=1 on a host that owns ports 3000 and 8080 to run it)`;
 }
 
 export function probeLiveStack(dockerfile: string, run: Runner = defaultRunner): LiveStackProbe {

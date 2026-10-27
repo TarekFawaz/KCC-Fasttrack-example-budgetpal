@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildProbe, probeLiveStack, type RunResult, type Runner } from './live-stack.js';
+import {
+  LIVE_STACK_OPT_IN,
+  buildProbe,
+  liveStackDeferral,
+  probeLiveStack,
+  type RunResult,
+  type Runner,
+} from './live-stack.js';
 
 /**
  * Gate for the Docker live-stack tests in packaging.test.ts (T-031, T-034, T-035).
@@ -183,5 +190,23 @@ describe('live-stack gate: probeLiveStack network capacity', () => {
     const probe = probeLiveStack(dockerfile, run);
     expect(probe.skipReason).toBeNull();
     expect(probe.network).toBe(true);
+  });
+});
+
+describe('live-stack gate: liveStackDeferral (H-001 opt-in)', () => {
+  it('defers by default and names the decision and the variable that opts in', () => {
+    const reason = liveStackDeferral({});
+    expect(reason).toContain('H-001');
+    expect(reason).toContain(LIVE_STACK_OPT_IN);
+  });
+
+  it('defers for any value other than 1', () => {
+    for (const value of ['', '0', 'true', 'yes', undefined]) {
+      expect(liveStackDeferral({ [LIVE_STACK_OPT_IN]: value }), String(value)).not.toBeNull();
+    }
+  });
+
+  it('runs the live stack only when the variable is exactly 1', () => {
+    expect(liveStackDeferral({ [LIVE_STACK_OPT_IN]: '1' })).toBeNull();
   });
 });
