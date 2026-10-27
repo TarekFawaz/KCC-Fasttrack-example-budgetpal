@@ -1,0 +1,87 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-004/src/IDEA-001-budgetpal[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 325[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 147[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m23 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (26)[39m
+[2m   Start at [22m 18:38:47
+[2m   Duration [22m 1.12s[2m (transform 81ms, setup 0ms, collect 557ms, tests 477ms, environment 0ms, prepare 394ms)[22m
+
+Scope: 2 of 3 workspace projects
+api test$ vitest run --config vitest.config.ts
+web test$ vitest run --config vite.config.ts
+api test: 
+api test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-004/src/IDEA-001-budgetpal/api
+api test: 
+web test: 
+web test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-004/src/IDEA-001-budgetpal/web
+web test: 
+api test:  ✓ test/config.test.ts (10 tests) 10ms
+api test:  ✓ test/db.test.ts (4 tests) 54ms
+api test:  ✓ src/modules/accounts/accounts.repository.test.ts (21 tests) 92ms
+api test:  ✓ src/kernel/validate.test.ts (7 tests) 208ms
+api test:  ✓ test/auth-storage.test.ts (23 tests) 393ms
+api test: {"level":30,"time":1793122730755,"pid":45992,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:57278"}
+api test: {"level":30,"time":1793122730770,"pid":45992,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test: {"level":30,"time":1793122730785,"pid":45992,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":14.63350000000014,"msg":"request completed"}
+api test:  ✓ src/kernel/require-user.test.ts (11 tests) 509ms
+api test:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 380ms
+api test:  ✓ test/health.test.ts (5 tests) 555ms
+api test:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 473ms
+api test:  ✓ test/app.test.ts (12 tests) 571ms
+api test:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 359ms
+api test:  ✓ src/modules/accounts/accounts.routes.test.ts (12 tests) 604ms
+api test:    ✓ POST/GET /api/accounts (Story-001) > T-006 POST valid returns 201 and GET lists it ordered by name (AC-1) 436ms
+api test:  ✓ src/modules/accounts/accounts.isolation.test.ts (13 tests) 637ms
+api test:    ✓ GET /api/accounts/:id (Story-002) > T-012 returns 200 for an own account, 400 for a malformed id and 404 for an unknown id (AC-1) 446ms
+api test:  ✓ src/modules/auth/signup.test.ts (13 tests) 809ms
+api test:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 382ms
+api test:  ✓ src/modules/auth/login.test.ts (13 tests) 986ms
+api test:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 431ms
+web test:  ✓ src/features/accounts/money.test.ts (34 tests) 26ms
+api test: {"level":30,"time":1793122731511,"pid":45992,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:49674"}
+api test: {"level":30,"time":1793122731512,"pid":45992,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+web test:  ✓ src/kernel/source-rules.test.ts (4 tests) 4ms
+api test: {"level":30,"time":1793122731584,"pid":45992,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:49676"}
+api test: {"level":30,"time":1793122731585,"pid":45992,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+api test:  ✓ test/server.test.ts (6 tests | 1 skipped) 1321ms
+api test:    ✓ start > T-020 migrates, then listens on PORT 468ms
+api test:    ✓ process > T-021 a failing migration exits non-zero and never listens 671ms
+web test:  ✓ src/kernel/registry.test.ts (6 tests) 11ms
+api test: 
+api test:  Test Files  13 passed (13)
+api test:       Tests  149 passed | 1 skipped (150)
+api test:    Start at  18:38:48
+api test:    Duration  2.88s (transform 1.65s, setup 0ms, collect 6.17s, tests 6.75s, environment 3ms, prepare 4.79s)
+api test: 
+api test: Done
+web test:  ✓ src/features/home/useHealth.test.tsx (3 tests) 326ms
+web test:  ✓ src/kernel/Shell.test.tsx (4 tests) 198ms
+web test:  ✓ src/features/accounts/AccountForm.test.tsx (10 tests) 405ms
+web test:  ✓ src/features/home/HomePage.test.tsx (7 tests) 392ms
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage > T-023 axe finds no serious or critical violation on the empty and the populated page; inputs are labelled
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/auth/auth.test.tsx (17 tests) 567ms
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/kernel/build.test.ts (2 tests) 2401ms
+web test:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 2399ms
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/accounts/AccountsPage.test.tsx (17 tests) 1146ms
+web test: 
+web test:  Test Files  10 passed (10)
+web test:       Tests  104 passed (104)
+web test:    Start at  18:38:48
+web test:    Duration  4.09s (transform 502ms, setup 3.97s, collect 2.09s, tests 5.48s, environment 12.55s, prepare 3.69s)
+web test: 
+web test: Done

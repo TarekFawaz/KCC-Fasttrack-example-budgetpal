@@ -30,7 +30,12 @@ const tlsFailure: RunResult = {
 const poolsExhausted: RunResult = {
   status: 1,
   stdout: '',
+<<<<<<< HEAD
   stderr: 'Error response from daemon: all predefined address pools have been fully subnetted\n',
+=======
+  stderr:
+    'Error response from daemon: all predefined address pools have been fully subnetted\n',
+>>>>>>> spec/SPEC-004
 };
 
 /** Fake docker: answers by subcommand and records every call. */
@@ -119,7 +124,34 @@ describe('live-stack gate: probeLiveStack', () => {
     expect(probe).toEqual({ cli: true, daemon: true, registry: true, network: true, skipReason: null });
   });
 
+<<<<<<< HEAD
   it('does not probe the registry when the Dockerfile downloads nothing, but still probes the network', () => {
+=======
+  it('skips and says so when Docker cannot create a network (address pools used up), without probing the registry', () => {
+    const docker = fakeDocker({ network: poolsExhausted });
+    const probe = probeLiveStack(dockerfile, docker.run);
+    expect(probe.cli).toBe(true);
+    expect(probe.daemon).toBe(true);
+    expect(probe.registry).toBeNull();
+    expect(probe.skipReason).toMatch(/cannot create a network/i);
+    expect(probe.skipReason).toContain('all predefined address pools have been fully subnetted');
+    expect(docker.calls.some((call) => call[1] === 'run')).toBe(false);
+    expect(docker.calls.some((call) => call[1] === 'network' && call[2] === 'rm')).toBe(false);
+  });
+
+  it('creates one throwaway network and removes the same one again when the probe passes', () => {
+    const docker = fakeDocker({});
+    probeLiveStack(dockerfile, docker.run);
+    const create = docker.calls.find((call) => call[1] === 'network' && call[2] === 'create');
+    const remove = docker.calls.find((call) => call[1] === 'network' && call[2] === 'rm');
+    expect(create).toBeDefined();
+    expect(remove).toBeDefined();
+    expect(remove![3]).toBe(create![3]);
+    expect(create![3]).toMatch(/^budgetpal-probe-/);
+  });
+
+  it('does not probe the registry when the Dockerfile downloads nothing', () => {
+>>>>>>> spec/SPEC-004
     const docker = fakeDocker({});
     const probe = probeLiveStack('FROM nginx:1.27-alpine\n', docker.run);
     expect(probe.skipReason).toBeNull();
