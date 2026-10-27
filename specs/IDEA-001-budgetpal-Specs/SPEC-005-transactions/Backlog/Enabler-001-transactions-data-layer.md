@@ -2,7 +2,7 @@
 
 | Type | Parent | Priority | Estimate | Status | Dialect | Depends on | Blocks |
 |--|--|--|--|--|--|--|--|
-| Enabler | [[../SPEC-005-transactions]] | P1 | S | Ready | backend-nodejs | None | Story-001, Story-002, Story-003 |
+| Enabler | [[../SPEC-005-transactions]] | P1 | S | Done | backend-nodejs | None | Story-001, Story-002, Story-003 |
 
 ## Outcome Statement
 Enable every transaction route to share one migration, one set of zod schemas and one user-scoped repository, so that the stories stay thin and isolation is enforced in one place.
