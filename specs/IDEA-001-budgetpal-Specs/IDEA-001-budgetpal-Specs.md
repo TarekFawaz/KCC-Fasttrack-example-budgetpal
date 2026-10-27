@@ -24,6 +24,8 @@ Idea: [[../../ideation/IDEA-001-budgetpal/idea-001-budgetpal]] · Roadmap: [[ROA
 | SPEC-006 | CSV import with column mapping and duplicate detection | Draft | [[SPEC-006-csv-import/SPEC-006-csv-import]] |
 | SPEC-007 | Budgets: monthly per-category progress and warnings | Draft | [[SPEC-007-budgets/SPEC-007-budgets]] |
 | SPEC-008 | Dashboard: spending by category and monthly trend | Draft | [[SPEC-008-dashboard/SPEC-008-dashboard]] |
+| SPEC-009 | Sign-in first: route guard and session bootstrap, `/` is the dashboard, API status as a footer dot | Draft | [[SPEC-009-signin-first/SPEC-009-signin-first]] |
+| SPEC-010 | Modern UI: Tailwind CSS and shadcn/ui, sidebar layout, every page restyled | Draft | [[SPEC-010-shadcn-ui/SPEC-010-shadcn-ui]] |
 
 ## Statistics
-- Specs: 8 · Draft: 8 · In progress: 0 · Done: 0 · Blocked: 0
+- Specs: 10 · Draft: 10 · In progress: 0 · Done: 0 · Blocked: 0

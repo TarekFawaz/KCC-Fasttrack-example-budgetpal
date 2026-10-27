@@ -10,7 +10,7 @@ tags:
   - kcc/v04
 created: 2026-10-27
 updated: 2026-10-27
-version: 0.1.0
+version: 0.2.0
 status: active
 architecture-depth: lite
 profile: fasttrack
@@ -22,15 +22,15 @@ idea-id: IDEA-001
 
 ## Overview
 
-BudgetPal is a local-only personal budgeting web app. A person signs up on their own machine, manages accounts and categories, adds, edits, deletes or CSV-imports transactions (duplicates detected), sets a monthly budget per category with 80% and over-budget warnings, and reads a dashboard of spending by category and a month-over-month trend. It runs with `docker compose up` (services `api` and `web`) and talks to no external service.
+BudgetPal is a local-only personal budgeting web app. A person signs up on their own machine and must sign in before reaching any other page, manages accounts and categories, adds, edits, deletes or CSV-imports transactions (duplicates detected), sets a monthly budget per category with 80% and over-budget warnings, and reads a dashboard of spending by category and a month-over-month trend. It runs with `docker compose up` (services `api` and `web`) and talks to no external service.
 
 This document is the stack source of truth for the planner, spec-writer (`## Architecture references`) and verifier (`QG-ARCH-CONFORMANCE`). The run uses the **fast-track profile**: decisions live in `## Decisions` below instead of ADR files, there is no spec-local `arch.md`, and the diagrams here are the only copies. Stack choices come from [[TechnicalDecisionBrief]], security scope from [[SecurityDecisionBrief]], the defaults taken silently from [[Assumptions]]. Source idea: [[idea-001-budgetpal]].
 
 **Style.** Clean Architecture + DDD scaled down to a modular monolith (`architecture-styles.md` -> Default style selection rule: backend/fullstack). One deployable API, one static web container. Each module owns its folders and migration range, so specs for different modules touch disjoint files and run in parallel:
 
 - API: `api/src/modules/<x>/` with `routes -> service -> repository`; shared code only from `api/src/kernel/`.
-- Web: `web/src/features/<x>/`; shared code only from `web/src/kernel/`.
-- E1 (walking skeleton) defines the **module registry**: the API auto-registers every `api/src/modules/*/index.ts` router, and the web auto-registers every `web/src/features/*/feature.ts` (route plus nav entry). No spec edits a shared router or nav file.
+- Web: `web/src/features/<x>/`; shared code only from `web/src/kernel/` and the shared UI kit `web/src/components/ui/` (D-25). Features never import from each other.
+- E1 (walking skeleton) defines the **module registry**: the API auto-registers every `api/src/modules/*/index.ts` router, and the web auto-registers every `web/src/features/*/feature.ts` (route, nav entry and a `public` flag, D-26). No spec edits a shared router or nav file.
 - Migrations are forward-only numbered SQL files, one file per epic, ranges reserved so parallel waves never collide: E1 `0001-0009`, E2 `0010-0019`, E3 `0030-0039`, E4 `0040-0049`, E5 `0050-0059`, E6 `0060-0069`, E7 `0070-0079`, E8 `0080-0089`.
 
 ## Context
@@ -54,7 +54,7 @@ C4Context
 
 Two containers and one volume, all started by `docker compose up`.
 
-- **web** (`nginx-unprivileged`, port 8080): serves the built React + Vite SPA and proxies `/api` to the api container, so the browser sees one origin and cookies stay same-origin (no CORS, GR-005). Adds the security headers (`nosniff`, `Referrer-Policy: no-referrer`, CSP `self`).
+- **web** (`nginx-unprivileged`, port 8080): serves the built React + Vite SPA (Tailwind CSS compiled to one static stylesheet at build time) and proxies `/api` to the api container, so the browser sees one origin and cookies stay same-origin (no CORS, GR-005). Adds the security headers (`nosniff`, `Referrer-Policy: no-referrer`, CSP `self`).
 - **api** (Node 22 on Debian-slim, port 3000): Fastify REST API. Validates every request with zod, enforces `requireUser` and `user_id` scoping, runs the migration runner at start, serves `GET /health`, the OpenAPI document and Swagger UI at `/docs`. Logs single-line JSON through pino.
 - **SQLite file** (`better-sqlite3`, on the named volume `budgetpal-data`): one writer, WAL mode, foreign keys on. Holds users, sessions (hashed ids), accounts, categories, transactions, budgets. Back up by copying the file.
 
@@ -65,7 +65,7 @@ C4Container
     Person(user, "Budget owner", "Browser on the same machine")
 
     System_Boundary(system, "BudgetPal (docker compose)") {
-        Container(web, "Web", "React 18, Vite 5, nginx-unprivileged", "SPA with feature folders; serves static files and proxies /api same-origin; port 8080 on 127.0.0.1")
+        Container(web, "Web", "React 18, Vite 5, Tailwind CSS 3.4, shadcn/ui, nginx-unprivileged", "SPA with feature folders, sign-in-first route guard and sidebar layout; serves static files and proxies /api same-origin; port 8080 on 127.0.0.1")
         Container(api, "API", "Node 22, Fastify 5, zod, TypeScript 5", "Modules routes -> service -> repository; auth, validation, CSV import, aggregates, OpenAPI at /docs; port 3000 on 127.0.0.1")
         ContainerDb(db, "SQLite database", "SQLite via better-sqlite3 12, named volume", "Users, sessions, accounts, categories, transactions, budgets; numbered migrations")
     }
@@ -124,12 +124,14 @@ Fast-track profile: decisions are rows here, not ADR files. "Std" cites `.KCC/ke
 | D-16 | Logging: single-line JSON to stdout with request id, allow-list field redaction; never log passwords, hashes, session ids, cookies, CSV content, or transaction descriptions and amounts | `pino@^9` | Std: Operations - Logging | Accepted |
 | D-17 | Configuration from environment; `.env.example` lists names only (`PORT`, `DATABASE_PATH`, `SESSION_SECRET`, `CURRENCY`, `LOG_LEVEL`, `COOKIE_SECURE`); `.env` git-ignored; no default credentials or seeded users | `node:process` env read once in kernel config, validated by zod | Std: Operations - Configuration | Accepted |
 | D-18 | Health: `GET /health` returns 200 `{status}` including a DB check; compose `healthcheck` on both services | none | Std: Operations - Health | Accepted |
-| D-19 | Frontend: React SPA with feature folders, server state in TanStack Query, charts with Recharts (declarative; Chart.js rejected as imperative canvas), plain CSS modules with CSS-variable tokens, no UI kit (`@radix-ui` primitives only if a dialog or select is needed) | `react@^18`, `react-dom@^18`, `vite@^5`, `react-router@^6`, `@tanstack/react-query@^5`, `recharts@^2` | Styles; Std: Accessibility - WCAG 2.2 AA | Accepted (assumed) |
-| D-20 | Accessibility and UX: WCAG 2.2 AA, keyboard reachable, visible focus, contrast >= 4.5:1, labelled inputs, light and dark by `prefers-color-scheme`, status never colour-only (green, amber at >= 80%, red over budget, each with icon and text), charts get a data-table alternative, single column below 768 px, usable to 360 px | `axe-core@^4` (tests) | Std: Accessibility - WCAG 2.2 AA | Accepted |
+| D-19 | Frontend: React SPA with feature folders, server state in TanStack Query, charts with Recharts (declarative; Chart.js rejected as imperative canvas). The "plain CSS modules with CSS-variable tokens, no UI kit" part is **superseded by D-25** | `react@^18`, `react-dom@^18`, `vite@^5`, `react-router-dom@^6`, `@tanstack/react-query@^5`, `recharts@^2` | Styles; Std: Accessibility - WCAG 2.2 AA | Accepted (assumed); styling part superseded by D-25 |
+| D-20 | Accessibility and UX: WCAG 2.2 AA, keyboard reachable, visible focus, contrast >= 4.5:1, labelled inputs, light and dark by `prefers-color-scheme`, status never colour-only (green, amber at >= 80%, red over budget, each with icon and text), charts get a data-table alternative, single column below 768 px, usable to 360 px. With D-25: shadcn components must keep labelled inputs (visible `Label` bound to each control), visible focus rings, and every page axe-clean; the 360 px layout uses a collapsible sidebar (a `Sheet` drawer opened from a labelled menu button on small screens, the fixed sidebar from 768 px) | `axe-core@^4` (tests) | Std: Accessibility - WCAG 2.2 AA | Accepted |
 | D-21 | Packaging: two multi-stage Docker images (api on Debian-slim, build toolchain in the build stage only; web on `nginx-unprivileged`), non-root user, pinned base tags, SQLite on named volume `budgetpal-data`; Alpine rejected because of native-module build risk | Docker Compose v2 | Std: Operations - Containers | Accepted (assumed) |
 | D-22 | Network exposure: publish `api` and `web` ports on `127.0.0.1` only (GR-001). The human said "local single-user tool", but a binding policy is a CR-7 question with no catalogue default, so it stays open in [[Assumptions]] (Security Q2) and the loopback binding is applied as the human-stated scope, not as a settled policy | none | Human: local single-user tool; Std: Security posture (no default; CR-7) | Proposed |
 | D-23 | Tests: vitest, Fastify `inject` for API, Testing Library for web, mandatory two-user isolation test per module; coverage floor from `.KCC/settings.json` | `vitest@^2`, `@testing-library/react@^16`, `supertest@^7` (optional) | Std: Testing | Accepted (assumed) |
 | D-24 | Repository tooling: pnpm workspace (`api/`, `web/`), committed lockfile, `pnpm audit` (no high-severity production advisories) in the quality gate, SemVer in root `package.json`, Conventional Commits | `pnpm >=9` | Std: Supply chain - lockfile and dependency audit | Accepted (assumed) |
+| D-25 | Frontend UI kit (**supersedes** the "plain CSS modules, no UI kit" part of D-19; human-approved stack change, 2026-10-27, CR-12): Tailwind CSS 3.4 with the classic shadcn/ui CLI setup (`components.json`, PostCSS). shadcn/ui components (built on Radix primitives) are copied into the repo under `web/src/components/ui/` and owned by the project; `cn()` helper in `web/src/kernel/`. Icons from lucide-react. Theme tokens are CSS variables (`--background`, `--foreground`, `--primary`, ...) with a light and a dark scheme, the dark one following `prefers-color-scheme` (no stored toggle, GR-013). App layout is a sidebar (fixed from 768 px, `Sheet` drawer below) fed by the feature registry. Recharts stays for charts; the shadcn `chart` component is not used (it injects HTML, GR-013). Tailwind v4 is not adopted: `@tailwindcss/vite` lists Vite `^5.2` as supported, but the classic CLI and `tailwindcss-animate` pairing is the v3 path and v4 was not verified in this repo | `tailwindcss@^3.4`, `postcss@^8`, `autoprefixer@^10`, `tailwindcss-animate@^1.0.7`, `@radix-ui/react-*` (`react-slot@^1`, `react-dialog@^1`, `react-label@^2`, `react-select@^2`, `react-dropdown-menu@^2`, `react-tooltip@^1`, add per component; all accept React 18), `lucide-react@^1` (React 18 peer ok), `class-variance-authority@^0.7`, `clsx@^2`, `tailwind-merge@^2` (the v2 line matches Tailwind 3; v3 of the package is for Tailwind 4) | Docs: https://ui.shadcn.com/docs (installation/vite, theming, components/sidebar); Std: Accessibility - WCAG 2.2 AA; Styles | Accepted |
+| D-26 | Frontend auth flow: on load the SPA asks `GET /api/auth/me`; while it is pending nothing but a loading state renders. Logged-out visitors can reach only `/login` and `/signup`; every other route redirects to `/login` and remembers the target (router state, not storage) so login returns there. A 401 from any API call clears the cached user and returns to `/login`. Each entry in the feature registry (`feature.ts`) carries a `public` flag, default `false`; only the login and signup features set it `true`. Post-login landing is the dashboard at `/`. The API health indicator is not a page; a small status dot in the sidebar footer is allowed. The guard is UX only: the API still enforces `requireUser` on every data route (D-08) | `react-router-dom@^6` (route guard via a layout route and `Navigate`), `@tanstack/react-query@^5` (`auth/me` query, global 401 handler) | Std: Security - Authorization (server-side enforcement stays); D-07 | Accepted |
 
 ### Waivers of catalogue defaults
 
@@ -148,7 +150,7 @@ Each row cites the human statement in [[idea-001-budgetpal]] (original request),
 
 ## Toolchain
 
-Versions follow the machine: the host runs Node 24, the containers run Node 22. Every pin below supports both (`better-sqlite3@^12` lists 22 and 24; `vite@^5` and `vitest@^2` accept both).
+Versions follow the machine: the host runs Node 24, the containers run Node 22. Every pin below supports both (`better-sqlite3@^12` lists 22 and 24; `vite@^5` and `vitest@^2` accept both; `tailwindcss@^3.4` needs only Node 14+ and runs as a PostCSS plugin inside Vite 5). Tailwind runs at build time only, so the web image still ships static files.
 
 | Tool | Version |
 |--|--|
@@ -170,9 +172,18 @@ Versions follow the machine: the host runs Node 24, the containers run Node 22. 
 | react | ^18 |
 | react-dom | ^18 |
 | vite | ^5 |
-| react-router | ^6 |
+| react-router-dom | ^6 |
 | @tanstack/react-query | ^5 |
 | recharts | ^2 |
+| tailwindcss | ^3.4 |
+| postcss | ^8 |
+| autoprefixer | ^10 |
+| tailwindcss-animate | ^1.0.7 |
+| @radix-ui/react-* (per component) | ^1 / ^2 (React 18 peer) |
+| lucide-react | ^1 |
+| class-variance-authority | ^0.7 |
+| clsx | ^2 |
+| tailwind-merge | ^2 |
 | vitest | ^2 |
 | @testing-library/react | ^16 |
 | axe-core | ^4 |
@@ -184,7 +195,7 @@ Versions follow the machine: the host runs Node 24, the containers run Node 22. 
 
 Prioritised: usability, maintainability, portability. Targets for a single local user, checked by the gates in [[quality-gates]]:
 
-- **Usability and accessibility:** WCAG 2.2 AA, axe check on every page, empty states and inline validation errors on each page.
+- **Usability and accessibility:** WCAG 2.2 AA, axe check on every page, empty states and inline validation errors on each page; sign-in first (D-26), sidebar layout and shadcn/ui kit (D-25).
 - **Maintainability:** module boundaries enforced by static rules (GR-006), one migration file per epic, a coverage floor from settings.
 - **Portability:** one `docker compose up` on Windows, macOS or Linux; no host dependencies besides Docker.
 - **Security:** the controls in D-06 to D-11 with the waivers above; two-user isolation proven per module.
@@ -196,6 +207,7 @@ Prioritised: usability, maintainability, portability. Targets for a single local
 - Native modules (`argon2`, `better-sqlite3`) fail to build in Docker - Debian-slim base, multi-stage build with the toolchain in the build stage only; `node:sqlite` is the documented fallback and needs a new Decisions row.
 - Parallel specs collide on shared files - module and nav auto-registration (E1) and reserved migration ranges.
 - A compose edit exposes the app beyond loopback - GR-001 and the compose check in QG-STATIC; D-22 stays `Proposed` until a human confirms the binding policy.
+- Radix `Dialog`/`Select` lock page scroll by injecting a `<style>` element, which the nginx CSP (`default-src 'self'`, no `style-src`) blocks; the visible effect is only a missing scroll lock. Do not weaken the CSP with `unsafe-inline`; verify in the browser and prefer components that do not need it. Inline `style` props set through the DOM are not affected.
 - Malicious or oversized CSV - caps, per-row validation, plain-text cells, no export (formula-injection risk deferred).
 - Password minimum: the technical brief draft said 8, the security brief and [[Assumptions]] settled on 15 (catalogue); 15 is the decision (D-06).
 - SQLite single writer on a Docker volume - fine at this scale.
