@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens (D-20, D-25). Values are HSL channels ("H S% L%") so tailwind.config.ts can wrap
+ * them in hsl(var(--x)). Light is the default; dark follows the operating system through
+ * prefers-color-scheme only: there is no toggle and nothing is stored in the browser.
+ * Contrast of the pairs is proven by src/theme.test.ts.
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 20%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 19% 35%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 16% 52%;
+    --input: 215 16% 52%;
+    --ring: 222 70% 40%;
+    --radius: 0.5rem;
+
+    --status-ok: 142 72% 24%;
+    --status-ok-foreground: 0 0% 100%;
+    --status-warning: 30 100% 27%;
+    --status-warning-foreground: 0 0% 100%;
+    --status-over: 0 72% 40%;
+    --status-over-foreground: 0 0% 100%;
+
+    --chart-1: 222 70% 40%;
+    --chart-2: 173 80% 25%;
+    --chart-3: 30 100% 33%;
+    --chart-4: 280 60% 40%;
+    --chart-5: 340 75% 40%;
+
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 222 47% 20%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 215 16% 52%;
+    --sidebar-ring: 222 70% 40%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 222 47% 7%;
+      --foreground: 210 40% 98%;
+      --card: 222 40% 10%;
+      --card-foreground: 210 40% 98%;
+      --popover: 222 40% 10%;
+      --popover-foreground: 210 40% 98%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 222 47% 11%;
+      --secondary: 217 33% 17%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 217 33% 17%;
+      --muted-foreground: 215 20% 70%;
+      --accent: 217 33% 20%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 80% 68%;
+      --destructive-foreground: 222 47% 8%;
+      --border: 215 16% 47%;
+      --input: 215 16% 47%;
+      --ring: 213 90% 68%;
+
+      --status-ok: 142 60% 50%;
+      --status-ok-foreground: 142 80% 6%;
+      --status-warning: 38 95% 55%;
+      --status-warning-foreground: 30 80% 7%;
+      --status-over: 0 80% 68%;
+      --status-over-foreground: 222 47% 8%;
+
+      --chart-1: 213 90% 68%;
+      --chart-2: 173 70% 50%;
+      --chart-3: 38 95% 58%;
+      --chart-4: 280 75% 72%;
+      --chart-5: 340 85% 70%;
+
+      --sidebar-background: 222 40% 9%;
+      --sidebar-foreground: 210 40% 98%;
+      --sidebar-primary: 213 90% 68%;
+      --sidebar-primary-foreground: 222 47% 8%;
+      --sidebar-accent: 217 33% 18%;
+      --sidebar-accent-foreground: 210 40% 98%;
+      --sidebar-border: 215 16% 47%;
+      --sidebar-ring: 213 90% 68%;
+    }
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Visible keyboard focus on every control (WCAG 2.2 AA, D-20). */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
