@@ -2,19 +2,12 @@ import { spawnSync } from 'node:child_process';
 
 /**
  * Decides whether the Docker live-stack tests (packaging.test.ts: T-031, T-034, T-035) can prove anything here.
-<<<<<<< HEAD
  * A running daemon is not enough:
  *  - the web image build runs `npm install -g pnpm@...` inside a build container, so that container must be able
  *    to reach the npm registry (offline, or a TLS-intercepting proxy, make it fail);
  *  - `docker compose up` creates a project network, so the daemon must still be able to allocate one (a host that
  *    has accumulated many stacks runs out of address pools: "all predefined address pools have been fully subnetted").
  * When either is missing, the suite is skipped with a reason and reported as deferred, never as passed.
-=======
- * A running daemon is not enough: compose must be able to create its project network (a host with every predefined
- * address pool used up cannot), and the web image build runs `npm install -g pnpm@...` inside a build container,
- * so that container must be able to reach the npm registry. When either fails (no free pool, offline, or a
- * TLS-intercepting proxy), the suite is skipped with a reason and reported as deferred, never as passed.
->>>>>>> spec/SPEC-004
  */
 
 export interface RunResult {
@@ -82,26 +75,6 @@ export function probeLiveStack(dockerfile: string, run: Runner = defaultRunner):
   if (run('docker', ['info'], 20_000).status !== 0) {
     return { cli: true, daemon: false, registry: null, network: null, skipReason: 'no Docker daemon answers' };
   }
-<<<<<<< HEAD
-=======
-  // `docker compose up` creates a project network. A host whose predefined address pools are used up
-  // ("all predefined address pools have been fully subnetted") answers `docker info` and can run a container on the
-  // default bridge, yet cannot start the stack. Prove it can by creating (and removing) one throwaway network.
-  const networkName = `budgetpal-probe-${process.pid}-${Date.now()}`;
-  const network = run('docker', ['network', 'create', networkName], 30_000);
-  if (network.status !== 0) {
-    return {
-      cli: true,
-      daemon: true,
-      registry: null,
-      skipReason: `Docker cannot create a network (${detail(network)})`,
-    };
-  }
-  run('docker', ['network', 'rm', networkName], 30_000);
-
-  const build = buildProbe(dockerfile);
-  if (!build) return { cli: true, daemon: true, registry: null, skipReason: null };
->>>>>>> spec/SPEC-004
 
   let registry: boolean | null = null;
   const build = buildProbe(dockerfile);
