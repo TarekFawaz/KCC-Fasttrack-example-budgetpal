@@ -137,3 +137,152 @@ describe('registration and OpenAPI (Story-001 AC-5)', () => {
     expect(Object.keys(operations?.get?.responses ?? {}).sort()).toEqual(['200', '401']);
   });
 });
+
+// ---- Story-002: PATCH and DELETE /api/categories/:id ----
+
+const patch = (user: LoggedInUser | undefined, id: number | string, payload: unknown) =>
+  app.inject({ method: 'PATCH', url: `/api/categories/${id}`, headers: user?.headers, payload: payload as object });
+const del = (user: LoggedInUser | undefined, id: number | string) =>
+  app.inject({ method: 'DELETE', url: `/api/categories/${id}`, headers: user?.headers });
+const makeCategory = async (user: LoggedInUser, name: string, kind: 'expense' | 'income' = 'expense') =>
+  (await post(user, { name, kind })).json() as { id: number; name: string; kind: string };
+
+describe('update (Story-002 AC-1)', () => {
+  it('T-015 PATCH name and kind returns 200 with the updated values and the list shows them', async () => {
+    const food = await makeCategory(alice, 'Food');
+    const renamed = await patch(alice, food.id, { name: '  Groceries ', kind: 'income' });
+    expect(renamed.statusCode).toBe(200);
+    expect(renamed.json()).toMatchObject({ id: food.id, name: 'Groceries', kind: 'income' });
+
+    const onlyKind = await patch(alice, food.id, { kind: 'expense' });
+    expect(onlyKind.json()).toMatchObject({ name: 'Groceries', kind: 'expense' });
+
+    expect((await get(alice)).json()).toEqual([onlyKind.json()]);
+  });
+});
+
+describe('OpenAPI for id routes (Story-002 AC-1)', () => {
+  it('T-016 /docs/json has PATCH and DELETE on /api/categories/{id} with params and body schemas', async () => {
+    const spec = (await app.inject('/docs/json')).json() as {
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            parameters?: Array<{ name: string; in: string }>;
+            requestBody?: { content: Record<string, { schema: unknown }> };
+            responses: Record<string, unknown>;
+          }
+        >
+      >;
+    };
+    const operations = spec.paths['/api/categories/{id}'];
+    expect(Object.keys(operations ?? {}).sort()).toEqual(['delete', 'patch']);
+    expect(operations?.patch?.parameters?.some((p) => p.name === 'id' && p.in === 'path')).toBe(true);
+    expect(operations?.delete?.parameters?.some((p) => p.name === 'id' && p.in === 'path')).toBe(true);
+    expect(operations?.patch?.requestBody?.content['application/json']?.schema).toBeDefined();
+    expect(Object.keys(operations?.patch?.responses ?? {}).sort()).toEqual(['200', '400', '401', '404', '409']);
+    expect(Object.keys(operations?.delete?.responses ?? {}).sort()).toEqual(['204', '400', '401', '404', '409']);
+  });
+});
+
+describe('duplicate rename (Story-002 AC-2)', () => {
+  it('T-017 renaming to another category name in a different case is 409 and changes nothing; its own name is 200', async () => {
+    await makeCategory(alice, 'Rent');
+    const food = await makeCategory(alice, 'Food');
+    const before = (await get(alice)).json();
+
+    const clash = await patch(alice, food.id, { name: 'rent' });
+    expect(clash.statusCode).toBe(409);
+    expect(clash.headers['content-type']).toContain('application/problem+json');
+    expect((clash.json() as Problem).status).toBe(409);
+    expect((await get(alice)).json()).toEqual(before);
+
+    const same = await patch(alice, food.id, { name: 'Food' });
+    expect(same.statusCode).toBe(200);
+    const otherCase = await patch(alice, food.id, { name: 'FOOD' });
+    expect(otherCase.statusCode).toBe(200);
+    expect(otherCase.json()).toMatchObject({ name: 'FOOD' });
+  });
+});
+
+describe('validation (Story-002 AC-3)', () => {
+  it.each([
+    ['an empty name', { name: '' }, 'name'],
+    ['a name over 60 characters', { name: 'x'.repeat(61) }, 'name'],
+    ['kind "other"', { kind: 'other' }, 'kind'],
+    ['an extra field', { name: 'Food', color: 'red' }, '(body)'],
+    ['an empty object', {}, '(body)'],
+  ])('T-019 %s returns 400 problem+json with field errors', async (_label, payload, field) => {
+    const food = await makeCategory(alice, 'Food');
+    const before = (await get(alice)).json();
+    const res = await patch(alice, food.id, payload);
+    expect(res.statusCode).toBe(400);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    const problem = res.json() as Problem;
+    expect(problem.errors?.some((e) => e.field === field && e.message.length > 0)).toBe(true);
+    expect((await get(alice)).json()).toEqual(before);
+  });
+
+  it.each(['abc', '1.5', '0', '-3'])('T-019 id "%s" returns 400 problem+json for PATCH and DELETE', async (id) => {
+    const patched = await patch(alice, id, { name: 'Food' });
+    const deleted = await del(alice, id);
+    for (const res of [patched, deleted]) {
+      expect(res.statusCode).toBe(400);
+      expect(res.headers['content-type']).toContain('application/problem+json');
+      expect((res.json() as Problem).errors?.some((e) => e.field.includes('id'))).toBe(true);
+    }
+  });
+});
+
+describe('delete (Story-002 AC-4, AC-5)', () => {
+  it('T-020 DELETE of an unused category returns 204 and it no longer lists', async () => {
+    const food = await makeCategory(alice, 'Food');
+    await makeCategory(alice, 'Rent');
+    const res = await del(alice, food.id);
+    expect(res.statusCode).toBe(204);
+    expect(res.body).toBe('');
+    expect(((await get(alice)).json() as Array<{ name: string }>).map((c) => c.name)).toEqual(['Rent']);
+    expect((await del(alice, food.id)).statusCode).toBe(404);
+  });
+
+  it('T-021 DELETE of a category referenced by a RESTRICT row returns 409 "in use" and the category remains', async () => {
+    // SPEC-005 and SPEC-007 declare the real referencing tables; a temporary one proves the rule here.
+    db.exec(
+      'CREATE TABLE temp_refs (id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT)',
+    );
+    const food = await makeCategory(alice, 'Food');
+    db.prepare('INSERT INTO temp_refs (category_id) VALUES (?)').run(food.id);
+
+    const res = await del(alice, food.id);
+    expect(res.statusCode).toBe(409);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect((res.json() as Problem).detail).toMatch(/in use/i);
+    expect(((await get(alice)).json() as Array<{ id: number }>).map((c) => c.id)).toEqual([food.id]);
+
+    db.prepare('DELETE FROM temp_refs').run();
+    expect((await del(alice, food.id)).statusCode).toBe(204);
+  });
+});
+
+describe('isolation and authentication (Story-002 AC-6)', () => {
+  it('T-022 user B PATCH and DELETE on A id return 404 and A category is unchanged; no session is 401', async () => {
+    const food = await makeCategory(alice, 'Food');
+    const before = (await get(alice)).json();
+
+    const patched = await patch(bob, food.id, { name: 'Stolen', kind: 'income' });
+    expect(patched.statusCode).toBe(404);
+    expect(patched.headers['content-type']).toContain('application/problem+json');
+    const deleted = await del(bob, food.id);
+    expect(deleted.statusCode).toBe(404);
+    expect(deleted.headers['content-type']).toContain('application/problem+json');
+    expect((await get(alice)).json()).toEqual(before);
+    expect((await get(bob)).json()).toEqual([]);
+
+    expect((await patch(undefined, food.id, { name: 'Food' })).statusCode).toBe(401);
+    const noSession = await del(undefined, food.id);
+    expect(noSession.statusCode).toBe(401);
+    expect(noSession.headers['content-type']).toContain('application/problem+json');
+    expect(rowCount()).toBe(1);
+  });
+});
