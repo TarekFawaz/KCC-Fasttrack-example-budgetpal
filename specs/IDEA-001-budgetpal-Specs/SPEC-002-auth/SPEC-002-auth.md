@@ -1,7 +1,7 @@
 ---
 id: SPEC-002
 title: Auth
-status: Ready
+status: Done
 depends_on: [SPEC-001]
 ---
 
@@ -9,7 +9,7 @@ depends_on: [SPEC-001]
 
 | Priority | Category | Status | Wave | Depends on | Blocks | Index |
 |--|--|--|--|--|--|--|
-| P0 | Feature | Ready | 2 | [[../SPEC-001-walking-skeleton/SPEC-001-walking-skeleton\|SPEC-001]] | SPEC-003, SPEC-004 | [[../IDEA-001-budgetpal-Specs]] |
+| P0 | Feature | Done | 2 | [[../SPEC-001-walking-skeleton/SPEC-001-walking-skeleton\|SPEC-001]] | SPEC-003, SPEC-004 | [[../IDEA-001-budgetpal-Specs]] |
 
 ## Delivery Brief
 - **Who:** a person running BudgetPal on their own machine (several isolated local users are possible).

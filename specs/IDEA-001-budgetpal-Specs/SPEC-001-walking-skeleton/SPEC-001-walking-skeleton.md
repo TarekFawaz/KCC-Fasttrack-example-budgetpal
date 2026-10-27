@@ -1,7 +1,7 @@
 ---
 id: SPEC-001
 title: Walking skeleton
-status: Ready
+status: Done
 depends_on: []
 ---
 
@@ -9,7 +9,7 @@ depends_on: []
 
 | Priority | Category | Status | Wave | Depends on | Blocks | Index |
 |--|--|--|--|--|--|--|
-| P0 | Feature | Ready | 1 | None | SPEC-002 | [[../IDEA-001-budgetpal-Specs]] |
+| P0 | Feature | Done | 1 | None | SPEC-002 | [[../IDEA-001-budgetpal-Specs]] |
 
 ## Delivery Brief
 - **Who:** the budget owner (and the developers of SPEC-002..008, who build on this base).

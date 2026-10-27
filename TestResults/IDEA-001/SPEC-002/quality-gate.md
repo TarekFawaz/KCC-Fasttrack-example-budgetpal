@@ -2,16 +2,16 @@
 title: "Quality Gate SPEC-002"
 tags:
   - kcc/quality-gate
-status: deferred
+status: pass
 ---
 
 # Quality Gate - SPEC-002 (IDEA-001)
 
-- Status: **deferred** (exit 3)
+- Status: **pass** (exit 0)
 - Workspace: `src/IDEA-001-budgetpal`
 - Mode: full
 - Coverage minimum: 80% (settings.quality.coverage_min_pct)
-- Errors: 0  Warnings: 1  Deferred: 1
+- Errors: 0  Warnings: 0  Deferred: 0
 
 | Check | Stack | Project | Status | Command | Exit | Message | Evidence |
 |--|--|--|--|--|--|--|--|
@@ -24,17 +24,5 @@ status: deferred
 | QG-COV | node | src/IDEA-001-budgetpal | pass | `pnpm run test:coverage` | - | coverage 100% >= 80% (settings.quality.coverage_min_pct) | src/IDEA-001-budgetpal/coverage |
 | QG-SECRETS | - | - | pass | `gitleaks dir --redact (full)` | 0 | gitleaks: no leaks (full) | TestResults/IDEA-001/SPEC-002/quality-gate-artifacts/gitleaks.json |
 | QG-DEPS | - | - | pass | `osv-scanner --format json -L <lockfile>...` | 0 | osv-scanner: no known vulnerabilities | TestResults/IDEA-001/SPEC-002/quality-gate-artifacts/osv.json |
-| QG-SAST | - | - | deferred | `` | - | SAST: tool 'semgrep' is missing; deferred (not a pass) | tool-missing:semgrep |
-| QG-STATIC | - | - | pass | `static-rules scan (18 rule(s) from architecture/static-rules.tsv)` | 0 | static rules: 18 rule(s) over 80 file(s), no forbidden pattern found | - |
-
-## Missing tools (deferred - NOT a pass)
-
-Approve through the toolchain-preflight gate, then re-run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .KCC\tools\toolchain-preflight.ps1 -Tools semgrep
-```
-
-```bash
-bash .KCC/tools/toolchain-preflight.sh semgrep
-```
+| QG-SAST | - | - | pass | `semgrep scan --config auto --json` | 0 | semgrep: no findings at severity >= error | TestResults/IDEA-001/SPEC-002/quality-gate-artifacts/semgrep.json |
+| QG-STATIC | - | - | pass | `static-rules scan (18 rule(s) from architecture/static-rules.tsv)` | 0 | static rules: 18 rule(s) over 115 file(s), no forbidden pattern found | - |

@@ -1,12 +1,3 @@
-{
-  "results": [],
-  "experimental_config": {
-    "licenses": {
-      "summary": false,
-      "allowlist": null
-    }
-  }
-}
 Starting filesystem walk for root: E:\
-Scanned E:\Tikasway.dev\TestRounds\round-14-budgetpal\.kcc-lanes\SPEC-001\src\IDEA-001-budgetpal\pnpm-lock.yaml file and found 15 packages
-End status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 1.5487ms elapsed, 1.5487ms wall time
+Scanned E:\Tikasway.dev\TestRounds\round-14-budgetpal\src\IDEA-001-budgetpal\pnpm-lock.yaml file and found 15 packages
+End status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 1.0338ms elapsed, 1.0338ms wall time

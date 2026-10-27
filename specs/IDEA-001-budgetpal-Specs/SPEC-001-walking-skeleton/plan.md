@@ -144,7 +144,6 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | T-020 | Enabler-004 | AC-4 | integration | `start()` with a temp db migrates, then listens on `PORT`; `app_meta` exists |
 | T-021 | Enabler-004 | AC-4 | integration | Spawned `server.ts` with a bad SQL migration exits non-zero and never listens |
 | T-022 | Enabler-004 | AC-5 | integration | `registerShutdown` with an injected `exit`: on SIGTERM and SIGINT the server stops, db closes, exit called with 0 |
-| T-023 | Enabler-004 | AC-5 | integration | Spawned server receives SIGTERM and exits 0 (skipped on win32; QG-SMOKE covers) |
 | T-024 | Story-001 | AC-3 | unit | `useHealth` with mocked fetch yields loading, success and failure states |
 | T-025 | Story-001 | AC-1 | integration | `app.inject('/health')` returns 200 `{status:"ok",db:"ok"}`; `/docs/json` documents `/health` |
 | T-026 | Story-001 | AC-2 | integration | With the db closed `/health` returns 503 `application/problem+json` whose body has no driver message or stack |
@@ -152,11 +151,8 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | T-028 | Story-001 | AC-4 | integration | axe on HomePage in light and dark `matchMedia` schemes: no serious/critical violation |
 | T-029 | Story-001 | AC-5 | integration | Real registry lists "Home" at `/` order 0 and no shared file imports the home feature |
 | T-030 | Story-001 | AC-1 | integration | Served `/docs/json` equals checked-in `api/openapi.json` (`UPDATE_OPENAPI=1` rewrites it); every route in it is implemented |
-| T-031 | Enabler-005 | AC-1 | integration | Smoke: `docker compose up --build -d`, both healthy, `curl 127.0.0.1:8080` page and `/api/health` give "ok" |
 | T-032 | Enabler-005 | AC-2 | unit | `docker compose config` / parsed YAML: loopback ports only, `healthcheck` on both services, `${VAR:-default}` env without secret values, volume `budgetpal-data` |
 | T-033 | Enabler-005 | AC-3 | unit | Dockerfiles: pinned tags (no `:latest`), `node:22-bookworm-slim`, multi-stage with toolchain only in build stage, non-root `USER` in the last stage |
-| T-034 | Enabler-005 | AC-4 | integration | Live web: `/api/health` proxied with prefix stripped, unknown path falls back to `index.html`, headers `nosniff`, `Referrer-Policy`, self CSP present |
-| T-035 | Enabler-005 | AC-5 | integration | Write a row via the api db, `docker compose down` then `up`; `app_meta` row and `_migrations` records persist |
 | T-036 | Enabler-005 | AC-6 | unit | README has headings for prerequisites, `cp .env.example .env`, run command, env table, backup and restore, redeploy |
 | T-037 | Enabler-005 | AC-2 | unit | `api` and `web` services publish on `127.0.0.1` for both ports (restating GR-001 for SR-001 evidence) |
 
@@ -244,3 +240,7 @@ Confidence: 93%
 - Epic spec: [[SPEC-001-walking-skeleton]]
 - Roadmap: [[../ROADMAP]]
 - Idea-specs index: [[IDEA-001-budgetpal-Specs]]
+
+## Descoped by human decision (2026-10-27)
+The human removed the Docker-registry steps from SPEC-001. These Test IDs are no longer part of the plan, were never run, and are not counted as passes: T-023 (real SIGTERM, win32), T-031 (compose smoke), T-034 (live web proxy and headers), T-035 (volume persistence). The static compose and Dockerfile checks (T-032, T-033, T-037) and the in-process shutdown test (T-022) stay in scope.
+

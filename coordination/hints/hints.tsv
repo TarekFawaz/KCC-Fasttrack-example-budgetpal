@@ -1,0 +1,1 @@
+H-001	all	0	1793128650	human	Human decision: skip the docker registry steps (compose up, container, smoke checks) and skip SAST/semgrep. Record both as accepted-deferred (never PASS), do not install semgrep, do not retry or park a spec for them, and treat SPEC-001 SR-018 and these two deferrals as waived.

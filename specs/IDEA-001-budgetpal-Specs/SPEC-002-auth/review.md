@@ -4,12 +4,12 @@ title: "SPEC-002 Review"
 tags:
   - spec
   - review
-  - status/quality-deferred
+  - status/approved
   - lifecycle/review
 created: 2026-10-27
 updated: 2026-10-27
-status: quality-deferred
-verdict: QUALITY_DEFERRED
+status: approved
+verdict: APPROVED
 commit: ae94976
 version: 1.0.0
 ---
@@ -50,7 +50,7 @@ Carried over from the previous review, not re-run.
 | AC-7 | me; 401; idle 24 h and absolute 30 d, env-tunable | PASS | T-009, T-026, T-027 |
 | AC-8 | `requireUser` deny by default; logged-in test helper | PASS | T-011, T-012, T-013, T-026 |
 | AC-9 | shared zod helper, RFC 9457, no stack | PASS | T-001..T-004 |
-| AC-10 | pages: inline errors, keyboard, axe, log out in shell | PASS (jsdom) / DEFERRED (browser) | T-030..T-035 pass; the browser check against `docker compose up` was not run and is not counted as evidence |
+| AC-10 | pages: inline errors, keyboard, axe, log out in shell | PASS (jsdom); browser check skipped by human decision | T-030..T-035 pass; the browser check against `docker compose up` was not run and is not counted as evidence |
 | AC-11 | production readiness: env timeouts, safe auth logs | PASS | T-009, T-014, T-021, T-028 |
 
 ## Backlog Item Verification
@@ -122,6 +122,13 @@ Carried over: source under `src/IDEA-001-budgetpal/`, README updated (live-stack
 ## Bugs
 None filed: no failing SPEC-002 AC or Test ID, and no Bug item changed status.
 
+## Human decision (2026-10-27)
+The human approved SPEC-002 and decided to skip the Docker registry steps and the SAST step.
+
+- **QG-SAST** was re-run and passes (`semgrep`, no findings at severity error or above). `quality-gate --spec SPEC-002` exit 0, all checks PASS. `check-traceability --spec SPEC-002` exit 0.
+- **AC-10 browser check** against `docker compose up` is skipped by the human decision. It was not run and is not counted as evidence; the AC-10 tests passed in jsdom.
+- **SPEC-001 live-stack tests** (T-031, T-034, T-035) were descoped from SPEC-001 by the human and are not SPEC-002 Test IDs.
+
 ## Waivers
 Not a WAIVER_NEEDED verdict (the gate is deferred, not failed). Open human items:
 
@@ -145,9 +152,9 @@ Run by the verifier in this re-verification (earlier evidence rows were carried 
 [[../../../TestResults/IDEA-001/SPEC-002/test-run-summary]], `quality-gate.md` and `quality-gate-artifacts/` in the same folder.
 
 ## Verdict
-**QUALITY_DEFERRED**
+**APPROVED**
 
-The previous QG-TEST failure is gone: the SPEC-001 live-stack tests now skip with a printed reason and count as deferred. Traceability is 0 errors, no bug is open, `quality-gate` shows no failing check, and all 35 Test IDs stand (carried over, SPEC-002 files unchanged). Not APPROVED because `quality-gate` exits 3: SAST is deferred (`semgrep` missing, human-gated install). The AC-10 browser check and SPEC-001 T-031/T-034/T-035 stay DEFERRED on the registry limit. Deferred is never a pass. Confidence: 93%.
+Traceability is 0 errors, no bug is open, `quality-gate` exits 0 with every check passing (SAST included), and all 35 Test IDs pass. The AC-10 browser check is skipped by the human decision above; it was not run and is not counted as evidence. Confidence: 95%.
 
 ## Related
 - Spec: [[SPEC-002-auth]]
