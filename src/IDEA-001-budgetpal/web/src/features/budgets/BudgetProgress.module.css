@@ -1,0 +1,137 @@
+/*
+ * Budget progress. Status colours are tokens, light by default and dark through the user's colour scheme.
+ * Every text token is at least 4.5:1 against --surface and --bg (checked by BudgetsPage.test.tsx).
+ * Single column from 360 px: nothing has a fixed width, long names wrap.
+ */
+.progress {
+  --status-ok: #146c2e;
+  --status-warning: #8a4b00;
+  --status-over: #b00020;
+  --track-bg: #e5e7eb;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-color-scheme: dark) {
+  .progress {
+    --status-ok: #81c995;
+    --status-warning: #fdd663;
+    --status-over: #ff8a80;
+    --track-bg: #2a2d33;
+  }
+}
+
+.ok {
+  --status: var(--status-ok);
+}
+
+.warning {
+  --status: var(--status-warning);
+}
+
+.over {
+  --status: var(--status-over);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  color: var(--status);
+  font-weight: 600;
+}
+
+.icon {
+  flex: none;
+}
+
+.figures {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  width: 100%;
+  height: 0.75rem;
+  overflow: hidden;
+  background: var(--track-bg);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius);
+}
+
+.fill {
+  height: 100%;
+  max-width: 100%;
+  background: var(--status);
+}
+
+/* The "over by" sentence. */
+.overBy {
+  margin: 0;
+  color: var(--status-over);
+  font-weight: 600;
+}
+
+.unbudgeted {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.unbudgetedRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.unbudgetedText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.action {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.action:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { currentMonth, isMonth, useBudgets, useExpenseCategories, useRemoveBudget, type BudgetItem } from './api';
-import { BudgetForm, formatAmount, installCurrency } from './BudgetForm';
+import { BudgetForm, installCurrency } from './BudgetForm';
+import { BudgetProgress, UnbudgetedList } from './BudgetProgress';
 import styles from './BudgetsPage.module.css';
 
 interface RemoveBudgetProps {
@@ -57,6 +58,12 @@ export function BudgetsPage() {
   useEffect(() => {
     if (removedCount > 0) listHeadingRef.current?.focus();
   }, [removedCount]);
+
+  // "Add budget" on an unbudgeted category: preselect it and put the cursor in the amount field.
+  function addBudgetFor(id: number) {
+    setCategoryId(String(id));
+    amountRef.current?.focus();
+  }
 
   const expenseCategories = categories.data ?? [];
   const items = budgets.data?.items ?? [];
@@ -126,17 +133,15 @@ export function BudgetsPage() {
           <ul className={styles.list} aria-label="Budgets">
             {items.map((item) => (
               <li key={item.categoryId} className={styles.row}>
-                <div className={styles.rowText}>
-                  <strong>{item.categoryName}</strong>
-                  <span className={styles.amount}>Budget: {formatAmount(item.budgetMinor, currency)}</span>
-                  <span className={`${styles.amount} ${styles.range}`}>Spent: {formatAmount(item.spentMinor, currency)}</span>
-                </div>
+                <BudgetProgress item={item} currency={currency} />
                 <RemoveBudget month={month} item={item} onRemoved={() => setRemovedCount((count) => count + 1)} />
               </li>
             ))}
           </ul>
         ) : null}
       </section>
+
+      {budgets.data ? <UnbudgetedList items={budgets.data.unbudgeted ?? []} currency={currency} onAdd={addBudgetFor} /> : null}
     </section>
   );
 }
