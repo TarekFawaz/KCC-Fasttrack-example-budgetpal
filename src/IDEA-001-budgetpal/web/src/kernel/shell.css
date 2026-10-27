@@ -126,3 +126,64 @@ a {
     padding: calc(var(--space) * 2);
   }
 }
+
+.shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shell-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem var(--space);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Guard states and the sign-in pages (no header, nav or footer). */
+.gate-main {
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: calc(var(--space) * 2) var(--space);
+}
+
+.gate-button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+/* API status dot in the footer: colour plus a different icon per state (never colour alone). */
+.health-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.health-dot[data-state='ok'] {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.health-dot[data-state='unavailable'] {
+  color: var(--warn);
+  border-color: var(--warn);
+}

@@ -61,6 +61,24 @@ describe('Shell with a fake feature', () => {
   });
 });
 
+describe('Shell optional slots', () => {
+  it('T-017 renders the actions in the banner and the footer content in a footer landmark', () => {
+    render(
+      <MemoryRouter future={routerFuture}>
+        <Shell features={registry} actions={<button type="button">Log out</button>} footer={<span>footer content</span>} />
+      </MemoryRouter>,
+    );
+    expect(within(screen.getByRole('banner')).getByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    expect(within(screen.getByRole('contentinfo')).getByText('footer content')).toBeInTheDocument();
+  });
+
+  it('T-017 renders no actions and no footer landmark when the slots are not given', () => {
+    renderShell('/');
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+});
+
 describe('shell.css', () => {
   const css = readFileSync(resolve(__dirname, 'shell.css'), 'utf8');
 

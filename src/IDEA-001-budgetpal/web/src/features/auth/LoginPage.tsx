@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiProblem, useLogIn, useLogOut } from './authApi';
 
@@ -96,7 +96,6 @@ export const LOGIN_FAILED_MESSAGE = 'Email or password is incorrect.';
 const FIELD_ORDER = ['email', 'password'] as const;
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const logIn = useLogIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -117,20 +116,17 @@ export function LoginPage() {
     if (password === '') next.password = 'Enter your password.';
     setErrors(next);
     if (next.email || next.password) return;
-    logIn.mutate(
-      { email: email.trim(), password },
-      {
-        onSuccess: () => navigate('/', { replace: true }),
-        onError: (problem) => {
-          // One message for every refusal, so the page never says which half was wrong.
-          setFormError(
-            problem instanceof ApiProblem && problem.status !== 401 && problem.status !== 400
-              ? 'Could not log in right now. Try again.'
-              : LOGIN_FAILED_MESSAGE,
-          );
-        },
-      },
-    );
+    // On success `useLogIn` turns the session authenticated and the route guard (`AuthGate`) moves the
+    // user to the remembered target or `/`: this page never navigates, so only one redirect decides.
+    // The promise form keeps the failure handler alive after the page unmounts.
+    logIn.mutateAsync({ email: email.trim(), password }).catch((problem: unknown) => {
+      // One message for every refusal, so the page never says which half was wrong.
+      setFormError(
+        problem instanceof ApiProblem && problem.status !== 401 && problem.status !== 400
+          ? 'Could not log in right now. Try again.'
+          : LOGIN_FAILED_MESSAGE,
+      );
+    });
   }
 
   return (
@@ -179,12 +175,38 @@ export function LogOutPage() {
   const navigate = useNavigate();
   const logOut = useLogOut();
   const started = useRef(false);
+  const [failed, setFailed] = useState(false);
+  const { mutateAsync } = logOut;
+
+  const run = useCallback(() => {
+    setFailed(false);
+    // 401 (session already gone) counts as signed out in the kernel hook. The promise form still
+    // resolves after this page unmounts because the session turned anonymous.
+    mutateAsync().then(
+      () => navigate('/login', { replace: true }),
+      () => setFailed(true),
+    );
+  }, [mutateAsync, navigate]);
 
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    logOut.mutate(undefined, { onSettled: () => navigate('/login', { replace: true }) });
-  }, [logOut, navigate]);
+    run();
+  }, [run]);
+
+  if (failed) {
+    return (
+      <section style={authStyles.page}>
+        <p role="alert" style={authStyles.error}>
+          <span aria-hidden="true">⚠ </span>
+          Log out failed. Try again.
+        </p>
+        <button type="button" onClick={run} style={authStyles.button}>
+          Try again
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section style={authStyles.page}>

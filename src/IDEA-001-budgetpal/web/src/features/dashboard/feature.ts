@@ -3,9 +3,9 @@ import type { Feature } from '../../kernel/registry';
 
 const feature: Feature = {
   id: 'dashboard',
-  path: '/dashboard',
+  path: '/',
   label: 'Dashboard',
-  order: 50,
+  order: 0,
   component: DashboardPage,
 };
 

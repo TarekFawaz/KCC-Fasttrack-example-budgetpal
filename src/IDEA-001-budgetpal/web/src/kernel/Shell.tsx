@@ -1,12 +1,17 @@
+import type { ReactNode } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import type { Feature } from './registry';
 
 interface ShellProps {
   features: Feature[];
+  /** Optional controls at the end of the header (the log-out control). */
+  actions?: ReactNode;
+  /** Optional footer content (the API status dot). The footer landmark renders only when given. */
+  footer?: ReactNode;
 }
 
 /** Landmark layout: header with the nav built from the registry, and `main` with its routes. */
-export function Shell({ features }: ShellProps) {
+export function Shell({ features, actions, footer }: ShellProps) {
   return (
     <div className="shell">
       <a className="skip-link" href="#main">
@@ -25,6 +30,7 @@ export function Shell({ features }: ShellProps) {
             ))}
           </ul>
         </nav>
+        {actions ? <div className="shell-actions">{actions}</div> : null}
       </header>
       <main id="main" className="shell-main" tabIndex={-1}>
         <Routes>
@@ -42,6 +48,7 @@ export function Shell({ features }: ShellProps) {
           />
         </Routes>
       </main>
+      {footer ? <footer className="shell-footer">{footer}</footer> : null}
     </div>
   );
 }

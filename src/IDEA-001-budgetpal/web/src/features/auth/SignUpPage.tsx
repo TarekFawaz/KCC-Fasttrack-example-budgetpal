@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ApiProblem, useSignUp } from './authApi';
 import { AuthField, authStyles, useFocusFirstError, type FieldErrors } from './LoginPage';
 
@@ -39,7 +39,6 @@ function fromProblem(problem: unknown): { fields: FieldErrors; form: string | nu
 }
 
 export function SignUpPage() {
-  const navigate = useNavigate();
   const signUp = useSignUp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,17 +52,12 @@ export function SignUpPage() {
     const next = validateSignUp(email, password);
     setErrors(next);
     if (next.email || next.password) return;
-    signUp.mutate(
-      { email: email.trim(), password },
-      {
-        onSuccess: () => navigate('/', { replace: true }),
-        onError: (problem) => {
-          const mapped = fromProblem(problem);
-          setErrors(mapped.fields);
-          setFormError(mapped.form);
-        },
-      },
-    );
+    // On success the session turns authenticated and `AuthGate` owns the move (see LoginPage).
+    signUp.mutateAsync({ email: email.trim(), password }).catch((problem: unknown) => {
+      const mapped = fromProblem(problem);
+      setErrors(mapped.fields);
+      setFormError(mapped.form);
+    });
   }
 
   return (

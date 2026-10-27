@@ -58,7 +58,7 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
+      <MemoryRouter initialEntries={['/']} future={routerFuture}>
         <DashboardPage />
       </MemoryRouter>
     </QueryClientProvider>,
