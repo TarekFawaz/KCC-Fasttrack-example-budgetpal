@@ -2,7 +2,7 @@
 
 | Type | Parent | Priority | Estimate | Status | Dialect | Depends on | Blocks |
 |--|--|--|--|--|--|--|--|
-| Story | [[../SPEC-005-transactions]] | P1 | S | Ready | backend-nodejs | Enabler-001 | Story-002, Story-003 |
+| Story | [[../SPEC-005-transactions]] | P1 | S | Done | backend-nodejs | Enabler-001 | Story-002, Story-003 |
 
 ## Statement
 As a budget owner, I want to record a transaction against one of my accounts and categories, so that my spending and income are tracked.

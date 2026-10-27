@@ -1,0 +1,132 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.5);
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Single column by default (360 px); the filters spread over a row from 768 px. */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space);
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.control {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  min-height: 2.75rem;
+  width: 100%;
+}
+
+.error {
+  margin: 0;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.button:focus-visible,
+.control:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.table .amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.direction {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  margin-top: var(--space);
+}
+
+.range {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (min-width: 768px) {
+  .filters {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
