@@ -3,12 +3,14 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { loadConfig } from '../../kernel/config.js';
 import { requireUser } from '../../kernel/require-user.js';
 import { problemContent, trendQuerySchema, trendResponseSchema } from './schemas.js';
+import * as service from './trend.service.js';
 
 export const TREND_PATH = '/api/dashboard/trend';
 
 /**
- * Scaffold route for `GET /api/dashboard/trend`: guarded, validated and documented. Story-002
- * replaces the placeholder handler with the monthly aggregate (service + repository).
+ * `GET /api/dashboard/trend`: the signed-in user's monthly expense totals for the last N months.
+ * The session guard runs in `onRequest` (GR-002). The handler logs the event only, never an
+ * amount (GR-008).
  */
 export function registerTrendRoutes(app: FastifyInstance): void {
   const typed = app.withTypeProvider<ZodTypeProvider>();
@@ -27,6 +29,12 @@ export function registerTrendRoutes(app: FastifyInstance): void {
         },
       },
     },
-    async () => ({ currency: loadConfig().currency, points: [] }),
+    async (request) => {
+      const userId = (request.user as { id: number }).id;
+      const { months, end } = request.query;
+      const trend = service.trendForUser(app.db, userId, loadConfig().currency, { months, ...(end ? { end } : {}) });
+      request.log.info({ event: 'dashboard.trend' }, 'trend served');
+      return trend;
+    },
   );
 }
