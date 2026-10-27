@@ -188,7 +188,7 @@ async function waitHealthy(timeoutMs: number): Promise<void> {
   throw new Error('services did not become healthy in time');
 }
 
-describe.skipIf(liveStack.skipReason !== null)('Enabler-005 live stack (needs a Docker daemon and npm registry access)', () => {
+describe.skipIf(liveStack.skipReason !== null)('Enabler-005 live stack (needs a Docker daemon, npm registry access and a free Docker network)', () => {
   it('T-031 compose up: both services healthy; web page and /api/health answer', async () => {
     const up = dc(['up', '--build', '-d']);
     expect(up.status, String(up.stderr)).toBe(0);

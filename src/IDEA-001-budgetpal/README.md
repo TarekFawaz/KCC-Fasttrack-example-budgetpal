@@ -46,7 +46,7 @@ pnpm --filter @budgetpal/api dev     # http://127.0.0.1:3000
 pnpm --filter @budgetpal/web dev     # http://127.0.0.1:5173, /api proxied to the api
 ```
 
-The Docker smoke, header and persistence tests (T-031, T-034, T-035) run only when the Docker daemon is up and a build container can reach the npm registry (the test run probes with the Dockerfile's own `npm view pnpm@...`); otherwise they are skipped with the reason printed and reported as deferred, never as passed. Behind a TLS-intercepting proxy the image build fails at `npm install -g pnpm` until the build container trusts the proxy's CA.
+The Docker smoke, header and persistence tests (T-031, T-034, T-035) run only when the Docker daemon is up, a build container can reach the npm registry (the test run probes with the Dockerfile's own `npm view pnpm@...`) and the daemon can still create a network (the probe creates and removes a throwaway one; a host with many leftover stacks fails with `all predefined address pools have been fully subnetted`, fixed by removing unused networks with `docker network prune`); otherwise they are skipped with the reason printed and reported as deferred, never as passed. Behind a TLS-intercepting proxy the image build fails at `npm install -g pnpm` until the build container trusts the proxy's CA.
 
 ## Backup and restore (rollback path)
 

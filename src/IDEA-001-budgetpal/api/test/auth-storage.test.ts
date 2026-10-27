@@ -80,7 +80,11 @@ describe('migration 0010-auth.sql', () => {
   it('T-005 applies on top of an existing database with the earlier migrations', () => {
     const copy = join(dir, 'migrations');
     cpSync(migrationsDir, copy, { recursive: true });
-    expect(runMigrations(db, copy)).toEqual(['0001-init.sql', '0010-auth.sql']);
+    const applied = runMigrations(db, copy);
+    // The earlier migrations come first and in order; later specs add their own (0030-categories.sql, ...),
+    // so the list is compared with the folder, not hard-coded.
+    expect(applied.slice(0, 2)).toEqual(['0001-init.sql', '0010-auth.sql']);
+    expect(applied).toEqual(readdirSync(copy).filter((name) => name.endsWith('.sql')).sort());
   });
 });
 
