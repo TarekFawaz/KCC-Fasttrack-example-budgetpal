@@ -52,7 +52,35 @@ describe('GET /health', () => {
   });
 });
 
+interface MediaTypes {
+  description: string;
+  content: Record<string, { schema: { type?: string; required?: string[]; properties?: Record<string, unknown> } }>;
+}
+
 describe('OpenAPI contract', () => {
+  it('T-030 documents /health as 200 application/json and 503 application/problem+json', async () => {
+    const served = (await app.inject('/docs/json')).json() as {
+      paths: Record<string, { get: { responses: Record<string, MediaTypes> } }>;
+    };
+    const responses = served.paths['/health']?.get.responses ?? {};
+    expect(Object.keys(responses).sort()).toEqual(['200', '503']);
+    expect(Object.keys(responses['200']?.content ?? {})).toEqual(['application/json']);
+    expect(Object.keys(responses['503']?.content ?? {})).toEqual(['application/problem+json']);
+
+    const problem = responses['503']?.content['application/problem+json']?.schema;
+    expect(problem?.type).toBe('object');
+    expect(problem?.required).toEqual(expect.arrayContaining(['type', 'title', 'status', 'detail']));
+    expect(Object.keys(problem?.properties ?? {})).toEqual(
+      expect.arrayContaining(['type', 'title', 'status', 'detail', 'instance', 'errors']),
+    );
+
+    // The documented status and media type are what the route really returns.
+    db.close();
+    const live = await app.inject('/health');
+    expect(live.statusCode).toBe(503);
+    expect(live.headers['content-type']).toContain('application/problem+json');
+  });
+
   it('T-030 served /docs/json equals the checked-in api/openapi.json and every route is implemented', async () => {
     const served = (await app.inject('/docs/json')).json() as { paths: Record<string, Record<string, unknown>> };
     if (process.env.UPDATE_OPENAPI === '1') {

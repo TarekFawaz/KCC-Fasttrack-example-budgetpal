@@ -1,13 +1,23 @@
 import type { FastifyPluginAsync } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { sendProblem } from '../../kernel/errors.js';
+import { sendProblem, type Problem } from '../../kernel/errors.js';
 import { checkDatabase } from './health.repository.js';
 
 const HealthResponse = z.object({
   status: z.literal('ok'),
   db: z.literal('ok'),
 });
+
+/** RFC 9457 body of `sendProblem`; documents the 503 under the media type it is returned with. */
+const ProblemResponse = z.object({
+  type: z.string(),
+  title: z.string(),
+  status: z.number().int(),
+  detail: z.string(),
+  instance: z.string().optional(),
+  errors: z.array(z.object({ field: z.string(), message: z.string() })).optional(),
+}) satisfies z.ZodType<Problem>;
 
 /** Public liveness check (deliberately unauthenticated): the api is up and the database answers. */
 const health: FastifyPluginAsync = async (app) => {
@@ -17,7 +27,13 @@ const health: FastifyPluginAsync = async (app) => {
       schema: {
         summary: 'API and database health',
         tags: ['health'],
-        response: { 200: HealthResponse },
+        response: {
+          200: HealthResponse,
+          503: {
+            description: 'The database is not available',
+            content: { 'application/problem+json': { schema: ProblemResponse } },
+          },
+        },
       },
     },
     async (request, reply) => {

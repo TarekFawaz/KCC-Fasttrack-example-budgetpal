@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-001-walking-skeleton]] | verifier | minor | blocked | Story-001 / AC-1 | T-030 | [[../../../../TestResults/IDEA-001/SPEC-001/Story-001-AC-1-Bug-002]] |
+| Bug | [[../SPEC-001-walking-skeleton]] | verifier | minor | fixed | Story-001 / AC-1 | T-030 | [[../../../../TestResults/IDEA-001/SPEC-001/Story-001-AC-1-Bug-002]] |
 
 ## Reproduce
 1. Read `api/openapi.json`: `/health` has only a `200` response.
@@ -16,6 +16,11 @@
 - `src/IDEA-001-budgetpal/api/src/modules/health/index.ts`
 - `src/IDEA-001-budgetpal/api/openapi.json`
 - `src/IDEA-001-budgetpal/api/test/health.test.ts`
+- `src/IDEA-001-budgetpal/api/src/app.ts` (added by the Option A ruling below)
+- `src/IDEA-001-budgetpal/api/test/app.test.ts` (wrapper unit test, T-011, added by the Option A ruling below)
+
+## Fix
+Option A applied. `app.ts` wraps `jsonSchemaTransform`: a response declared as `{ description?, content: { '<media type>': { schema: <zod> } } }` is converted per media type; bare zod responses go through the provider unchanged. `health/index.ts` declares `503` as `application/problem+json` with a `Problem` zod schema (`satisfies z.ZodType<Problem>`), `api/openapi.json` regenerated (`UPDATE_OPENAPI=1`). Tests: T-030 (503 listed under `application/problem+json`, 200 under `application/json`, live 503 matches), T-011 (wrapper: mixed, content-only and `hide` routes). Red first, then green; `pnpm -r build`, `pnpm lint`, `pnpm test` and QG-COV (100%) pass.
 
 ## Ruling needed
 **Blocker.** The contract cannot list the 503 as `application/problem+json` (and the 200 as `application/json`) from the three Impacted Files. Probed with the installed versions (fastify-type-provider-zod 4.0.2, @fastify/swagger 9.9.2):
@@ -33,3 +38,7 @@ No code was changed for this Bug; the red regression test was removed again so `
 | D. Upgrade fastify-type-provider-zod | Newer major with `content` support | Library major bump, needs a Decisions row (D-03) and a lockfile change; largest cost |
 
 **Recommended: A.** Answer `revise` with "Option A approved: edit `api/src/app.ts` for this Bug".
+
+## Ruling
+
+- 2026-10-27T15:55:27Z human: `revise` -> Status open - silent run: no human ruling; apply the recommended option of the Ruling needed section of each reopened Bug item

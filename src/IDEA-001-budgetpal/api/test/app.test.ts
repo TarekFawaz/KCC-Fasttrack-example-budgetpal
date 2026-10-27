@@ -210,6 +210,58 @@ describe('OpenAPI (Enabler-002 AC-6)', () => {
     expect(ui.headers['content-type']).toContain('text/html');
     expect(ui.body.toLowerCase()).toContain('swagger');
   });
+
+  it('T-011 documents a response declared with a media type next to plain zod responses', async () => {
+    addModule(
+      'mixed',
+      [
+        "import { z } from 'zod';",
+        'export default async function (app) {',
+        "  app.get('/mixed', { schema: { response: {",
+        '    200: z.object({ count: z.number().int() }),',
+        "    409: { description: 'Conflict', content: { 'application/problem+json': { schema: z.object({ title: z.string(), status: z.number() }) } } },",
+        "  } } }, async () => ({ count: 0 }));",
+        "  app.get('/only-content', { schema: { response: {",
+        "    503: { content: { 'application/problem+json': { schema: z.object({ title: z.string() }) } } },",
+        "  } } }, async () => ({}));",
+        "  app.get('/hidden', { schema: { hide: true, response: {",
+        "    503: { content: { 'application/problem+json': { schema: z.object({ title: z.string() }) } } },",
+        "  } } }, async () => ({}));",
+        '}',
+        '',
+      ].join('\n'),
+    );
+    const instance = await build();
+    const document = (await instance.inject({ method: 'GET', url: '/docs/json' })).json() as {
+      paths: Record<
+        string,
+        {
+          get: {
+            responses: Record<
+              string,
+              { description: string; content: Record<string, { schema: { type: string; properties: object; required: string[] } }> }
+            >;
+          };
+        }
+      >;
+    };
+
+    const mixed = document.paths['/mixed']?.get.responses ?? {};
+    expect(Object.keys(mixed['200']?.content ?? {})).toEqual(['application/json']);
+    expect(mixed['409']?.description).toBe('Conflict');
+    expect(Object.keys(mixed['409']?.content ?? {})).toEqual(['application/problem+json']);
+    const conflict = mixed['409']?.content['application/problem+json']?.schema;
+    expect(conflict?.type).toBe('object');
+    expect(Object.keys(conflict?.properties ?? {})).toEqual(['title', 'status']);
+    expect(conflict?.required).toEqual(['title', 'status']);
+
+    const onlyContent = document.paths['/only-content']?.get.responses ?? {};
+    expect(Object.keys(onlyContent)).toEqual(['503']);
+    expect(onlyContent['503']?.description).toBe('Default Response');
+    expect(Object.keys(onlyContent['503']?.content ?? {})).toEqual(['application/problem+json']);
+
+    expect(document.paths).not.toHaveProperty('/hidden');
+  });
 });
 
 describe('database decoration', () => {
