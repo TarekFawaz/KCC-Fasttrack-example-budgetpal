@@ -200,7 +200,18 @@ Paths here are the repo-root workspace paths (`api/`, `web/`), matching the back
 | GR-018 | verifier:no rate limiter or lockout or CSRF library or audit table is added |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (auth): effort high |
+| Enabler-002 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (crypto): effort high |
+| Enabler-003 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authorization): effort high |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (personal data): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authentication): effort high |
+| Story-003 | 4 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (auth): effort high |
 
 ## Verification Steps
 1. `pnpm install --frozen-lockfile` then `pnpm -r build`, `pnpm -r lint`.

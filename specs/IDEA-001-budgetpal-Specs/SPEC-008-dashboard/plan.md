@@ -189,7 +189,17 @@ All under `W/`. Migration `api/migrations/0080-dashboard-transactions-index.sql`
 | GR-018 | verifier:no rate limiter or csrf or audit or SBOM dependency added |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (session): effort high |
+| Story-002 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (session): effort high |
+| Story-003 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-004 | 4 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
 
 ## Verification Steps
 1. `pnpm --filter api test -- dashboard` runs T-001..T-021; `pnpm --filter web test -- dashboard` runs T-022..T-035.

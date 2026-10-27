@@ -192,7 +192,17 @@ All paths follow the architecture layout (`api/`, `web/` at the repo root, as in
 | GR-018 | verifier:no-CSRF-rate-limit-lockout-or-audit-dependency-or-table-added |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authorization): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
+| Story-003 | 4 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-004 | 5 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
 
 ## Verification Steps
 1. `pnpm --filter api test -- budgets` - T-001..T-021 (Enabler-001, Story-001, Story-002).

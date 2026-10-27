@@ -196,7 +196,17 @@ All paths in the Backlog Impacted Files: 5 (Enabler-001) + 3 (Enabler-002) + 4 (
 | GR-018 | verifier:no CSRF or throttle or audit table or SBOM dependency added |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
+| Enabler-002 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authz): effort high |
+| Story-003 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
 
 ## Verification Steps
 1. `pnpm install --frozen-lockfile` then `pnpm -r build`, `pnpm -r lint`, `pnpm -r test` (all T-001..T-037).

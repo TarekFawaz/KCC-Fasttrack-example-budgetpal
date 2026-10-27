@@ -190,7 +190,18 @@ Counts: unit 3, integration 37, performance 1 (41). Per item <= 8 (SZ-4).
 | GR-018 | verifier:no CSRF or rate limiter or audit or SBOM dependency or table is added |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (auth): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (session): effort high |
+| Story-003 | 4 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Story-004 | 5 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-005 | 6 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
 
 ## Verification Steps
 1. `pnpm --filter api test -- transactions` -> T-001..T-027 green (includes two-user, validation, log, OpenAPI and perf tests).

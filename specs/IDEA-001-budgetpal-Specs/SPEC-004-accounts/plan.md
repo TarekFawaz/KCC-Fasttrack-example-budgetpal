@@ -182,6 +182,19 @@ All paths use the repo layout fixed by `architecture.md` and `static-rules.tsv` 
 | GR-017 | n/a: no Dockerfile change |
 | GR-018 | verifier:no CSRF or rate limit or audit or SBOM dependency or table appears |
 
+## Routing
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; complexity high: effort high |
+| Story-001 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authz): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authz): effort high |
+| Story-003 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-004 | 4 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+
 ## Verification Steps
 1. `pnpm install --frozen-lockfile` then `pnpm -r typecheck`, `pnpm -r lint`.
 2. `pnpm --filter api test -- accounts` (T-001..T-017, T-029) and `pnpm --filter web test -- accounts` (T-018..T-028).

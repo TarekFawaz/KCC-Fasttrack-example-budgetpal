@@ -209,7 +209,18 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | GR-018 | verifier:no out-of-scope security dependency or table appears in the manifests and migrations |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (secret): effort high |
+| Enabler-002 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (secret): effort high |
+| Enabler-003 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Enabler-004 | 3 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Story-001 | 4 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Enabler-005 | 5 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (secret): effort high |
 
 ## Verification Steps
 1. `pnpm install --frozen-lockfile` (T-002, QG-LOCK).
