@@ -112,3 +112,36 @@
     align-self: flex-end;
   }
 }
+
+/* Row edit and delete states. */
+.rowForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.item:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+.item > .message {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .rowForm {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+}

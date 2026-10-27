@@ -80,6 +80,19 @@ export async function createCategory(input: NewCategory): Promise<Category> {
   return (await response.json()) as Category;
 }
 
+export async function updateCategory(id: number, input: Partial<NewCategory>): Promise<Category> {
+  const response = await send(`/${id}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  return (await response.json()) as Category;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await send(`/${id}`, { method: 'DELETE' });
+}
+
 /** The signed-in user's categories, ordered by name by the api. */
 export function useCategories() {
   return useQuery({ queryKey: CATEGORIES_KEY, queryFn: fetchCategories, retry: false });
@@ -90,6 +103,24 @@ export function useCreateCategory() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: createCategory,
+    onSuccess: () => client.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+  });
+}
+
+/** Renames or re-kinds a category and refreshes the list; a refused update leaves the cached list untouched. */
+export function useUpdateCategory() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: number } & NewCategory) => updateCategory(id, input),
+    onSuccess: () => client.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+  });
+}
+
+/** Deletes a category and refreshes the list; a 409 (in use) leaves the cached list untouched. */
+export function useDeleteCategory() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
     onSuccess: () => client.invalidateQueries({ queryKey: CATEGORIES_KEY }),
   });
 }

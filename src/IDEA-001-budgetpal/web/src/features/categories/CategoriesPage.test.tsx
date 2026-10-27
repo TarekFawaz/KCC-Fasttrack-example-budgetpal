@@ -97,8 +97,8 @@ describe('categories list (Story-003 AC-2)', () => {
     const expenses = await screen.findByRole('region', { name: 'Expense categories' });
     const income = screen.getByRole('region', { name: 'Income categories' });
     const expenseItems = within(expenses).getAllByRole('listitem');
-    expect(expenseItems.map((item) => item.textContent)).toEqual(['FoodExpense', 'RentExpense']);
-    expect(within(income).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['SalaryIncome']);
+    expect(expenseItems.map((item) => item.textContent)).toEqual(['FoodExpenseEditDelete', 'RentExpenseEditDelete']);
+    expect(within(income).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['SalaryIncomeEditDelete']);
     expect(screen.queryByText(/no categories yet/i)).not.toBeInTheDocument();
   });
 });
@@ -204,7 +204,7 @@ describe('accessibility (Story-003 AC-5)', () => {
     const tabbable = Array.from(container.querySelectorAll<HTMLElement>('input, select, button, a[href], [tabindex]')).filter(
       (element) => element.tabIndex >= 0 && !element.hasAttribute('disabled'),
     );
-    expect(tabbable.map((element) => element.id || element.textContent)).toEqual(['category-name', 'category-kind', 'Add category']);
+    expect(tabbable.map((element) => element.id || element.textContent)).toEqual(['category-name', 'category-kind', 'Add category', 'Edit', 'Delete', 'Edit', 'Delete']);
   });
 
   it('T-028 axe reports no violations on the empty state', async () => {

@@ -6,24 +6,17 @@ import {
   type Category,
   type CategoryKind,
 } from './categories.api';
+import { CategoryRow, KIND_LABELS, MAX_NAME_LENGTH, validateName } from './CategoryRow';
 import styles from './CategoriesPage.module.css';
 
-export const MAX_NAME_LENGTH = 60;
-export const KIND_LABELS: Record<CategoryKind, string> = { expense: 'Expense', income: 'Income' };
+export { KIND_LABELS, MAX_NAME_LENGTH, validateName };
+
 const GROUPS: readonly CategoryKind[] = ['expense', 'income'];
 
 export interface CreateErrors {
   name?: string;
   kind?: string;
   form?: string;
-}
-
-/** Mirrors the api's rules so the common mistake is caught before a request; the server stays the authority. */
-export function validateName(name: string): string | undefined {
-  const trimmed = name.trim();
-  if (trimmed === '') return 'Name is required.';
-  if (trimmed.length > MAX_NAME_LENGTH) return `Name must be at most ${MAX_NAME_LENGTH} characters.`;
-  return undefined;
 }
 
 /** Maps a refused create onto the fields: 400 `errors[]` by field name, 409 onto the name, the rest to a form message. */
@@ -41,15 +34,6 @@ export function errorsFromProblem(problem: unknown): CreateErrors {
   return { form: 'Could not save the category right now. Try again.' };
 }
 
-function CategoryItem({ category }: { category: Category }) {
-  return (
-    <li className={styles.item}>
-      <span>{category.name}</span>
-      <span className={styles.kind}>{KIND_LABELS[category.kind]}</span>
-    </li>
-  );
-}
-
 function CategoryGroups({ categories }: { categories: Category[] }) {
   return (
     <>
@@ -64,7 +48,7 @@ function CategoryGroups({ categories }: { categories: Category[] }) {
             </h2>
             <ul className={styles.list}>
               {members.map((category) => (
-                <CategoryItem key={category.id} category={category} />
+                <CategoryRow key={category.id} category={category} />
               ))}
             </ul>
           </section>
