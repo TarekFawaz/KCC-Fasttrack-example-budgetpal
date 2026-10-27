@@ -6,11 +6,18 @@ import { sendProblem, type Problem } from '../../kernel/errors.js';
 import { requireUser } from '../../kernel/require-user.js';
 import { buildProblem, validationProblem, type FieldError } from '../../kernel/problem.js';
 import { MAX_FILE_BYTES } from './import.parser.js';
-import { importRequestSchema, previewResponseSchema, type ImportRequest } from './import.schemas.js';
+import {
+  commitRequestSchema,
+  commitResponseSchema,
+  importRequestSchema,
+  previewResponseSchema,
+  type ImportRequest,
+} from './import.schemas.js';
 import * as service from './import.service.js';
 
 export const IMPORT_PATH = '/api/import';
 export const PREVIEW_PATH = `${IMPORT_PATH}/preview`;
+export const COMMIT_PATH = `${IMPORT_PATH}/commit`;
 
 /** RFC 9457 body, documented under the media type it is returned with. */
 const problemSchema = z.object({
@@ -178,6 +185,53 @@ export function registerPreviewRoute(app: FastifyInstance): void {
           invalid: outcome.value.invalidCount,
         },
         'import previewed',
+      );
+      return outcome.value;
+    },
+  );
+}
+
+/**
+ * `POST /api/import/commit`. Same guard order and body reading as preview, but the mapping and date format are
+ * required. The handler logs counts only: file text, descriptions and amounts never reach the log (GR-008).
+ */
+export function registerCommitRoute(app: FastifyInstance): void {
+  const typed = app.withTypeProvider<ZodTypeProvider>();
+
+  typed.post(
+    COMMIT_PATH,
+    {
+      onRequest: requireUser,
+      schema: {
+        summary: 'Import the valid rows of a CSV file, skipping duplicates',
+        description:
+          'multipart/form-data: `file` (CSV, at most 5 MB and 5000 rows, UTF-8), `accountId`, `mapping` (JSON column ' +
+          'indexes), `dateFormat`, and `expenseCategoryId` / `incomeCategoryId` for the rows of that sign. Valid rows ' +
+          'are stored in one transaction; rows already imported for this user are skipped.',
+        tags: ['import'],
+        consumes: ['multipart/form-data'],
+        response: {
+          200: commitResponseSchema,
+          400: problemContent('The file exceeds a cap, the mapping is wrong or the multipart body is malformed'),
+          401: problemContent('There is no valid session'),
+          404: problemContent('The account is not one of the user\'s'),
+        },
+      },
+    },
+    async (request, reply) => {
+      const userId = (request.user as { id: number }).id;
+      const form = await readForm(request, commitRequestSchema);
+      if (!form.ok) return sendProblem(reply, form.problem);
+      const outcome = service.commit(app.db, userId, form.value.bytes, form.value.request, pathOf(request.url));
+      if (!outcome.ok) return sendProblem(reply, outcome.problem);
+      request.log.info(
+        {
+          event: 'import.committed',
+          imported: outcome.value.imported,
+          skipped: outcome.value.skipped,
+          invalid: outcome.value.invalid,
+        },
+        'import committed',
       );
       return outcome.value;
     },

@@ -4,7 +4,8 @@ import { buildProblem, type FieldError } from '../../kernel/problem.js';
 import { ImportError, parseCsv, type ParsedCsv } from './import.parser.js';
 import { suggestMapping, validateRow, type ColumnMapping, type InvalidRow, type ValidRow } from './import.rows.js';
 import * as repository from './import.repository.js';
-import type { ImportRequest, PreviewResponse } from './import.schemas.js';
+import { dedupeKey } from './import.dedupe.js';
+import type { CommitResponse, ImportRequest, PreviewResponse } from './import.schemas.js';
 
 /** Either the value, or the problem+json body the route must send. */
 export type Outcome<T> = { ok: true; value: T } | { ok: false; problem: Problem };
@@ -131,6 +132,54 @@ export function preview(
         .slice(0, PREVIEW_ROW_LIMIT)
         .map(({ line, date, amountMinor, description }) => ({ line, date, amountMinor, description })),
       invalidRows: rows?.invalid ?? [],
+    },
+  };
+}
+
+/**
+ * Commit use case: re-reads the same bytes with the same code as preview (`analyse`), then stores every valid
+ * row in one transaction. A row whose dedupe key already exists for this user, in the file or in an earlier
+ * import, is skipped. Invalid rows are reported by line and never stored. The amount is stored as its absolute
+ * value (SPEC-005: the category carries the direction); the dedupe key uses the signed value.
+ */
+export function commit(
+  db: Database.Database,
+  userId: number,
+  bytes: Uint8Array,
+  request: ImportRequest,
+  instance: string,
+): Outcome<CommitResponse> {
+  const analysis = analyse(db, userId, bytes, request, instance);
+  if (!analysis.ok) return analysis;
+  const { rows } = analysis.value;
+  if (rows === undefined) {
+    return fail(instance, 'The request did not pass validation.', [
+      { field: 'mapping', message: 'Choose which columns hold the date, amount and description.' },
+    ]);
+  }
+
+  const insertRows = rows.valid.map((row) => ({
+    categoryId: row.categoryId,
+    occurredOn: row.date,
+    amountMinor: Math.abs(row.amountMinor),
+    description: row.description,
+    dedupeKey: dedupeKey({
+      userId,
+      accountId: request.accountId,
+      date: row.date,
+      amountMinor: row.amountMinor,
+      description: row.description,
+    }),
+  }));
+  const outcomes = repository.insertBatch(db, userId, request.accountId, insertRows);
+  const imported = outcomes.filter((outcome) => outcome === 'inserted').length;
+  return {
+    ok: true,
+    value: {
+      imported,
+      skipped: outcomes.length - imported,
+      invalid: rows.invalid.length,
+      invalidRows: rows.invalid,
     },
   };
 }
