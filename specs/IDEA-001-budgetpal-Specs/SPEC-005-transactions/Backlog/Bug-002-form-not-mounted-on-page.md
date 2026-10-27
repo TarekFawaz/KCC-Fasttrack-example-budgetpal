@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-005-transactions]] | verifier | major | fixed | Story-005 / AC-1 | T-035 | [[../../../../TestResults/IDEA-001/SPEC-005/Story-005-AC-1-Bug-002]] |
+| Bug | [[../SPEC-005-transactions]] | verifier | major | verified | Story-005 / AC-1 | T-035 | [[../../../../TestResults/IDEA-001/SPEC-005/Story-005-AC-1-Bug-002]] |
 
 ## Reproduce
 1. In `src/IDEA-001-budgetpal/web/src`, search for imports of `TransactionForm` and `DeleteTransaction` outside test files: `grep -rn "TransactionForm\|DeleteTransaction" --include=*.tsx --include=*.ts . | grep -v test`.

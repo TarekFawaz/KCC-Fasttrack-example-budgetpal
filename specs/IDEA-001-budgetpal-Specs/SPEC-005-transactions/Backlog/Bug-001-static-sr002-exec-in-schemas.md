@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-005-transactions]] | verifier | major | fixed | Enabler-001 / AC-3 | T-003 | [[../../../../TestResults/IDEA-001/SPEC-005/Enabler-001-AC-3-Bug-001]] |
+| Bug | [[../SPEC-005-transactions]] | verifier | major | verified | Enabler-001 / AC-3 | T-003 | [[../../../../TestResults/IDEA-001/SPEC-005/Enabler-001-AC-3-Bug-001]] |
 
 ## Reproduce
 1. Run `.KCC/tools/quality-gate -Spec SPEC-005`.
