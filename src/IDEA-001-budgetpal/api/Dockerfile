@@ -2,9 +2,14 @@
 #   docker build -f api/Dockerfile .
 # The native toolchain (python3, make, g++) lives in the build stages only; the
 # runtime stage carries compiled output and production dependencies.
+# Every stage starts from the pinned external base (GR-017 / SR-018: no stage
+# reference after FROM). The two build stages repeat the same toolchain steps;
+# identical instructions on the same parent hit the Docker build cache, so the
+# toolchain layers are built once.
 
-# ---- toolchain: pinned base, pnpm, native build tools for better-sqlite3
-FROM node:22-bookworm-slim AS toolchain
+# ---- build: pinned base, pnpm, native build tools for better-sqlite3,
+#      all api dependencies, TypeScript compiled to dist/
+FROM node:22-bookworm-slim AS build
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ \
     && rm -rf /var/lib/apt/lists/* \
@@ -13,16 +18,21 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY api/package.json api/package.json
 COPY web/package.json web/package.json
-
-# ---- build: all api dependencies, compile TypeScript to dist/
-FROM toolchain AS build
 RUN pnpm install --frozen-lockfile --filter @budgetpal/api...
 COPY api/tsconfig.json api/tsconfig.json
 COPY api/src api/src
 RUN pnpm --filter @budgetpal/api build
 
-# ---- prod-deps: production dependencies only (better-sqlite3 compiled here)
-FROM toolchain AS prod-deps
+# ---- prod-deps: same toolchain, production dependencies only (better-sqlite3 compiled here)
+FROM node:22-bookworm-slim AS prod-deps
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 make g++ \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g pnpm@12.11.2
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY api/package.json api/package.json
+COPY web/package.json web/package.json
 RUN pnpm install --frozen-lockfile --prod --filter @budgetpal/api...
 
 # ---- runtime: no toolchain, non-root

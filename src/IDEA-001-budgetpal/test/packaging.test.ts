@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { readRoot, root } from './helpers.js';
 
@@ -13,6 +15,8 @@ const apiDockerfile = readRoot('api/Dockerfile');
 const webDockerfile = readRoot('web/Dockerfile');
 const nginx = readRoot('web/nginx.conf');
 const readme = readRoot('README.md');
+/** The architect's static rules, two levels above the workspace (src/IDEA-001-budgetpal -> repo root). */
+const staticRulesFile = resolve(root, '..', '..', 'architecture', 'static-rules.tsv');
 
 const dockerCli = spawnSync('docker', ['compose', 'version'], { encoding: 'utf8' }).status === 0;
 const dockerDaemon =
@@ -108,6 +112,27 @@ describe('Enabler-005 Dockerfiles', () => {
     expect(webParts[0].from).toMatch(/^FROM node:22-bookworm-slim\b/);
     expect(webParts[webParts.length - 1].from).toMatch(/^FROM nginxinc\/nginx-unprivileged:\d+\.\d+\.\d+-alpine\b/);
     expect(apiDockerfile).toMatch(/^HEALTHCHECK/m);
+  });
+
+  // GR-017 / SR-018 as the quality gate enforces it: the rule is read from the architecture file and applied
+  // line by line (comments included) to every Dockerfile. Every FROM must name an external image with a tag.
+  it.skipIf(!existsSync(staticRulesFile))('GR-017 no Dockerfile line hits static rule SR-018', () => {
+    const row = readFileSync(staticRulesFile, 'utf8')
+      .split(/\r?\n/)
+      .map((line) => line.split('\t'))
+      .find((cols) => cols[0] === 'SR-018');
+    expect(row, 'SR-018 is declared in architecture/static-rules.tsv').toBeDefined();
+    const [, files, forbidden] = row as string[];
+    const pattern = new RegExp(forbidden);
+    for (const rel of ['api/Dockerfile', 'web/Dockerfile']) {
+      expect(new RegExp(files).test(rel), `${rel} is in the scope of SR-018`).toBe(true);
+      const hits = readRoot(rel)
+        .split('\n')
+        .map((line, index) => ({ line: index + 1, text: line }))
+        .filter(({ text }) => pattern.test(text))
+        .map(({ line, text }) => `${rel}:${line} ${text.trim()}`);
+      expect(hits, `SR-018 hits in ${rel}`).toEqual([]);
+    }
   });
 });
 
