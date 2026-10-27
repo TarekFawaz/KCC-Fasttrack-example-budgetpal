@@ -170,6 +170,7 @@ describe('TransactionsPage', () => {
       'Account',
       'Category',
       'Amount',
+      'Actions',
     ]);
     const rows = within(table).getAllByRole('row').slice(1);
     expect(rows).toHaveLength(2);
@@ -322,5 +323,212 @@ describe('TransactionsPage', () => {
     expect(base).toMatch(/\.filters\s*\{[^}]*grid-template-columns:\s*1fr;/);
     expect(base).not.toMatch(/grid-template-columns:\s*1fr 1fr/);
     expect(wide).toMatch(/grid-template-columns:\s*1fr 1fr 1fr/);
+  });
+});
+
+interface Write {
+  url: string;
+  method: string;
+  body: unknown;
+}
+
+/**
+ * A fetch stub with a small in-memory store: POST, PATCH and DELETE change `rows`, and the list endpoint
+ * serves the changed rows, so a refetch after a mutation shows the new state. Records every write.
+ */
+function mockCrudApi(initial: Transaction[], options: { accounts?: unknown[]; categories?: unknown[] } = {}) {
+  const rows = [...initial];
+  const writes: Write[] = [];
+  let nextId = 100;
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: string, init?: RequestInit) => {
+      const method = init?.method ?? 'GET';
+      if (input === '/api/accounts') return json(200, options.accounts ?? ACCOUNTS);
+      if (input === '/api/categories') return json(200, options.categories ?? CATEGORIES);
+      if (method === 'GET' && input.startsWith('/api/transactions?')) {
+        const params = new URL(input, 'http://x').searchParams;
+        const limit = Number(params.get('limit'));
+        const offset = Number(params.get('offset'));
+        return json(200, { items: rows.slice(offset, offset + limit), total: rows.length, limit, offset });
+      }
+      const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : undefined;
+      if (method === 'POST' && input === '/api/transactions' && body) {
+        writes.push({ url: input, method, body });
+        const created = { ...tx(nextId++), ...body } as Transaction;
+        rows.unshift(created);
+        return json(201, created);
+      }
+      const target = input.match(/^\/api\/transactions\/(\d+)$/);
+      const index = target ? rows.findIndex((row) => row.id === Number(target[1])) : -1;
+      if (method === 'PATCH' && index >= 0 && body) {
+        writes.push({ url: input, method, body });
+        rows[index] = { ...rows[index]!, ...body } as Transaction;
+        return json(200, rows[index]);
+      }
+      if (method === 'DELETE' && index >= 0) {
+        writes.push({ url: input, method, body });
+        rows.splice(index, 1);
+        return new Response(null, { status: 204 });
+      }
+      throw new Error(`unexpected request ${method} ${input}`);
+    }),
+  );
+  return { rows, writes };
+}
+
+describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => {
+  it('T-035 the page offers Add transaction; the opened form posts minor units and the new row appears in the list', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' })]);
+    renderPage();
+    await screen.findByRole('table');
+    expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    const form = await screen.findByRole('form', { name: 'Add a transaction' });
+    await within(form).findByRole('option', { name: 'Main' });
+    fireEvent.change(within(form).getByLabelText('Date'), { target: { value: '2026-04-02' } });
+    fireEvent.change(within(form).getByLabelText('Amount'), { target: { value: '12.50' } });
+    fireEvent.change(within(form).getByLabelText('Description'), { target: { value: 'Coffee beans' } });
+    fireEvent.change(within(form).getByLabelText('Account'), { target: { value: '1' } });
+    fireEvent.change(within(form).getByLabelText('Category'), { target: { value: '10' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Add transaction' }));
+
+    await waitFor(() =>
+      expect(api.writes).toEqual([
+        {
+          url: '/api/transactions',
+          method: 'POST',
+          body: { accountId: 1, categoryId: 10, occurredOn: '2026-04-02', amountMinor: 1250, description: 'Coffee beans' },
+        },
+      ]),
+    );
+    // The list was fetched again: the new row is in the table and the form was reset.
+    expect(await screen.findByRole('rowheader', { name: 'Coffee beans' })).toBeInTheDocument();
+    expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(3);
+    await waitFor(() => expect(within(form).getByLabelText('Description')).toHaveValue(''));
+  });
+
+  it('T-035 the add form can be closed again from the page', async () => {
+    mockCrudApi([tx(1)]);
+    renderPage();
+    await screen.findByRole('table');
+    // A real click focuses the button; fireEvent does not, so focus it first. The toggle stays in the DOM
+    // while the form opens and closes, so focus never leaves it.
+    const toggle = screen.getByRole('button', { name: 'Add transaction' });
+    toggle.focus();
+    fireEvent.click(toggle);
+    await screen.findByRole('form', { name: 'Add a transaction' });
+    expect(toggle).toHaveTextContent('Close add form');
+    fireEvent.click(toggle);
+    expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument();
+    expect(toggle).toHaveTextContent('Add transaction');
+    expect(toggle).toHaveFocus();
+  });
+
+  it('T-035 with no rows the empty state points at a real Add transaction control', async () => {
+    mockCrudApi([]);
+    renderPage();
+    await screen.findByText(/You have no transactions yet/);
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    expect(await screen.findByRole('form', { name: 'Add a transaction' })).toBeInTheDocument();
+  });
+
+  it('T-038 Edit opens the form for that row with its values; saving sends a PATCH and the row updates', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
+    renderPage();
+    const table = await screen.findByRole('table');
+    fireEvent.click(within(table).getByRole('button', { name: 'Edit Weekly shop' }));
+
+    const form = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    await within(form).findByRole('option', { name: 'Main' });
+    expect(within(form).getByLabelText('Amount')).toHaveValue('12.50');
+    fireEvent.change(within(form).getByLabelText('Description'), { target: { value: 'Weekly shop (big)' } });
+    fireEvent.change(within(form).getByLabelText('Amount'), { target: { value: '20' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(api.writes).toEqual([
+        {
+          url: '/api/transactions/1',
+          method: 'PATCH',
+          body: { accountId: 1, categoryId: 10, occurredOn: '2026-03-15', amountMinor: 2000, description: 'Weekly shop (big)' },
+        },
+      ]),
+    );
+    expect(await screen.findByRole('rowheader', { name: 'Weekly shop (big)' })).toBeInTheDocument();
+    expect(screen.queryByRole('form', { name: /^Edit transaction/ })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Edit Weekly shop (big)' })).toHaveFocus());
+  });
+
+  it('T-038 Cancel closes the edit form, sends nothing and returns focus to Edit', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
+    const form = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    await within(form).findByRole('option', { name: 'Main' });
+    fireEvent.click(within(form).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('form', { name: /^Edit transaction/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit Weekly shop' })).toHaveFocus();
+    expect(api.writes).toHaveLength(0);
+  });
+
+  it('T-038 only one row is edited at a time', async () => {
+    mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
+    await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Bus' }));
+    expect(await screen.findByRole('form', { name: 'Edit transaction Bus' })).toBeInTheDocument();
+    expect(screen.queryByRole('form', { name: 'Edit transaction Weekly shop' })).not.toBeInTheDocument();
+  });
+
+  it('T-039 Delete and confirm removes the row from the list; focus moves to the list heading', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Weekly shop' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm delete' }));
+
+    await waitFor(() => expect(api.writes).toEqual([{ url: '/api/transactions/1', method: 'DELETE', body: undefined }]));
+    await waitFor(() => expect(screen.queryByRole('rowheader', { name: 'Weekly shop' })).not.toBeInTheDocument());
+    expect(screen.getByRole('rowheader', { name: 'Bus' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { level: 2, name: 'Your transactions' })).toHaveFocus());
+  });
+
+  it('T-039 cancelling the confirm keeps the row and sends nothing', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Weekly shop' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('rowheader', { name: 'Weekly shop' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus();
+    expect(api.writes).toHaveLength(0);
+  });
+
+  it('T-040 with no accounts the opened add form says to create an account first', async () => {
+    mockCrudApi([], { accounts: [] });
+    renderPage();
+    await screen.findByText(/You have no transactions yet/);
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    expect(await screen.findByText(/you first need an account/)).toHaveTextContent('Accounts page');
+    expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument();
+  });
+
+  it('T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open', async () => {
+    mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
+    const { container } = renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    const add = await screen.findByRole('form', { name: 'Add a transaction' });
+    await within(add).findByRole('option', { name: 'Main' });
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
+    const edit = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    await within(edit).findByRole('option', { name: 'Main' });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Bus' }));
+    expect(await serious(container)).toEqual([]);
   });
 });

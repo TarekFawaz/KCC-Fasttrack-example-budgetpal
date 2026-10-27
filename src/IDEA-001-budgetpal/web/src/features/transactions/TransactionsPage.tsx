@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import {
   PAGE_SIZE,
   useAccountOptions,
@@ -7,6 +7,7 @@ import {
   type CategoryKind,
   type TransactionFilters,
 } from './api';
+import { DeleteTransaction, TransactionForm } from './TransactionForm';
 import styles from './TransactionsPage.module.css';
 
 /**
@@ -45,13 +46,47 @@ export function directionOf(kind: CategoryKind | undefined): { label: string; ic
 
 const INITIAL: TransactionFilters = { month: '', accountId: '', categoryId: '', limit: PAGE_SIZE, offset: 0 };
 
-/** Transactions page: filters (month, account, category), the table, then the pager. */
+/** Columns of the table: the five data columns plus the row actions. */
+const COLUMN_COUNT = 6;
+
+/**
+ * Transactions page: the add control, filters (month, account, category), the table with Edit and Delete
+ * per row, then the pager. The add form opens on request; one row at a time can be edited.
+ */
 export function TransactionsPage() {
   const [filters, setFilters] = useState<TransactionFilters>(INITIAL);
+  const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [deletedCount, setDeletedCount] = useState(0);
   const accounts = useAccountOptions();
   const categories = useCategoryOptions();
   const list = useTransactions(filters);
   const currency = installCurrency();
+  const editButtons = useRef(new Map<number, HTMLButtonElement>());
+  const editedId = useRef<number | null>(null);
+  const listHeadingRef = useRef<HTMLHeadingElement | null>(null);
+
+  // Closing an edit form puts focus back on that row's Edit button.
+  useEffect(() => {
+    if (editingId === null && editedId.current !== null) {
+      editButtons.current.get(editedId.current)?.focus();
+      editedId.current = null;
+    }
+  }, [editingId]);
+
+  // A deleted row takes its Delete button with it, so focus moves to the list heading.
+  useEffect(() => {
+    if (deletedCount > 0) listHeadingRef.current?.focus();
+  }, [deletedCount]);
+
+  const openEdit = (id: number) => {
+    editedId.current = null;
+    setEditingId(id);
+  };
+  const closeEdit = () => {
+    editedId.current = editingId;
+    setEditingId(null);
+  };
 
   const accountNames = new Map((accounts.data ?? []).map((account) => [account.id, account.name]));
   const categoryById = new Map((categories.data ?? []).map((category) => [category.id, category]));
@@ -70,6 +105,14 @@ export function TransactionsPage() {
   return (
     <section className={styles.page}>
       <h1>Transactions</h1>
+      <div className={styles.field}>
+        <div>
+          <button type="button" className={styles.button} onClick={() => setAdding((open) => !open)}>
+            {adding ? 'Close add form' : 'Add transaction'}
+          </button>
+        </div>
+        {adding ? <TransactionForm /> : null}
+      </div>
       <form className={styles.filters} aria-label="Filter transactions" onSubmit={(event) => event.preventDefault()}>
         <div className={styles.field}>
           <label htmlFor="filter-month">Month</label>
@@ -116,7 +159,9 @@ export function TransactionsPage() {
       </form>
 
       <section aria-labelledby="transactions-list-heading">
-        <h2 id="transactions-list-heading">Your transactions</h2>
+        <h2 id="transactions-list-heading" tabIndex={-1} ref={listHeadingRef}>
+          Your transactions
+        </h2>
         {list.isPending ? <p role="status">Loading transactions...</p> : null}
         {list.isError ? (
           <p role="alert" className={styles.error}>
@@ -146,6 +191,9 @@ export function TransactionsPage() {
                   <th scope="col" className={styles.amount}>
                     Amount
                   </th>
+                  <th scope="col">
+                    <span className={styles.visuallyHidden}>Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -153,23 +201,50 @@ export function TransactionsPage() {
                   const category = categoryById.get(item.categoryId);
                   const direction = directionOf(category?.kind);
                   return (
-                    <tr key={item.id}>
-                      <td>
-                        <time dateTime={item.occurredOn}>{formatDate(item.occurredOn)}</time>
-                      </td>
-                      <th scope="row">{item.description}</th>
-                      <td>{accountNames.get(item.accountId) ?? `Account ${item.accountId}`}</td>
-                      <td>{category?.name ?? `Category ${item.categoryId}`}</td>
-                      <td className={styles.amount}>
-                        {direction ? (
-                          <span className={styles.direction}>
-                            <span aria-hidden="true">{direction.icon} </span>
-                            {direction.label}{' '}
-                          </span>
-                        ) : null}
-                        {formatAmount(item.amountMinor, currency)}
-                      </td>
-                    </tr>
+                    <Fragment key={item.id}>
+                      <tr>
+                        <td>
+                          <time dateTime={item.occurredOn}>{formatDate(item.occurredOn)}</time>
+                        </td>
+                        <th scope="row">{item.description}</th>
+                        <td>{accountNames.get(item.accountId) ?? `Account ${item.accountId}`}</td>
+                        <td>{category?.name ?? `Category ${item.categoryId}`}</td>
+                        <td className={styles.amount}>
+                          {direction ? (
+                            <span className={styles.direction}>
+                              <span aria-hidden="true">{direction.icon} </span>
+                              {direction.label}{' '}
+                            </span>
+                          ) : null}
+                          {formatAmount(item.amountMinor, currency)}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className={styles.button}
+                            aria-label={`Edit ${item.description}`}
+                            ref={(element) => {
+                              if (element) editButtons.current.set(item.id, element);
+                              else editButtons.current.delete(item.id);
+                            }}
+                            onClick={() => openEdit(item.id)}
+                          >
+                            Edit
+                          </button>{' '}
+                          <DeleteTransaction
+                            transaction={item}
+                            onDeleted={() => setDeletedCount((count) => count + 1)}
+                          />
+                        </td>
+                      </tr>
+                      {editingId === item.id ? (
+                        <tr>
+                          <td colSpan={COLUMN_COUNT}>
+                            <TransactionForm transaction={item} onSaved={closeEdit} onCancel={closeEdit} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
                   );
                 })}
               </tbody>
