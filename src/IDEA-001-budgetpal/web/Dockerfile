@@ -11,6 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY api/package.json api/package.json
 COPY web/package.json web/package.json
 RUN pnpm install --frozen-lockfile --filter @budgetpal/web...
+COPY web/components.json web/tailwind.config.ts web/postcss.config.js web/
 COPY web/tsconfig.json web/vite.config.ts web/index.html web/
 COPY web/src web/src
 RUN pnpm --filter @budgetpal/web build
