@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-009-signin-first]] | verifier | major | fixed | Story-002 / AC-2 | T-022 | [[../../../../TestResults/IDEA-001/SPEC-009/Story-002-AC-2-Bug-001]] |
+| Bug | [[../SPEC-009-signin-first]] | verifier | major | verified | Story-002 / AC-2 | T-022 | [[../../../../TestResults/IDEA-001/SPEC-009/Story-002-AC-2-Bug-001]] |
 
 ## Reproduce
 1. From `src/IDEA-001-budgetpal`: `pnpm --filter @budgetpal/web test:coverage` (the command `quality-gate` runs as QG-COV). It fails 3 of 3 runs.

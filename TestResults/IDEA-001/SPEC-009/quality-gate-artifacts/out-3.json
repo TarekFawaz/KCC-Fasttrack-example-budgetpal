@@ -1,0 +1,178 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-009/src/IDEA-001-budgetpal[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 234[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 163[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m40 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (43)[39m
+[2m   Start at [22m 00:23:18
+[2m   Duration [22m 1.01s[2m (transform 77ms, setup 0ms, collect 290ms, tests 402ms, environment 0ms, prepare 352ms)[22m
+
+Scope: 2 of 3 workspace projects
+api test$ vitest run --config vitest.config.ts
+web test$ vitest run --config vite.config.ts
+api test: 
+api test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-009/src/IDEA-001-budgetpal/api
+api test: 
+web test: 
+web test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-009/src/IDEA-001-budgetpal/web
+web test: 
+api test:  ✓ test/config.test.ts (10 tests) 11ms
+api test:  ✓ src/modules/budgets/budgets.schema.test.ts (3 tests) 7ms
+api test:  ✓ src/modules/transactions/transactions.schemas.test.ts (13 tests) 10ms
+api test:  ✓ src/modules/categories/categories.schema.test.ts (4 tests) 8ms
+api test:  ✓ test/db.test.ts (4 tests) 81ms
+api test:  ✓ src/modules/categories/categories.repository.test.ts (7 tests) 85ms
+api test:  ✓ src/modules/categories/categories.service.test.ts (4 tests) 9ms
+api test:  ✓ src/modules/import/import.parser.test.ts (43 tests) 66ms
+api test:  ✓ src/modules/transactions/transactions.repository.test.ts (8 tests) 127ms
+api test:  ✓ src/modules/import/import.repository.test.ts (14 tests) 218ms
+api test:  ✓ src/modules/budgets/budgets.repository.test.ts (14 tests) 213ms
+api test:  ✓ src/modules/accounts/accounts.repository.test.ts (21 tests) 261ms
+api test:  ✓ src/modules/dashboard/schemas.test.ts (2 tests) 6ms
+api test:  ✓ test/auth-storage.test.ts (23 tests) 537ms
+api test:  ✓ src/kernel/validate.test.ts (7 tests) 273ms
+api test:  ✓ src/kernel/require-user.test.ts (11 tests) 803ms
+api test:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 603ms
+api test:  ✓ test/app.test.ts (12 tests) 932ms
+api test:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 532ms
+api test: {"level":30,"time":1793143403909,"pid":41212,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:50263"}
+api test: {"level":30,"time":1793143403927,"pid":41212,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test: {"level":30,"time":1793143403935,"pid":40588,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/api/dashboard/spending"},"msg":"incoming request"}
+api test: {"level":30,"time":1793143403956,"pid":41212,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":28.194600000000264,"msg":"request completed"}
+api test: {"level":30,"time":1793143403948,"pid":40588,"hostname":"Tika","reqId":"req-1","event":"auth.denied","msg":"request denied"}
+api test: {"level":30,"time":1793143403952,"pid":40588,"hostname":"Tika","reqId":"req-1","res":{"statusCode":401},"responseTime":16.133900000000267,"msg":"request completed"}
+api test: {"level":30,"time":1793143403954,"pid":40588,"hostname":"Tika","reqId":"req-2","req":{"method":"GET","url":"/api/dashboard/trend"},"msg":"incoming request"}
+api test: {"level":30,"time":1793143403954,"pid":40588,"hostname":"Tika","reqId":"req-2","event":"auth.denied","msg":"request denied"}
+api test: {"level":30,"time":1793143403954,"pid":40588,"hostname":"Tika","reqId":"req-2","res":{"statusCode":401},"responseTime":0.49270000000024083,"msg":"request completed"}
+api test: {"level":30,"time":1793143404029,"pid":40588,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test: {"level":30,"time":1793143404065,"pid":40588,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":36.49389999999994,"msg":"request completed"}
+api test:  ✓ src/modules/dashboard/dashboard.module.test.ts (3 tests) 1302ms
+api test:    ✓ dashboard module scaffold (Enabler-001) > T-001 both dashboard routes are routed by the module loader: 401, not 404 (AC-1) 1188ms
+api test:  ✓ test/health.test.ts (5 tests) 1440ms
+api test:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 1217ms
+api test:  ✓ src/modules/dashboard/spending.test.ts (9 tests) 1316ms
+api test:    ✓ spending service (Story-001) > T-006 totalMinor equals the sum of the category rows, rows keep their descending order, amounts are integers (AC-1) 894ms
+api test:  ✓ src/modules/budgets/budgets.routes.test.ts (8 tests) 1495ms
+api test:    ✓ budgets routes: set > T-006 PUT creates (201) then replaces (200) and returns the budget 1130ms
+api test:  ✓ src/modules/dashboard/trend.test.ts (9 tests) 1337ms
+api test:    ✓ trend service (Story-002) > T-014 months=6,end=2026-03 yields 2025-10..2026-03 oldest first across a year boundary (AC-1) 893ms
+api test:  ✓ src/modules/accounts/accounts.routes.test.ts (12 tests) 1389ms
+api test:    ✓ POST/GET /api/accounts (Story-001) > T-006 POST valid returns 201 and GET lists it ordered by name (AC-1) 962ms
+api test:  ✓ src/modules/accounts/accounts.isolation.test.ts (13 tests) 1590ms
+api test:    ✓ GET /api/accounts/:id (Story-002) > T-012 returns 200 for an own account, 400 for a malformed id and 404 for an unknown id (AC-1) 1116ms
+api test:  ✓ src/modules/budgets/budgets.progress.test.ts (11 tests) 1659ms
+api test:    ✓ budgets progress > T-014 returns each budgeted category with id, name, budget, spent, percent and status 1130ms
+api test:  ✓ src/modules/auth/signup.test.ts (13 tests) 1450ms
+api test:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 537ms
+api test:    ✓ OpenAPI (Story-001 AC-5) > T-022 the module loader registers the auth module (default export) and serves the route 366ms
+api test:  ✓ src/modules/import/import.commit.test.ts (15 tests) 1819ms
+api test:    ✓ POST /api/import/commit (Story-002) > T-023 a 10-row file returns {imported, skipped, invalid, invalidRows} and stores a formula description verbatim (AC-1) 1132ms
+api test:  ✓ src/modules/import/import.preview.test.ts (16 tests) 1982ms
+api test:    ✓ POST /api/import/preview (Story-001) > T-015 with a mapping returns headers, suggested mapping, counts, the first 20 valid rows and invalid rows by line (AC-1) 1151ms
+api test:  ✓ src/modules/auth/login.test.ts (13 tests) 1774ms
+api test:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 678ms
+web test:  ✓ src/kernel/useHealth.test.tsx (4 tests) 416ms
+api test: {"level":30,"time":1793143405054,"pid":41212,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:51002"}
+api test: {"level":30,"time":1793143405056,"pid":41212,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+api test:  ✓ src/modules/categories/categories.routes.test.ts (27 tests) 2226ms
+api test:    ✓ create and list (Story-001 AC-1) > T-007 POST returns 201 with id, name and kind and GET lists it 1146ms
+api test: {"level":30,"time":1793143405156,"pid":41212,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:51004"}
+api test: {"level":30,"time":1793143405156,"pid":41212,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+api test:  ✓ test/server.test.ts (6 tests | 1 skipped) 2348ms
+api test:    ✓ start > T-020 migrates, then listens on PORT 1115ms
+api test:    ✓ process > T-021 a failing migration exits non-zero and never listens 978ms
+web test:  ✓ src/features/accounts/money.test.ts (34 tests) 36ms
+web test:  ✓ src/kernel/source-rules.test.ts (4 tests) 7ms
+web test:  ✓ src/features/accounts/AccountForm.test.tsx (10 tests) 593ms
+api test:  ✓ src/modules/transactions/transactions.routes.test.ts (47 tests) 2741ms
+api test:    ✓ POST /api/transactions (Story-001) > T-007 valid body returns 201 with the stored row; it is in the database as integer minor units (AC-1) 1141ms
+web test:  ✓ src/features/dashboard/format.test.ts (6 tests) 37ms
+api test: 
+api test:  Test Files  32 passed (32)
+api test:       Tests  406 passed | 1 skipped (407)
+api test:    Start at  00:23:20
+api test:    Duration  5.14s (transform 8.40s, setup 0ms, collect 27.44s, tests 29.52s, environment 8ms, prepare 16.08s)
+api test: 
+api test: Done
+web test:  ✓ src/features/budgets/BudgetForm.test.tsx (12 tests) 421ms
+web test: stderr | src/features/budgets/BudgetsPage.test.tsx > budgets page accessibility and layout > T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (light)
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/budgets/BudgetsPage.test.tsx > budgets page accessibility and layout > T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (dark)
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/budgets/BudgetsPage.test.tsx (17 tests) 830ms
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/dashboard/SpendingByCategory.test.tsx (4 tests) 372ms
+web test:  ✓ src/kernel/registry.test.ts (12 tests) 8ms
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/categories/CategoryRow.test.tsx (7 tests) 1348ms
+web test:    ✓ edit a category (Story-004 AC-1) > T-029 Edit, change name and kind, Save shows the new values 324ms
+web test:    ✓ keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states 440ms
+web test:  ✓ src/kernel/Shell.test.tsx (6 tests) 325ms
+web test:  ✓ src/features/transactions/TransactionForm.test.tsx (19 tests) 1209ms
+web test:    ✓ TransactionForm add (AC-1..AC-3) > T-035 submits the add form as minor units, refreshes the list and resets the form 308ms
+web test:  ✓ src/kernel/HealthDot.test.tsx (10 tests) 574ms
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage > T-023 axe finds no serious or critical violation on the empty and the populated page; inputs are labelled
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/categories/CategoriesPage.test.tsx (9 tests) 872ms
+web test:  ✓ src/kernel/session.test.ts (18 tests) 2042ms
+web test:  ✓ src/kernel/AuthGate.test.tsx (14 tests) 847ms
+web test:  ✓ src/features/budgets/BudgetsPage.set.test.tsx (15 tests) 998ms
+web test:    ✓ budgets feature registration > T-022 the shell shows a "Budgets" nav link that opens the page with the current month selected 322ms
+web test:  ✓ src/features/dashboard/TrendChart.test.tsx (7 tests) 1123ms
+web test:    ✓ TrendChart > T-030 renders one chart point per month, oldest first, ending at the selected month 414ms
+web test:  ✓ src/features/dashboard/DashboardPage.test.tsx (16 tests) 1158ms
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/transactions/TransactionsPage.test.tsx > TransactionsPage > T-034 axe finds no serious or critical violation with rows, with no rows and with an error
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/accounts/AccountsPage.test.tsx (17 tests) 1580ms
+web test:  ✓ src/features/import/ImportPage.test.tsx (19 tests) 1795ms
+web test:    ✓ accessibility (AC-6) > T-036 axe finds no serious violations on the empty, mapping, preview and result steps 309ms
+web test:  ✓ src/features/auth/auth.test.tsx (48 tests) 2125ms
+web test: stderr | src/features/transactions/TransactionsPage.test.tsx > TransactionsPage mounts the add, edit and delete UI (Bug-002) > T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/transactions/TransactionsPage.test.tsx (27 tests) 2454ms
+web test:    ✓ TransactionsPage > T-032 Previous and Next move the offset by the limit and the range and total are shown 463ms
+web test:  ✓ src/kernel/build.test.ts (2 tests) 7041ms
+web test:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 7039ms
+web test: 
+web test:  Test Files  24 passed (24)
+web test:       Tests  337 passed (337)
+web test:    Start at  00:23:20
+web test:    Duration  9.45s (transform 1.97s, setup 15.17s, collect 23.53s, tests 28.21s, environment 64.25s, prepare 11.23s)
+web test: 
+web test: Done

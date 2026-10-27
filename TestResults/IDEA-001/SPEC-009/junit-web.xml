@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="331" failures="0" errors="0" time="6.534">
+    <testsuite name="src/kernel/AuthGate.test.tsx" timestamp="2026-10-27T23:01:46.015Z" hostname="Tika" tests="14" failures="0" errors="0" skipped="0" time="0.8374324">
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate states &gt; T-013 shows only a neutral loading status while the session is pending, with no redirect" time="0.1362874">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate states &gt; T-014 shows an alert with Retry on a non-401 failure, no nav, no redirect; Retry asks again" time="0.0464464">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate states &gt; T-014 also treats a network failure as the error state" time="0.0293247">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate states &gt; T-020 has no serious or critical axe violation in the loading and error states" time="0.0795066">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate anonymous visitor &gt; T-015 renders /login and /signup bare, without header, nav or footer" time="0.0591553">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate anonymous visitor &gt; T-015 redirects every other URL (also an unknown one and /logout) to /login keeping path and query as from" time="0.0926378">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate signed-in user &gt; T-016 redirects /login and /signup to / but still renders /logout" time="0.0932391">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate signed-in user &gt; T-017 shows the header, the nav of non-public features in registry order, the routes and the log-out control" time="0.0364335">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate signed-in user &gt; T-017 shows &quot;Page not found&quot; inside the shell for an unknown URL" time="0.02122">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate signed-in user &gt; T-017 the log-out control ends the session and lands on /login without a remembered target" time="0.0549225">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate signed-in user &gt; T-017 a failed log-out keeps the user signed in and says so" time="0.0312702">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate with the API as the authority &gt; T-018 a 401 on a protected page makes the session anonymous, drops cached data and lands on /login with from" time="0.0764145">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate with the API as the authority &gt; T-019 a protected page rendered with the guard bypassed still gets 401 from its data call, and that ends the session" time="0.0583619">
+        </testcase>
+        <testcase classname="src/kernel/AuthGate.test.tsx" name="AuthGate with the API as the authority &gt; T-019 a 403 from a protected page keeps the session" time="0.0205606">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/build.test.ts" timestamp="2026-10-27T23:01:46.022Z" hostname="Tika" tests="2" failures="0" errors="0" skipped="0" time="4.7560093">
+        <testcase classname="src/kernel/build.test.ts" name="vite build and dev proxy (Enabler-003 AC-4) &gt; T-016 vite build exits 0 and emits dist/index.html with a script bundle" time="4.7547942">
+        </testcase>
+        <testcase classname="src/kernel/build.test.ts" name="vite build and dev proxy (Enabler-003 AC-4) &gt; T-016 the dev server proxies /api to the api and strips the prefix for health and budgets only" time="0.0003322">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/HealthDot.test.tsx" timestamp="2026-10-27T23:01:46.022Z" hostname="Tika" tests="10" failures="0" errors="0" skipped="0" time="0.525642">
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-029 is a status region named &quot;API status: checking&quot; while the health call is pending" time="0.1019155">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-029 is named &quot;API status: ok&quot; when the health call succeeds" time="0.0216992">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-029 is named &quot;API status: unavailable&quot; when the health call fails" time="0.022205">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-030 each state has a different aria-hidden icon besides colour" time="0.0732562">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-033 has no serious or critical axe violation in the light scheme (checking, ok, unavailable)" time="0.1253964">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-033 has no serious or critical axe violation in the dark scheme (checking, ok, unavailable)" time="0.1084998">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot states &gt; T-039 carries the loading, ok, unavailable and axe cases the removed Home page tests had" time="0.0009416">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot in the guarded shell &gt; T-028 the signed-in shell footer holds the dot; there is no /health route and no nav entry for it" time="0.0478379">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="HealthDot in the guarded shell &gt; T-034 an anonymous visitor sees no dot and triggers no /api/health request" time="0.0202459">
+        </testcase>
+        <testcase classname="src/kernel/HealthDot.test.tsx" name="kernel boundary &gt; T-032 no file in kernel/ imports a features/* module (GR-006)" time="0.0020259">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/registry.test.ts" timestamp="2026-10-27T23:01:46.026Z" hostname="Tika" tests="12" failures="0" errors="0" skipped="0" time="0.0064848">
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 sorts features by order, whatever order the files were found in" time="0.0016041">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 breaks order ties by id so the nav is stable" time="0.0003519">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 throws on a duplicate id and names both files" time="0.000883">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 throws on a module that does not export a feature" time="0.0003364">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 returns an empty list when there are no feature modules" time="0.0001332">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-012 the real registry is a sorted list of valid features" time="0.0002137">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-001 defaults public to false (via isPublic), keeps true and rejects a non-boolean naming the file" time="0.000328">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-002 registers every entry of a features array, with and without a default, sorted" time="0.0001636">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-002 validates each entry of a features array" time="0.0002368">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-003 throws on a duplicate id across files and inside one features array, naming both places" time="0.0005077">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-004 keeps the original T-012 behaviour (the cases above run unchanged)" time="0.0002657">
+        </testcase>
+        <testcase classname="src/kernel/registry.test.ts" name="buildRegistry &gt; T-005 isPublic returns the flag with false as default and reads no raw field" time="0.0002614">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/session.test.ts" timestamp="2026-10-27T23:01:46.028Z" hostname="Tika" tests="18" failures="0" errors="0" skipped="0" time="2.0318923">
+        <testcase classname="src/kernel/session.test.ts" name="useSession &gt; T-006 is loading first, then authenticated with {id, email} on 200" time="0.1028275">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="useSession &gt; T-006 is anonymous on 401 (not an error) and requests it exactly once" time="0.1386388">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="useSession &gt; T-006 is error on 500 and on a network failure, and retry asks again" time="0.1581783">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="useSignOut &gt; T-007 POSTs /api/auth/logout; on 204 the session is anonymous and other queries are gone" time="0.1530625">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="useSignOut &gt; T-007 POSTs /api/auth/logout; on 401 the session is anonymous and other queries are gone" time="0.1553779">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="useSignOut &gt; T-007 a server failure on logout is an error and keeps the session" time="0.0791247">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-008 has retry 1, no focus refetch and both cache onError hooks" time="0.0003647">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (ApiProblem shape) from a query turns an authenticated session anonymous and clears other queries" time="0.1534839">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (ApiProblem shape) from a mutation turns an authenticated session anonymous and clears other queries" time="0.1554046">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (DashboardProblem shape) from a query turns an authenticated session anonymous and clears other queries" time="0.1531115">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (DashboardProblem shape) from a mutation turns an authenticated session anonymous and clears other queries" time="0.1570249">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (CategoryApiError shape) from a query turns an authenticated session anonymous and clears other queries" time="0.1539784">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-009 a 401 (CategoryApiError shape) from a mutation turns an authenticated session anonymous and clears other queries" time="0.1541067">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-010 while already anonymous a 401 changes nothing" time="0.1562295">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-010 a 403 leaves an authenticated session and cached data untouched" time="0.0790781">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-010 a 500 leaves an authenticated session and cached data untouched" time="0.0786345">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="the shared query client &gt; T-011 main.tsx imports the shared client and creates none; the kernel holds one new QueryClient(" time="0.0009624">
+        </testcase>
+        <testcase classname="src/kernel/session.test.ts" name="mockSession &gt; T-012 answers /api/auth/me with 200, 401 and 500 and 404s anything unmocked" time="0.0005881">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/Shell.test.tsx" timestamp="2026-10-27T23:01:46.031Z" hostname="Tika" tests="6" failures="0" errors="0" skipped="0" time="0.2470775">
+        <testcase classname="src/kernel/Shell.test.tsx" name="Shell with a fake feature &gt; T-013 shows the nav link in order and the route content with no shared-file edit" time="0.1329314">
+        </testcase>
+        <testcase classname="src/kernel/Shell.test.tsx" name="Shell with a fake feature &gt; T-013 renders the second feature on its own path and a not-found page elsewhere" time="0.0191239">
+        </testcase>
+        <testcase classname="src/kernel/Shell.test.tsx" name="Shell with a fake feature &gt; T-014 has header, nav and main landmarks and no serious or critical axe violation" time="0.0724192">
+        </testcase>
+        <testcase classname="src/kernel/Shell.test.tsx" name="Shell optional slots &gt; T-017 renders the actions in the banner and the footer content in a footer landmark" time="0.0162975">
+        </testcase>
+        <testcase classname="src/kernel/Shell.test.tsx" name="Shell optional slots &gt; T-017 renders no actions and no footer landmark when the slots are not given" time="0.004448">
+        </testcase>
+        <testcase classname="src/kernel/Shell.test.tsx" name="shell.css &gt; T-014 has a visible focus style, dark-scheme tokens and a 768 px breakpoint" time="0.0004951">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/source-rules.test.ts" timestamp="2026-10-27T23:01:46.033Z" hostname="Tika" tests="4" failures="0" errors="0" skipped="0" time="0.0047483">
+        <testcase classname="src/kernel/source-rules.test.ts" name="web source rules (GR-013, D-19) &gt; T-015 scans a non-empty set of source files" time="0.0009823">
+        </testcase>
+        <testcase classname="src/kernel/source-rules.test.ts" name="web source rules (GR-013, D-19) &gt; T-015 detects the raw-HTML prop and both browser storages (the rule is not vacuous)" time="0.0005922">
+        </testcase>
+        <testcase classname="src/kernel/source-rules.test.ts" name="web source rules (GR-013, D-19) &gt; T-015 has no raw-HTML prop and no browser storage" time="0.0011053">
+        </testcase>
+        <testcase classname="src/kernel/source-rules.test.ts" name="web source rules (GR-013, D-19) &gt; T-015 creates exactly one QueryClient" time="0.0010994">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/kernel/useHealth.test.tsx" timestamp="2026-10-27T23:01:46.033Z" hostname="Tika" tests="4" failures="0" errors="0" skipped="0" time="0.3998839">
+        <testcase classname="src/kernel/useHealth.test.tsx" name="useHealth &gt; T-031 goes from loading to success when /api/health answers ok" time="0.0893453">
+        </testcase>
+        <testcase classname="src/kernel/useHealth.test.tsx" name="useHealth &gt; T-031 fails on a 503 and on a body that is not ok" time="0.1549138">
+        </testcase>
+        <testcase classname="src/kernel/useHealth.test.tsx" name="useHealth &gt; T-031 fails when the network call rejects" time="0.0768727">
+        </testcase>
+        <testcase classname="src/kernel/useHealth.test.tsx" name="useHealth strictness &gt; T-031 makes one attempt on failure (no retry) and rejects a body whose db is not ok" time="0.0776049">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/accounts/AccountForm.test.tsx" timestamp="2026-10-27T23:01:46.034Z" hostname="Tika" tests="10" failures="0" errors="0" skipped="0" time="0.4209561">
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-021 submit POSTs integer minor units, then resets the form" time="0.1652644">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-021 a blank balance is sent as 0 and a negative one as negative minor units" time="0.0501442">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-021 an amount with too many decimals is refused before any request" time="0.0337897">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-022 an empty name shows an inline error on the labelled input and focuses it" time="0.0158443">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-022 a 409 duplicate name shows its message next to Name and focuses it, keeping the typed values" time="0.0258799">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-022 a 400 with several field errors shows each beside its input and focuses the first in form order" time="0.0377554">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-022 a problem with no field of the form, and a server failure, show one alert" time="0.0428306">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm &gt; T-022 splitProblem maps api field names to form fields and keeps the rest" time="0.0004596">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm edit mode &gt; T-024 starts with the account values, PUTs integer minor units and reports success" time="0.0290318">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountForm.test.tsx" name="AccountForm edit mode &gt; T-025 a 400 keeps the form open with the error beside the field and does not report success" time="0.0184335">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/accounts/AccountsPage.test.tsx" timestamp="2026-10-27T23:01:46.035Z" hostname="Tika" tests="17" failures="0" errors="0" skipped="0" time="1.1972396">
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="accounts feature registration &gt; T-018 feature.ts exports {id, path, label: &quot;Accounts&quot;, order, component} and the registry lists it" time="0.0018566">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="accounts feature registration &gt; T-018 the shell shows an &quot;Accounts&quot; nav entry that routes to the page, with no shared file edited" time="0.1919658">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-019 with no accounts it shows an empty state that explains how to add the first one" time="0.0372706">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-020 each row shows name, type and the Intl-formatted opening balance in the install currency" time="0.0372856">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-021 adding an account sends minor units, the new row appears and the form resets" time="0.0571874">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-022 a failing list shows one alert instead of rows" time="0.0187592">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-023 axe finds no serious or critical violation on the empty and the populated page; inputs are labelled" time="0.1844582">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-023 axe finds no serious or critical violation while the form shows field errors" time="0.0607498">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage &gt; T-023 styles use CSS variables only, the layout is one column below 768 px, and no browser storage is used" time="0.0018575">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-024 Edit prefills the decimal balance; saving PUTs minor units and the row updates" time="0.089354">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-024 Cancel leaves the row and sends nothing" time="0.0453815">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-025 a 409 duplicate name and a 400 on save show inline errors and the row is unchanged" time="0.0629091">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-026 Delete opens an accessible dialog; confirming a 204 removes the row" time="0.0777222">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-026 Cancel and Escape close the dialog without a request" time="0.04279">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-027 a 409 on DELETE closes the dialog, keeps the row and says the account is in use" time="0.0535769">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-027 another failure on DELETE gives a generic message and keeps the row" time="0.0435714">
+        </testcase>
+        <testcase classname="src/features/accounts/AccountsPage.test.tsx" name="AccountsPage edit and delete &gt; T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean" time="0.1890129">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/accounts/money.test.ts" timestamp="2026-10-27T23:01:46.036Z" hostname="Tika" tests="34" failures="0" errors="0" skipped="0" time="0.0266869">
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;1234.50&quot; is 123450 minor units for a 2-digit currency" time="0.0013254">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;-20&quot; is -2000 minor units for a 2-digit currency" time="0.0003056">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;0.1&quot; is 10 minor units for a 2-digit currency" time="0.0001333">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;.5&quot; is 50 minor units for a 2-digit currency" time="0.0001028">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;5.&quot; is 500 minor units for a 2-digit currency" time="0.0000868">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;  7.05 &quot; is 705 minor units for a 2-digit currency" time="0.000072">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;+3&quot; is 300 minor units for a 2-digit currency" time="0.0000709">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;-0&quot; is 0 minor units for a 2-digit currency" time="0.0000562">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;0&quot; is 0 minor units for a 2-digit currency" time="0.0000669">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 &quot;1000000000.00&quot; is 100000000000 minor units for a 2-digit currency" time="0.0000733">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 never loses a cent to float rounding" time="0.0002609">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;1.234&quot;" time="0.0001058">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;abc&quot;" time="0.0000453">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;1,5&quot;" time="0.0000371">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;1e3&quot;" time="0.0000375">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;--2&quot;" time="0.0000362">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;1.2.3&quot;" time="0.0000914">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;&quot;" time="0.0000774">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;  &quot;" time="0.0000915">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;.&quot;" time="0.0000556">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;-&quot;" time="0.0000858">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;$5&quot;" time="0.0000733">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects &quot;0x10&quot;" time="0.0000588">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 rejects an amount beyond the supported range and accepts the limit" time="0.0001747">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="toMinorUnits (T-021) &gt; T-021 follows the currency digits: none for JPY, three for KWD" time="0.0189079">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 123450 minor units with 2 digits is &quot;1234.50&quot;" time="0.000237">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 -2000 minor units with 2 digits is &quot;-20.00&quot;" time="0.0000849">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 5 minor units with 2 digits is &quot;0.05&quot;" time="0.0001012">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 0 minor units with 2 digits is &quot;0.00&quot;" time="0.000107">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 1500 minor units with 0 digits is &quot;1500&quot;" time="0.0000876">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 1234 minor units with 3 digits is &quot;1.234&quot;" time="0.0000988">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-021 fromMinorUnits is the inverse of toMinorUnits" time="0.0003523">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 formats through Intl in the given currency, exactly" time="0.0012384">
+        </testcase>
+        <testcase classname="src/features/accounts/money.test.ts" name="fromMinorUnits and formatMoney (T-020) &gt; T-020 the install currency is USD unless a valid VITE_CURRENCY says otherwise" time="0.0002702">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/auth/auth.test.tsx" timestamp="2026-10-27T23:01:46.039Z" hostname="Tika" tests="42" failures="0" errors="0" skipped="0" time="1.1731298">
+        <testcase classname="src/features/auth/auth.test.tsx" name="SignUpPage &gt; T-030 a valid submit calls signup with the credentials, then lands on the home page" time="0.1662629">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="SignUpPage &gt; T-031 invalid input shows inline errors tied to the labelled inputs and focuses the first one" time="0.0597795">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="SignUpPage &gt; T-031 a server 400 puts its field errors beside the fields and focuses the first" time="0.0332659">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="SignUpPage &gt; T-031 a server 409 shows the taken-email message on the email field" time="0.0298029">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="SignUpPage &gt; T-031 an unexpected server failure shows one alert and keeps the typed values" time="0.0185801">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="LoginPage &gt; T-032 wrong credentials show one generic error and stay on the page" time="0.0267723">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="LoginPage &gt; T-032 correct credentials log in and land on the home page" time="0.0295206">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="LoginPage &gt; T-032 empty fields are caught on the page without a request" time="0.0207424">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out &gt; T-033 the log-out entry calls logout and lands on the login page" time="0.0255899">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out &gt; T-033 an already expired session (401) still lands on the login page" time="0.015044">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="accessibility and tokens &gt; T-034 the sign-up page has no serious or critical axe violation and a keyboard-reachable tab order" time="0.0718701">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="accessibility and tokens &gt; T-034 the login page has no serious or critical axe violation and a keyboard-reachable tab order" time="0.0247958">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="accessibility and tokens &gt; T-034 an error state is also free of serious or critical axe violations" time="0.0468736">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="accessibility and tokens &gt; T-034 styles use CSS variables only and the feature touches no browser storage" time="0.0019058">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="registry &gt; T-021 the real registry lists /login, /signup and /logout from the auth features array, all public" time="0.0013272">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;//evil.example&quot; + &quot;&quot; and falls back to /" time="0.0001682">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;https://evil.example&quot; + &quot;&quot; and falls back to /" time="0.0000663">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/\\evil.example&quot; + &quot;&quot; and falls back to /" time="0.0000994">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;javascript:alert(1)&quot; + &quot;&quot; and falls back to /" time="0.0000768">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/login&quot; + &quot;&quot; and falls back to /" time="0.0000609">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/signup&quot; + &quot;?x=1&quot; and falls back to /" time="0.0000509">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/logout&quot; + &quot;&quot; and falls back to /" time="0.0000574">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/logout/&quot; + &quot;&quot; and falls back to /" time="0.0000581">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/budgets&quot; + &quot;https://evil.example&quot; and falls back to /" time="0.0000561">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from &quot;/budgets&quot; + &quot;\\evil&quot; and falls back to /" time="0.0000705">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses from 42 + &quot;&quot; and falls back to /" time="0.0000605">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-023 safeTarget refuses a missing, malformed or non-object from" time="0.000181">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="safe return target &gt; T-022 safeTarget keeps a same-origin path with its query" time="0.0001843">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-022 a visitor sent from /budgets?month=2026-10 lands there after logging in" time="0.056792">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-022 a visitor sent from /budgets?month=2026-10 lands there after signing up" time="0.0594691">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-022 with no remembered target, login and sign-up land on /" time="0.0921711">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-023 a remembered target of //evil.example is not followed: login lands on /" time="0.0458391">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-023 a remembered target of https://evil.example is not followed: login lands on /" time="0.0257101">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-023 a remembered target of /login is not followed: login lands on /" time="0.0362253">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-023 a remembered target of /signup is not followed: login lands on /" time="0.0309443">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-023 a remembered target of /logout is not followed: login lands on /" time="0.046581">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="return to the target after sign-in &gt; T-026 a wrong password inside the guarded app stays a form error and the user stays anonymous" time="0.0413414">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out inside the guarded app &gt; T-024 the shell control posts logout, clears the cache, makes the session anonymous and lands on /login" time="0.0218866">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out inside the guarded app &gt; T-024 opening /logout while signed in logs out and lands on /login" time="0.0312123">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out inside the guarded app &gt; T-025 an expired session (401) still ends on /login from the control and from /logout" time="0.0773984">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="log out inside the guarded app &gt; T-025 a server failure on /logout keeps the user signed in and offers a retry" time="0.0305522">
+        </testcase>
+        <testcase classname="src/features/auth/auth.test.tsx" name="target and storage rules &gt; T-027 the target is read from router state and no auth source touches browser storage" time="0.0013476">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/categories/CategoriesPage.test.tsx" timestamp="2026-10-27T23:01:46.043Z" hostname="Tika" tests="9" failures="0" errors="0" skipped="0" time="0.6834559">
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="categories feature registration (Story-003 AC-1) &gt; T-023 feature.ts exports the route and a &quot;Categories&quot; nav entry that the kernel registry picks up" time="0.1681792">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="categories list (Story-003 AC-2) &gt; T-024 an empty list shows the empty state that explains how to add the first category" time="0.031716">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="categories list (Story-003 AC-2) &gt; T-025 a filled list shows name and kind as text, expense and income labelled" time="0.0381992">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="create category (Story-003 AC-3) &gt; T-026 submitting a name and a kind adds the row and resets the form" time="0.0846649">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="inline errors (Story-003 AC-4) &gt; T-027 an empty name shows an announced inline error, sends nothing and leaves the list unchanged" time="0.037696">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="inline errors (Story-003 AC-4) &gt; T-027 a 409 duplicate shows the conflict next to the name field and the list is unchanged" time="0.0582949">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="inline errors (Story-003 AC-4) &gt; T-027 a server 400 maps to the field and a server failure to a form-level message" time="0.0545839">
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="accessibility (Story-003 AC-5) &gt; T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form" time="0.1490713">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/features/categories/CategoriesPage.test.tsx" name="accessibility (Story-003 AC-5) &gt; T-028 axe reports no violations on the empty state" time="0.0594887">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/categories/CategoryRow.test.tsx" timestamp="2026-10-27T23:01:46.044Z" hostname="Tika" tests="7" failures="0" errors="0" skipped="0" time="1.1022897">
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="edit a category (Story-004 AC-1) &gt; T-029 Edit, change name and kind, Save shows the new values" time="0.2422953">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="edit a category (Story-004 AC-1) &gt; T-030 Cancel restores the row and sends no request" time="0.0628375">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="edit errors (Story-004 AC-2) &gt; T-031 an empty name and a 409 duplicate show an inline error on the row and keep edit mode" time="0.1024766">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="delete a category (Story-004 AC-3, AC-4) &gt; T-032 Delete then confirm removes an unused category" time="0.0839015">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="delete a category (Story-004 AC-3, AC-4) &gt; T-033 a 409 on delete keeps the row and says the category is in use" time="0.0491994">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="keyboard, names, focus and axe (Story-004 AC-5) &gt; T-034 buttons carry the category name; focus moves to the field on Edit and back to the row after Save, Cancel and a refused delete" time="0.2299859">
+        </testcase>
+        <testcase classname="src/features/categories/CategoryRow.test.tsx" name="keyboard, names, focus and axe (Story-004 AC-5) &gt; T-035 axe reports no violations in view, edit, confirm and error states" time="0.3302801">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/budgets/BudgetForm.test.tsx" timestamp="2026-10-27T23:01:46.045Z" hostname="Tika" tests="12" failures="0" errors="0" skipped="0" time="0.3162412">
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-024 &quot;12.50&quot; is 1250 and &quot;12&quot; is 1200 for a two-digit currency" time="0.0013161">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-024 the conversion is exact where a float is not (0.07, 1.15, 8.2)" time="0.0002173">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-024 a zero-digit currency takes whole numbers only and a three-digit one three decimals" time="0.0002047">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-025 empty, zero, negative, non-numeric, too many decimals and too large are all null" time="0.0005389">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-024 minor units go back to decimal text and to an Intl-formatted amount" time="0.0180496">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="amount text to integer minor units &gt; T-025 api field names map to the form fields and the rest has no field" time="0.0008674">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-025 an empty amount shows a labelled inline error, focuses the field and sends nothing" time="0.1768699">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-025 no category chosen shows a category error and sends nothing" time="0.0162316">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-024 a valid amount is sent as integer minor units to PUT /api/budgets/:month/:categoryId" time="0.0308481">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-025 an api 400 for the amount is shown next to the amount field and the typed value stays" time="0.0270807">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-025 an api error without a field is shown as an alert; a network-level failure gets a retry message" time="0.0354141">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetForm.test.tsx" name="BudgetForm &gt; T-028 the category select and amount input have visible labels; choosing a category reports it" time="0.0075076">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/budgets/BudgetsPage.set.test.tsx" timestamp="2026-10-27T23:01:46.046Z" hostname="Tika" tests="15" failures="0" errors="0" skipped="0" time="0.861402">
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="budgets feature registration &gt; T-022 feature.ts exports {id, path, label: &quot;Budgets&quot;, order, component} and the registry lists it" time="0.0019628">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="budgets feature registration &gt; T-022 the shell shows a &quot;Budgets&quot; nav link that opens the page with the current month selected" time="0.2197657">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="budgets feature registration &gt; T-022 currentMonth is YYYY-MM with the month zero-padded" time="0.0002754">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage month picker &gt; T-023 changing the month refetches the list with the new month and shows that month" time="0.0627997">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage month picker &gt; T-023 a cleared month asks for a month and sends no list request for it" time="0.0490756">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage set and remove &gt; T-024 &quot;12.50&quot; saves amountMinor 1250 for the selected month and the list shows the formatted amount" time="0.0959807">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage set and remove &gt; T-024 saving the same category again replaces the amount in the list (one row)" time="0.1082919">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage set and remove &gt; T-025 a zero amount shows the inline error and sends no PUT" time="0.0231762">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage set and remove &gt; T-026 Remove keeps the row until the api confirms, then the row disappears" time="0.0822551">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage set and remove &gt; T-026 a failed remove leaves the row and shows an alert" time="0.0495017">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage empty states &gt; T-027 no budgets for the month: the empty state names the next step and the form is available" time="0.0183725">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage empty states &gt; T-027 no expense categories (only income): the empty state points to the Categories page and offers no form" time="0.0263166">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage empty states &gt; T-027 income categories are not offered in the category select" time="0.0350312">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage keyboard and labels &gt; T-028 the month, category, amount, save and remove controls are reachable, labelled and in tab order" time="0.0462627">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.set.test.tsx" name="BudgetsPage keyboard and labels &gt; T-028 a failed validation puts focus on the amount field (the first invalid control)" time="0.0406848">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/budgets/BudgetsPage.test.tsx" timestamp="2026-10-27T23:01:46.047Z" hostname="Tika" tests="17" failures="0" errors="0" skipped="0" time="0.6200949">
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-029 shows category, spent, budget and percent, and a progressbar with a name and aria-valuenow" time="0.1202505">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-029 the page renders each budget as a row with its progressbar and a Remove button" time="0.0856221">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-030 status ok renders its icon and the exact text" time="0.0062497">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-030 status warning renders its icon and the exact text" time="0.0043687">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-030 status over renders its icon and the exact text" time="0.0041398">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-030 the three statuses differ in icon and text, not in colour alone" time="0.0003034">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-031 at 150% spent the bar is capped at full width and the amount over the budget is stated" time="0.0092695">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-031 within the budget there is no over-by text, and exactly at the limit there is none either" time="0.0069824">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetProgress row &gt; T-031 barPercent keeps the bar inside its track for any figure" time="0.000291">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetsPage unbudgeted categories &gt; T-032 lists unbudgeted expense categories with their spending and an &quot;Add budget&quot; action" time="0.0265878">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetsPage unbudgeted categories &gt; T-032 &quot;Add budget&quot; preselects the category and focuses the amount field" time="0.0527486">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="BudgetsPage unbudgeted categories &gt; T-032 with nothing unbudgeted the section is not shown, and income categories are never offered" time="0.0269317">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="budgets page accessibility and layout &gt; T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (light)" time="0.1699952">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="budgets page accessibility and layout &gt; T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (dark)" time="0.1027348">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="budgets page accessibility and layout &gt; T-033 every text token pair is at least 4.5:1 and bar colours at least 3:1 (light)" time="0.0009837">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="budgets page accessibility and layout &gt; T-033 every text token pair is at least 4.5:1 and bar colours at least 3:1 (dark)" time="0.0004182">
+        </testcase>
+        <testcase classname="src/features/budgets/BudgetsPage.test.tsx" name="budgets page accessibility and layout &gt; T-034 the CSS is a single column with no fixed width and no horizontal overflow" time="0.0005778">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/DashboardPage.test.tsx" timestamp="2026-10-27T23:01:46.049Z" hostname="Tika" tests="16" failures="0" errors="0" skipped="0" time="0.851316">
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 feature.ts exports the Dashboard entry for / and the registry lists it" time="0.0020654">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 the shell shows a &quot;Dashboard&quot; nav entry that opens / with the current month selected" time="0.2178859">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 the month picker starts on the current month" time="0.0126155">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-024 shows the pie chart and the table once the data arrives" time="0.0439432">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-025 changing the month refetches that month and updates chart and table" time="0.065693">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-025 a cleared month does not call the api" time="0.0443261">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-026 an empty month shows the empty state with a link to transactions and no chart" time="0.0361072">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-027 shows a loading state while the request is pending" time="0.0159978">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-027 a failure shows an error message and Retry fetches again" time="0.0583466">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-028 the month picker has an accessible label and axe finds no serious or critical violation" time="0.1341537">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-028 axe is clean for the empty, loading and error states too" time="0.1623935">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-029 every category on the page is a table row with text, not colour alone" time="0.025255">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard is the landing page (SPEC-009 Story-004) &gt; T-035 feature.ts is path /, order 0, first in the registry, and /dashboard is no route" time="0.0002153">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard is the landing page (SPEC-009 Story-004) &gt; T-036 the dashboard shows at / with the current month selected" time="0.0174655">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard is the landing page (SPEC-009 Story-004) &gt; T-037 no Home feature, no &quot;API: ok&quot; text and no home id remain" time="0.0073972">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard is the landing page (SPEC-009 Story-004) &gt; T-040 an unknown /dashboard path shows &quot;Page not found&quot; inside the shell" time="0.0058999">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/format.test.ts" timestamp="2026-10-27T23:01:46.050Z" hostname="Tika" tests="6" failures="0" errors="0" skipped="0" time="0.0261738">
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 shares add up to exactly 100.0% (largest remainder) and keep input order" time="0.0019841">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 a zero or empty total is safe (no division by zero, no NaN)" time="0.0003728">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 shares are formatted from integers" time="0.0002068">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 money is formatted with Intl in the response currency from integer minor units" time="0.0201901">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 the current month is YYYY-MM in local time and matches the month pattern" time="0.0004573">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 dashboard sources use no toFixed and no parseFloat (GR-007)" time="0.0017455">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/SpendingByCategory.test.tsx" timestamp="2026-10-27T23:01:46.051Z" hostname="Tika" tests="4" failures="0" errors="0" skipped="0" time="0.2911308">
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-024 renders a Recharts pie with one slice per category" time="0.090369">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-024 renders a table of category, formatted amount and share with a total row" time="0.1471068">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-029 every slice is also a table row carrying its number, name and share as text" time="0.0318155">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-029 shares of the rows add up to the total share" time="0.0207498">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/TrendChart.test.tsx" timestamp="2026-10-27T23:01:46.051Z" hostname="Tika" tests="7" failures="0" errors="0" skipped="0" time="0.8757104">
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-030 renders one chart point per month, oldest first, ending at the selected month" time="0.3145354">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-031 a table with month and formatted amount sits alongside the chart" time="0.0798288">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-032 the selector offers 3, 6 (default) and 12 and a change requests that count" time="0.1492526">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-033 all-zero points show the trend empty state and no chart" time="0.023151">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-034 trend loading does not blank the category section" time="0.033496">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-034 a trend failure shows its own error, Retry refetches, categories stay" time="0.0739956">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-035 axe finds no serious or critical violation with the trend section rendered" time="0.2003168">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/import/ImportPage.test.tsx" timestamp="2026-10-27T23:01:46.052Z" hostname="Tika" tests="19" failures="0" errors="0" skipped="0" time="1.6044116">
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 feature.ts exports the Import entry and the registry lists it" time="0.0021347">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 the shell shows an &quot;Import&quot; nav entry that leads to the page" time="0.1767031">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 the empty state shows the file picker, the 5 MB / 5000-row limits and the UTF-8 note" time="0.0105645">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 with no account the page points to Accounts and disables the picker" time="0.0275703">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 uploading asks for a preview, pre-fills the selects from the suggestion and asks again with the mapping" time="0.0970882">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 changing a select asks for a new preview with the new value" time="0.1101288">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 without a suggestion the selects start empty and no rows are requested until all three are chosen" time="0.1034352">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="preview (AC-3) &gt; T-033 valid rows show in a table, invalid rows by line with the reason, and Import is enabled" time="0.0891923">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="preview (AC-3) &gt; T-033 Import is disabled while no valid row exists" time="0.1172115">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="result (AC-4) &gt; T-034 confirming sends the commit and shows imported, skipped and invalid as text with an icon, the invalid lines and a link" time="0.0919863">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="result (AC-4) &gt; T-034 &quot;Import another file&quot; returns to the empty state" time="0.0910656">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 400 with a field error shows it inline next to that control" time="0.061891">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 400 on the file shows next to the picker; a 404 shows next to the account select" time="0.0448494">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 404 shows an inline error next to the account select" time="0.0484747">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 HTML and spreadsheet formulas in a cell render as plain text" time="0.0468463">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a failing commit shows its field error and stays on the preview" time="0.0938757">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-036 axe finds no serious violations on the empty, mapping, preview and result steps" time="0.2185321">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-037 every control has a label and the tab order follows the page" time="0.0621817">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-037 focus moves to the Preview heading, then to the result heading" time="0.1086579">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/transactions/TransactionForm.test.tsx" timestamp="2026-10-27T23:01:46.054Z" hostname="Tika" tests="19" failures="0" errors="0" skipped="0" time="0.9210061">
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="money.ts (AC-2) &gt; T-036 parses 12.50, 12 and 0.05 into minor units" time="0.0012299">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="money.ts (AC-2) &gt; T-036 rejects 1.234, abc, blank, zero, signs and out-of-range text" time="0.0006162">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="money.ts (AC-2) &gt; T-036 formats minor units back to input text" time="0.0003511">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm add (AC-1..AC-3) &gt; T-035 submits the add form as minor units, refreshes the list and resets the form" time="0.2350166">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm add (AC-1..AC-3) &gt; T-036 shows an inline error for invalid amount text and sends nothing" time="0.0568092">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm add (AC-1..AC-3) &gt; T-037 renders server 400 field errors next to the inputs and keeps the entered values" time="0.0558037">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm add (AC-1..AC-3) &gt; T-037 maps an amountMinor server error onto the Amount input" time="0.0486503">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm add (AC-1..AC-3) &gt; T-037 shows a form-level alert when the save fails for another reason" time="0.0545858">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm edit (AC-4) &gt; T-038 starts with the stored values, sends the PATCH on save and calls onSaved" time="0.0492394">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm edit (AC-4) &gt; T-038 Cancel calls onCancel and sends nothing" time="0.0279913">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="DeleteTransaction (AC-5) &gt; T-039 confirm deletes, refreshes the list and calls onDeleted" time="0.0165343">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="DeleteTransaction (AC-5) &gt; T-039 cancel changes nothing, returns focus to Delete; Escape does the same" time="0.0242121">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="DeleteTransaction (AC-5) &gt; T-039 a failed delete keeps the confirm open with an alert" time="0.0141113">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm prerequisites (AC-6) &gt; T-040 with no accounts says to create an account first" time="0.0211032">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm prerequisites (AC-6) &gt; T-040 with no categories says to create a category first" time="0.0305372">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm prerequisites (AC-6) &gt; T-040 with neither, names both" time="0.0172172">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm accessibility (AC-7) &gt; T-041 axe finds no serious or critical violation in the add form, with errors shown" time="0.1604782">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm accessibility (AC-7) &gt; T-041 axe is clean for the edit form and the open delete confirm" time="0.0780893">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionForm.test.tsx" name="TransactionForm accessibility (AC-7) &gt; T-041 every control has a visible label" time="0.0265552">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/transactions/TransactionsPage.test.tsx" timestamp="2026-10-27T23:01:46.055Z" hostname="Tika" tests="27" failures="0" errors="0" skipped="0" time="1.834136">
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="transactions feature registration &gt; T-028 feature.ts exports {id, path, label: &quot;Transactions&quot;, order, component} and the registry lists it" time="0.0019978">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="transactions feature registration &gt; T-028 the shell shows a &quot;Transactions&quot; nav entry that leads to /transactions" time="0.1960186">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="display helpers &gt; T-029 formats minor units through Intl without a float" time="0.0066942">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="display helpers &gt; T-029 formats a stored day without shifting it by time zone" time="0.0056105">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="display helpers &gt; T-029 expense and income are told apart by text and an icon" time="0.0006578">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-029 each row says Expense or Income in text, not by colour" time="0.0394905">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-030 the table shows date, description, account, category and the Intl amount" time="0.0425721">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-031 labelled selects are fed from the list endpoints; changing a filter refetches with its params" time="0.0884057">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-032 Previous and Next move the offset by the limit and the range and total are shown" time="0.3417328">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-032 changing a filter starts again at the first page" time="0.1166154">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-033 with no rows an empty state explains how to add the first one" time="0.0217062">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-033 a filter with no match says so instead of the first-time message" time="0.0453581">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-033 while loading a status message is shown" time="0.0156809">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-033 on an error an alert is shown" time="0.0306471">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-034 axe finds no serious or critical violation with rows, with no rows and with an error" time="0.2057968">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-034 filters and pager are labelled native controls in tab order, none with a positive tabindex" time="0.0336596">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage &gt; T-034 the stylesheet is one column by default, uses tokens and shows keyboard focus" time="0.0007867">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-035 the page offers Add transaction; the opened form posts minor units and the new row appears in the list" time="0.0868898">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-035 the add form can be closed again from the page" time="0.045938">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-035 with no rows the empty state points at a real Add transaction control" time="0.0327006">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-038 Edit opens the form for that row with its values; saving sends a PATCH and the row updates" time="0.0930128">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-038 Cancel closes the edit form, sends nothing and returns focus to Edit" time="0.0697551">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-038 only one row is edited at a time" time="0.0564218">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-039 Delete and confirm removes the row from the list; focus moves to the list heading" time="0.0782823">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-039 cancelling the confirm keeps the row and sends nothing" time="0.0293237">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-040 with no accounts the opened add form says to create an account first" time="0.0332661">
+        </testcase>
+        <testcase classname="src/features/transactions/TransactionsPage.test.tsx" name="TransactionsPage mounts the add, edit and delete UI (Bug-002) &gt; T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open" time="0.1133309">
+            <system-err>
+Not implemented: HTMLCanvasElement&apos;s getContext() method: without installing the canvas npm package
+
+            </system-err>
+        </testcase>
+    </testsuite>
+</testsuites>
