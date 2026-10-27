@@ -27,12 +27,15 @@ describe('vite build and dev proxy (Enabler-003 AC-4)', () => {
     }
   });
 
-  it('T-016 the dev server proxies /api to the api and rewrites the prefix away', () => {
+  it('T-016 the dev server proxies /api to the api and strips the prefix for health and budgets only', () => {
     const proxy = config.server?.proxy?.['/api'];
     expect(proxy).toBeDefined();
     const options = proxy as { target: string; rewrite: (path: string) => string };
     expect(options.target).toBe('http://127.0.0.1:3000');
     expect(options.rewrite('/api/health')).toBe('/health');
-    expect(options.rewrite('/api/transactions?x=1')).toBe('/transactions?x=1');
+    expect(options.rewrite('/api/budgets/2026-10/3?x=1')).toBe('/budgets/2026-10/3?x=1');
+    expect(options.rewrite('/api/budgets?month=2026-10')).toBe('/budgets?month=2026-10');
+    expect(options.rewrite('/api/transactions?x=1')).toBe('/api/transactions?x=1');
+    expect(options.rewrite('/api/auth/login')).toBe('/api/auth/login');
   });
 });

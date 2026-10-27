@@ -148,7 +148,8 @@ describe('Enabler-005 Dockerfiles', () => {
 
 describe('Enabler-005 nginx.conf', () => {
   it('serves the SPA with fallback, proxies /api/ with the prefix stripped and sets headers once', () => {
-    expect(nginx).toMatch(/proxy_pass\s+http:\/\/api:3000\/;/);
+    expect(nginx).toMatch(/proxy_pass\s+http:\/\/api:3000;/);
+    expect(nginx).toMatch(/rewrite\s+\^\/api\/\(\.\*\)\$\s+\/\$1\s+break;/);
     expect(nginx).toMatch(/try_files\s+\$uri\s+\$uri\/\s+\/index\.html;/);
     expect(nginx).toMatch(/add_header X-Content-Type-Options "nosniff" always;/);
     expect(nginx).toMatch(/add_header Referrer-Policy "no-referrer" always;/);

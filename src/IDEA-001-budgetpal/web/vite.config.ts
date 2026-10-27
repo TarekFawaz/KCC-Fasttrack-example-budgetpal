@@ -1,8 +1,10 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-// The dev server reaches the api through /api with the prefix stripped, the same
-// shape the nginx proxy gives the production container (D-22, GR-005: no CORS).
+// The dev server reaches the api through /api, the same shape the nginx proxy gives the
+// production container (D-22, GR-005: no CORS). The api serves /health and /budgets
+// without the prefix and every other module under /api, so the prefix is stripped for
+// those two only (same rule as web/nginx.conf).
 export const API_DEV_TARGET = 'http://127.0.0.1:3000';
 
 export default defineConfig({
@@ -14,7 +16,7 @@ export default defineConfig({
       '/api': {
         target: API_DEV_TARGET,
         changeOrigin: false,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api\/(health|budgets)(?=[/?]|$)/, '/$1'),
       },
     },
   },
