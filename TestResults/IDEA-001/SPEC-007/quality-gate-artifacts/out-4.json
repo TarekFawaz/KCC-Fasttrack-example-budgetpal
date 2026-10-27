@@ -1,0 +1,270 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-007/src/IDEA-001-budgetpal[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 312[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 31181[2mms[22m[39m
+   [33m[2m✓[22m[39m Enabler-005 live stack (needs a Docker daemon, npm registry access and a free Docker network)[2m > [22mT-031 compose up: both services healthy; web page and /api/health answer [33m14809[2mms[22m[39m
+   [33m[2m✓[22m[39m Enabler-005 live stack (needs a Docker daemon, npm registry access and a free Docker network)[2m > [22mT-035 data and migration records persist across down and up [33m16167[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m30 passed[39m[22m[90m (30)[39m
+[2m   Start at [22m 20:43:05
+[2m   Duration [22m 34.13s[2m (transform 85ms, setup 0ms, collect 2.21s, tests 31.50s, environment 1ms, prepare 468ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+---------------|---------|----------|---------|---------|-------------------
+File           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------|---------|----------|---------|---------|-------------------
+All files      |     100 |    89.18 |     100 |     100 |                   
+ helpers.ts    |     100 |     87.5 |     100 |     100 | 18                
+ live-stack.ts |     100 |    89.65 |     100 |     100 | 38-39,55          
+---------------|---------|----------|---------|---------|-------------------
+web test:coverage$ vitest run --config vite.config.ts --coverage
+api test:coverage$ vitest run --config vitest.config.ts --coverage
+api test:coverage: 
+api test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-007/src/IDEA-001-budgetpal/api
+api test:coverage:       Coverage enabled with v8
+api test:coverage: 
+web test:coverage: 
+web test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-007/src/IDEA-001-budgetpal/web
+web test:coverage:       Coverage enabled with v8
+web test:coverage: 
+api test:coverage:  ✓ test/config.test.ts (10 tests) 15ms
+api test:coverage:  ✓ src/modules/transactions/transactions.schemas.test.ts (13 tests) 22ms
+api test:coverage:  ✓ src/modules/budgets/budgets.schema.test.ts (3 tests) 11ms
+api test:coverage:  ✓ src/modules/categories/categories.schema.test.ts (4 tests) 13ms
+api test:coverage:  ✓ test/db.test.ts (4 tests) 82ms
+api test:coverage:  ✓ src/modules/categories/categories.repository.test.ts (7 tests) 74ms
+api test:coverage:  ✓ src/modules/transactions/transactions.repository.test.ts (8 tests) 90ms
+api test:coverage:  ✓ src/modules/budgets/budgets.repository.test.ts (14 tests) 146ms
+api test:coverage:  ✓ src/modules/categories/categories.service.test.ts (4 tests) 14ms
+api test:coverage:  ✓ src/modules/accounts/accounts.repository.test.ts (21 tests) 217ms
+api test:coverage:  ✓ test/auth-storage.test.ts (23 tests) 613ms
+api test:coverage:  ✓ src/kernel/validate.test.ts (7 tests) 346ms
+api test:coverage:    ✓ validate(): body > T-001 rejects a bad, a missing and an unknown body field with a 400 problem and never calls the handler 309ms
+api test:coverage: {"level":30,"time":1793130224805,"pid":30924,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:53864"}
+api test:coverage: {"level":30,"time":1793130224833,"pid":30924,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test:coverage: {"level":30,"time":1793130224875,"pid":30924,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":41.07439999999997,"msg":"request completed"}
+api test:coverage:  ✓ test/app.test.ts (12 tests) 945ms
+api test:coverage:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 608ms
+api test:coverage:  ✓ src/kernel/require-user.test.ts (11 tests) 1023ms
+api test:coverage:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 742ms
+api test:coverage:  ✓ test/health.test.ts (5 tests) 1211ms
+api test:coverage:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 961ms
+api test:coverage:  ✓ src/modules/budgets/budgets.routes.test.ts (8 tests) 1239ms
+api test:coverage:    ✓ budgets routes: set > T-006 PUT creates (201) then replaces (200) and returns the budget 915ms
+api test:coverage:  ✓ src/modules/budgets/budgets.progress.test.ts (11 tests) 1310ms
+api test:coverage:    ✓ budgets progress > T-014 returns each budgeted category with id, name, budget, spent, percent and status 907ms
+api test:coverage:  ✓ src/modules/accounts/accounts.routes.test.ts (12 tests) 1295ms
+api test:coverage:    ✓ POST/GET /api/accounts (Story-001) > T-006 POST valid returns 201 and GET lists it ordered by name (AC-1) 900ms
+api test:coverage:  ✓ src/modules/accounts/accounts.isolation.test.ts (13 tests) 1373ms
+api test:coverage:    ✓ GET /api/accounts/:id (Story-002) > T-012 returns 200 for an own account, 400 for a malformed id and 404 for an unknown id (AC-1) 918ms
+api test:coverage:  ✓ src/modules/auth/signup.test.ts (13 tests) 1433ms
+api test:coverage:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 618ms
+api test:coverage:  ✓ src/modules/auth/login.test.ts (13 tests) 1687ms
+api test:coverage:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 723ms
+api test:coverage:  ✓ src/modules/categories/categories.routes.test.ts (27 tests) 1804ms
+api test:coverage:    ✓ create and list (Story-001 AC-1) > T-007 POST returns 201 with id, name and kind and GET lists it 914ms
+api test:coverage: {"level":30,"time":1793130226301,"pid":30924,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:49403"}
+api test:coverage: {"level":30,"time":1793130226302,"pid":30924,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+api test:coverage: {"level":30,"time":1793130226403,"pid":30924,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:62427"}
+api test:coverage:  ✓ src/modules/transactions/transactions.routes.test.ts (47 tests) 2391ms
+api test:coverage:    ✓ POST /api/transactions (Story-001) > T-007 valid body returns 201 with the stored row; it is in the database as integer minor units (AC-1) 920ms
+api test:coverage: {"level":30,"time":1793130226404,"pid":30924,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+api test:coverage:  ✓ test/server.test.ts (6 tests | 1 skipped) 2514ms
+api test:coverage:    ✓ start > T-020 migrates, then listens on PORT 957ms
+api test:coverage:    ✓ process > T-021 a failing migration exits non-zero and never listens 1286ms
+web test:coverage:  ✓ src/kernel/source-rules.test.ts (4 tests) 7ms
+web test:coverage:  ✓ src/features/accounts/money.test.ts (34 tests) 40ms
+web test:coverage:  ✓ src/features/home/useHealth.test.tsx (3 tests) 352ms
+api test:coverage: 
+api test:coverage:  Test Files  24 passed (24)
+api test:coverage:       Tests  295 passed | 1 skipped (296)
+api test:coverage:    Start at  20:43:41
+api test:coverage:    Duration  5.40s (transform 4.89s, setup 0ms, collect 19.28s, tests 19.87s, environment 9ms, prepare 15.73s)
+api test:coverage: 
+api test:coverage:  % Coverage report from v8
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: All files          |   98.97 |    92.42 |   99.33 |   98.97 |                   
+api test:coverage:  src               |     100 |      100 |     100 |     100 |                   
+api test:coverage:   app.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/kernel        |   99.64 |    86.13 |     100 |   99.64 |                   
+api test:coverage:   config.ts        |     100 |    91.66 |     100 |     100 | 55                
+api test:coverage:   errors.ts        |     100 |    88.23 |     100 |     100 | 59-68             
+api test:coverage:   log.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:   modules.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   problem.ts       |   98.21 |    76.92 |     100 |   98.21 | 76                
+api test:coverage:   require-user.ts  |     100 |    93.33 |     100 |     100 | 63                
+api test:coverage:   validate.ts      |     100 |       75 |     100 |     100 | 43,58-59,70       
+api test:coverage:  src/kernel/db     |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   migrate.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...dules/accounts |   97.54 |    88.52 |     100 |   97.54 |                   
+api test:coverage:   ...repository.ts |   95.55 |     82.6 |     100 |   95.55 | 120-121,133-134   
+api test:coverage:   ...nts.routes.ts |     100 |    94.11 |     100 |     100 | 26                
+api test:coverage:   ...ts.schemas.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ts.service.ts |   94.73 |       90 |     100 |   94.73 | 75-76,100-101     
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/modules/auth  |    98.3 |    95.23 |   96.66 |    98.3 |                   
+api test:coverage:   ...repository.ts |    91.3 |    88.88 |    87.5 |    91.3 | 44-45,55-58       
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   login.ts         |   97.72 |    92.85 |     100 |   97.72 | 122-123           
+api test:coverage:   password.ts      |     100 |      100 |     100 |     100 |                   
+api test:coverage:   schemas.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   sessions.ts      |     100 |    93.75 |     100 |     100 | 70,103            
+api test:coverage:   signup.ts        |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...odules/budgets |     100 |    96.72 |     100 |     100 |                   
+api test:coverage:   ...ess.routes.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ss.service.ts |     100 |       80 |     100 |     100 | 29                
+api test:coverage:   ...repository.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ets.routes.ts |     100 |     90.9 |     100 |     100 | 15                
+api test:coverage:   ...ets.schema.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ts.service.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ets.status.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...les/categories |   97.88 |    88.13 |     100 |   97.88 |                   
+api test:coverage:   ...repository.ts |    92.4 |    85.71 |     100 |    92.4 | ...,97-98,111-112 
+api test:coverage:   ...ies.routes.ts |     100 |       75 |     100 |     100 | 49,71,96,123      
+api test:coverage:   ...ies.schema.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...es.service.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...modules/health |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...repository.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...s/transactions |     100 |    96.42 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...repository.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ons.routes.ts |     100 |     92.3 |     100 |     100 | 39                
+api test:coverage:   ...ns.schemas.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...ns.service.ts |     100 |    95.45 |     100 |     100 | 71                
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage:  ✓ src/kernel/registry.test.ts (6 tests) 9ms
+api test:coverage: Done
+web test:coverage:  ✓ src/features/budgets/BudgetForm.test.tsx (12 tests) 507ms
+web test:coverage: stderr | src/features/budgets/BudgetsPage.test.tsx > budgets page accessibility and layout > T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (light)
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/kernel/Shell.test.tsx (4 tests) 407ms
+web test:coverage:  ✓ src/features/accounts/AccountForm.test.tsx (10 tests) 792ms
+web test:coverage:    ✓ AccountForm > T-021 submit POSTs integer minor units, then resets the form 318ms
+web test:coverage:  ✓ src/features/home/HomePage.test.tsx (7 tests) 649ms
+web test:coverage: stderr | src/features/budgets/BudgetsPage.test.tsx > budgets page accessibility and layout > T-033 axe finds no serious or critical violation with all three states and unbudgeted rows (dark)
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/budgets/BudgetsPage.test.tsx (17 tests) 1107ms
+web test:coverage: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage > T-023 axe finds no serious or critical violation on the empty and the populated page; inputs are labelled
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/auth/auth.test.tsx (17 tests) 1093ms
+web test:coverage:    ✓ SignUpPage > T-030 a valid submit calls signup with the credentials, then lands on the home page 315ms
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/kernel/build.test.ts (2 tests) 4075ms
+web test:coverage:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 4072ms
+web test:coverage:  ✓ src/features/budgets/BudgetsPage.set.test.tsx (15 tests) 1321ms
+web test:coverage:    ✓ budgets feature registration > T-022 the shell shows a "Budgets" nav link that opens the page with the current month selected 393ms
+web test:coverage:  ✓ src/features/categories/CategoriesPage.test.tsx (9 tests) 1240ms
+web test:coverage:    ✓ categories feature registration (Story-003 AC-1) > T-023 feature.ts exports the route and a "Categories" nav entry that the kernel registry picks up 320ms
+web test:coverage:    ✓ accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form 337ms
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/transactions/TransactionForm.test.tsx (19 tests) 1664ms
+web test:coverage:    ✓ TransactionForm add (AC-1..AC-3) > T-035 submits the add form as minor units, refreshes the list and resets the form 407ms
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/categories/CategoryRow.test.tsx (7 tests) 1895ms
+web test:coverage:    ✓ edit a category (Story-004 AC-1) > T-029 Edit, change name and kind, Save shows the new values 483ms
+web test:coverage:    ✓ keyboard, names, focus and axe (Story-004 AC-5) > T-034 buttons carry the category name; focus moves to the field on Edit and back to the row after Save, Cancel and a refused delete 349ms
+web test:coverage:    ✓ keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states 629ms
+web test:coverage: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/transactions/TransactionsPage.test.tsx > TransactionsPage > T-034 axe finds no serious or critical violation with rows, with no rows and with an error
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/accounts/AccountsPage.test.tsx > AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/accounts/AccountsPage.test.tsx (17 tests) 2349ms
+web test:coverage:    ✓ accounts feature registration > T-018 the shell shows an "Accounts" nav entry that routes to the page, with no shared file edited 346ms
+web test:coverage:    ✓ AccountsPage > T-023 axe finds no serious or critical violation on the empty and the populated page; inputs are labelled 365ms
+web test:coverage:    ✓ AccountsPage edit and delete > T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean 360ms
+web test:coverage: stderr | src/features/transactions/TransactionsPage.test.tsx > TransactionsPage mounts the add, edit and delete UI (Bug-002) > T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage:  ✓ src/features/transactions/TransactionsPage.test.tsx (27 tests) 3682ms
+web test:coverage:    ✓ transactions feature registration > T-028 the shell shows a "Transactions" nav entry that leads to /transactions 337ms
+web test:coverage:    ✓ TransactionsPage > T-032 Previous and Next move the offset by the limit and the range and total are shown 868ms
+web test:coverage:    ✓ TransactionsPage > T-032 changing a filter starts again at the first page 400ms
+web test:coverage:    ✓ TransactionsPage > T-034 axe finds no serious or critical violation with rows, with no rows and with an error 370ms
+web test:coverage:    ✓ TransactionsPage mounts the add, edit and delete UI (Bug-002) > T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open 369ms
+web test:coverage: 
+web test:coverage:  Test Files  17 passed (17)
+web test:coverage:       Tests  210 passed (210)
+web test:coverage:    Start at  20:43:41
+web test:coverage:    Duration  9.61s (transform 1.59s, setup 13.03s, collect 9.24s, tests 21.19s, environment 43.15s, prepare 9.76s)
+web test:coverage: 
+web test:coverage:  % Coverage report from v8
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: All files          |    98.4 |    92.15 |   98.27 |    98.4 |                   
+web test:coverage:  features/accounts |   99.33 |    92.89 |     100 |   99.33 |                   
+web test:coverage:   AccountForm.tsx  |   99.42 |     96.1 |     100 |   99.42 | 116               
+web test:coverage:   AccountsPage.tsx |   99.34 |    89.47 |     100 |   99.34 | 81                
+web test:coverage:   accounts.api.ts  |   98.94 |    96.15 |     100 |   98.94 | 69                
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:   money.ts         |     100 |    85.71 |     100 |     100 | 14-15,20          
+web test:coverage:  features/auth     |   96.81 |    92.04 |   93.54 |   96.81 |                   
+web test:coverage:   LoginPage.tsx    |   99.37 |    95.12 |     100 |   99.37 | 128               
+web test:coverage:   SignUpPage.tsx   |   95.87 |       84 |     100 |   95.87 | 19-20,36-37       
+web test:coverage:   authApi.ts       |   92.85 |    95.45 |    87.5 |   92.85 | 51,85-87,93-94    
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:  features/budgets  |   97.76 |    91.87 |     100 |   97.76 |                   
+web test:coverage:   BudgetForm.tsx   |   98.23 |    89.18 |     100 |   98.23 | 76,149-150        
+web test:coverage:   ...tProgress.tsx |     100 |     92.3 |     100 |     100 | 35                
+web test:coverage:   BudgetsPage.tsx  |   94.39 |    93.47 |     100 |   94.39 | 95-98,121-124     
+web test:coverage:   api.ts           |   98.91 |    96.29 |     100 |   98.91 | 81                
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:  ...res/categories |   97.31 |    89.51 |   97.36 |   97.31 |                   
+web test:coverage:   ...oriesPage.tsx |   97.87 |    88.67 |     100 |   97.87 | 165-168           
+web test:coverage:   CategoryRow.tsx  |   96.06 |    86.95 |    92.3 |   96.06 | ...37,102,184-186 
+web test:coverage:   ...gories.api.ts |   98.85 |       96 |     100 |   98.85 | 56                
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:  features/home     |     100 |      100 |     100 |     100 |                   
+web test:coverage:   HomePage.tsx     |     100 |      100 |     100 |     100 |                   
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:   useHealth.ts     |     100 |      100 |     100 |     100 |                   
+web test:coverage:  ...s/transactions |   99.41 |    92.36 |   98.48 |   99.41 |                   
+web test:coverage:   ...ctionForm.tsx |   99.33 |    94.78 |     100 |   99.33 | 36,142            
+web test:coverage:   ...tionsPage.tsx |   99.56 |    90.69 |   94.44 |   99.56 | 218               
+web test:coverage:   api.ts           |   99.12 |    97.29 |     100 |   99.12 | 95                
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:   money.ts         |     100 |    79.16 |     100 |     100 | 10-11,16,39       
+web test:coverage:  kernel            |     100 |    95.23 |     100 |     100 |                   
+web test:coverage:   Shell.tsx        |     100 |      100 |     100 |     100 |                   
+web test:coverage:   registry.ts      |     100 |    94.44 |     100 |     100 | 22                
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: Done
