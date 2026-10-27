@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-001-walking-skeleton]] | verifier | minor | fixed | Story-001 / AC-1 | T-030 | [[../../../../TestResults/IDEA-001/SPEC-001/Story-001-AC-1-Bug-002]] |
+| Bug | [[../SPEC-001-walking-skeleton]] | verifier | minor | verified | Story-001 / AC-1 | T-030 | [[../../../../TestResults/IDEA-001/SPEC-001/Story-001-AC-1-Bug-002]] |
 
 ## Reproduce
 1. Read `api/openapi.json`: `/health` has only a `200` response.
