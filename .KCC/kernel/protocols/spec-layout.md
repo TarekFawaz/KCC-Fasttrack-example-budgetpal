@@ -1,0 +1,314 @@
+---
+# Functional fields
+description: Layout for every spec. A spec is one lean file describing the smallest user-valuable delivery, linked to its backlog items and its arch.md, grouped under a per-idea Specs folder with a token-optimised ROADMAP.
+inputs: An IDEA-ID + slug from the upstream idea, plus a SPEC-ID + slug chosen by the spec-writer agent.
+outputs: A `specs/IDEA-{ID}-{slug}-Specs/` folder with an index, `ROADMAP.md`, and one `SPEC-{ID}-{slug}/` folder per spec (spec file, `arch.md` in the full lifecycle, `Backlog/` items; `plan.md` and `review.md` created by their owners). Under the fast-track profile no `arch.md` exists; the spec file carries `## Architecture references`.
+
+# Obsidian metadata
+title: "Spec Folder Layout Protocol"
+aliases:
+  - spec-layout
+  - spec folder convention
+  - epic backlog convention
+  - spec folder note
+  - idea-specs-index
+tags:
+  - framework/protocol
+  - spec
+  - backlog
+  - documentation
+created: 2026-05-24
+updated: 2026-09-21
+version: 6.0.0
+status: active
+copyright: "KCC framework (c) 2026 Tarek Fawaz"
+homepage: "https://tikasway.dev/kcc"
+license: "Licensed under the terms in LICENSE"
+---
+
+# Spec Folder Layout
+
+A spec is the **smallest delivery a user can get value from**. It is one lean
+file. The detail lives in its backlog items and its `arch.md`, and each file
+is read only when a step needs it. Specs are grouped per idea, so the trace
+chain `Idea -> Specs -> Story/Enabler/Bug` is visible in Obsidian.
+
+```text
+specs/
+|-- specs.md                          <- top-level MOC across all ideas
+`-- IDEA-{ID}-{slug}-Specs/           <- per-idea spec group
+    |-- IDEA-{ID}-{slug}-Specs.md     <- index; the ONLY file linking back to the idea
+    |-- ROADMAP.md                    <- spec order, waves, lanes, token plan, restore points
+    `-- SPEC-{ID}-{slug}/
+        |-- SPEC-{ID}-{slug}.md       <- THE spec: delivery brief + ACs + backlog table + arch link
+        |-- arch.md                   <- spec-local design (embedded mermaid); full lifecycle only, none under fast track
+        |-- Backlog/
+        |   |-- Story-{NNN}-{slug}.md
+        |   |-- Enabler-{NNN}-{slug}.md
+        |   `-- Bug-{NNN}-{slug}.md   <- added by /bug-report or the verifier
+        |-- plan.md                   <- created by planner (not a stub)
+        `-- review.md                 <- created by verifier (not a stub)
+```
+
+**Trace edges:** idea -> index -> spec -> backlog items. No level is skipped.
+
+**No stub files.** Each file is created by its owner when it has real content.
+`backlog.md`, `parallelization.md`, `budget.md`, and `handovers.md` are
+retired (see *Legacy v5 specs*).
+
+---
+
+## Files and owners
+
+A file exists only when a named consumer reads it (agent runtime contract, rule 10). The `Read by`
+column names that consumer; a file with none is not written.
+
+| File | Owner | Content | Read by |
+|--|--|--|--|
+| `IDEA-{ID}-{slug}-Specs.md` | spec-writer | Spec index: key, delivery, status, links. | planner, `check-run-conformance` LINK-002/003, the dashboard |
+| `ROADMAP.md` | spec-writer (shape), token-guard (estimates) | Execution plan across specs. See *ROADMAP.md shape*. | `kcc-run` (order, lanes, `Depends on`), token-guard, `check-run-conformance` SPEC-005/006/009/011, the dashboard |
+| `SPEC-{ID}-{slug}.md` | spec-writer | See *Spec file shape*. | planner, implementer, verifier, `check-run-conformance` SPEC-001/002/010 |
+| `arch.md` (full lifecycle only) | architect (spec-writer seeds the section skeleton) | Embedded design slice. Content bar: >= 1 ```mermaid``` block plus prose ([[architecture-documentation]]). Under the fast-track profile this file does not exist: the spec file's `## Architecture references` replaces it. | planner, implementer, verifier, `check-run-conformance` SPEC-003/ARCH-005 |
+| `Backlog/Story-*`, `Enabler-*` | spec-writer | See *Backlog item shape*. | planner, implementer, verifier, `check-traceability`, `check-wave-scope` |
+| `Backlog/Bug-*` | `/bug-report` skill, verifier | See *Bug item shape*. | implementer (FIX), verifier, `check-run-conformance -Scope bugs`, `kcc-run` ruling gate |
+| `plan.md` | planner | Ordered changes, `## Waves` (file-disjoint), `## Atomic test cases`. | implementer, verifier, `kcc-run` (waves, toolchain, routing), `check-run-conformance -Scope plan`, `quality-gate` (gates coverage) |
+| `review.md` | verifier | PASS/FAIL per AC, `## Evidence` (commands run + exit codes), verdict. | `kcc-run` (verdict), `check-run-conformance -Scope review`, repo-steward, the dashboard |
+| `pr.md` (optional) | repo-steward | Pull-request draft written by `/spec-merge` after an `APPROVED` review. See [[git-workflow]]. | the human |
+
+Token estimates and approvals go to `ROADMAP.md`, the trace session
+(`TokenUsage.md`, `HumanDecisions.md`), and the backchannel. Handover
+envelopes go to `coordination/handover/`.
+
+### Fast-track profile
+
+Under `--fasttrack` (`check-run-conformance -RunProfile fasttrack`) the spec folder holds the spec
+file, `Backlog/`, `plan.md` and `review.md`, and nothing else. No `arch.md`: the spec file carries a
+`## Architecture references` section instead (5 lines at most: the Decision ids from
+`architecture/architecture.md -> ## Decisions` the spec relies on, the containers of the C2 diagram
+it touches, and the wikilink to the Architecture Document). The planner and the verifier read that
+section and `architecture.md`; SPEC-001 requires it, and an `arch.md` under this profile is reported
+as a duplicate (SPEC-003, warning). `ROADMAP.md` names only build-time dependencies in `Depends on`
+(a spec whose files, API or data this spec needs to build); feature specs depend on SPEC-001 alone by
+default, specs that touch disjoint files never depend on each other, and the `Order` column groups
+the specs that build at the same time. A roadmap that chains every spec after the previous one is
+reported (SPEC-011, warning).
+
+---
+
+## Sizing rules (enforced by `check-run-conformance -Scope specs`)
+
+| Rule | Limit | If exceeded |
+|--|--|--|
+| SZ-1 | A spec covers **one** user-valuable delivery (one outcome, one primary persona) | Split into more specs |
+| SZ-2 | At most **6** backlog items (stories + enablers) per spec at creation | Split |
+| SZ-3 | Each item touches at most **5** impacted files | Split the item |
+| SZ-4 | Each item needs at most **8** atomic tests (the planner checks this) | Split the item |
+| SZ-5 | The spec file is at most **150** lines | Move detail into items or `arch.md` |
+
+Splitting increases the spec count. It never drops scope (CR-13). Bugs added
+later don't count toward SZ-2.
+
+---
+
+## Spec file shape (`SPEC-{ID}-{slug}.md`)
+
+````markdown
+# SPEC-{ID}: {Delivery title}
+
+| Priority | Category | Status | Wave | Depends on | Blocks | Index |
+|--|--|--|--|--|--|--|
+| P1 | Feature | Ready | 1 | None | SPEC-{ID+1} | [[../IDEA-{ID}-{slug}-Specs]] |
+
+## Delivery Brief
+- **Who:** {persona}
+- **Gets:** {the smallest usable outcome}
+- **Value:** {why it matters}
+- **Measured by:** {bounded, observable signal}
+- **Out of scope:** {explicit exclusions}
+
+## Acceptance Criteria
+- [ ] AC-1 - {concrete, testable}
+
+## Backlog
+| Key | Type | Title | Status | Depends on | Wave | Files | File |
+|--|--|--|--|--|--|--|--|
+| Enabler-001 | Enabler | {title} | Ready | None | 1 | 3 | [[Backlog/Enabler-001-{slug}]] |
+| Story-001 | Story | {title} | Ready | Enabler-001 | 2 | 4 | [[Backlog/Story-001-{slug}]] |
+
+## Architecture
+- Spec design: [[arch]]
+- Architecture Document: [[../../../architecture/architecture]]
+- ADRs / guardrails / quality gates: [[../../../architecture/guardrails]], [[../../../architecture/quality-gates]]
+
+## Risks
+- {risk} - {mitigation}
+````
+
+Under the fast-track profile the `## Architecture` section is replaced by:
+
+````markdown
+## Architecture references
+- Decisions: D-2 (HTTP framework), D-5 (password storage)
+- Containers: API, Database
+- Architecture Document: [[../../../architecture/architecture]]
+````
+
+Use wikilinks only. Never use bare relative paths, and never link
+`architecture/README.md` (it must not exist). The `Wave` column is
+spec-writer's first cut. The planner's `plan.md -> ## Waves` is
+authoritative, and items in the same wave must have disjoint impacted files.
+
+---
+
+## Backlog item shape (`Backlog/Story-*.md`, `Backlog/Enabler-*.md`)
+
+````markdown
+# Story-001: {Title}
+
+| Type | Parent | Priority | Estimate | Status | Dialect | Depends on | Blocks |
+|--|--|--|--|--|--|--|--|
+| Story | [[../SPEC-{ID}-{slug}]] | P1 | S | Ready | frontend-react | None | Story-003 |
+
+## Statement
+As a {persona}, I want {capability}, so that {value}.
+
+## Acceptance Criteria
+- [ ] AC-1 - Given {context}, when {action}, then {result}.
+
+## INVEST
+I PASS · N PASS · V PASS · E PASS · S PASS · T PASS  ({notes only for non-obvious calls})
+
+## Impacted Files
+- `src/IDEA-{ID}-{slug}/...` - {change}
+
+## Test Hints
+- unit: ... · integration: ... (map to AC IDs)
+````
+
+Enablers replace `## Statement` with `## Outcome Statement`: *Enable {outcome}
+by {technical work}, so that {value}.*
+
+INVEST is required for every story and enabler (Independent, Negotiable,
+Valuable, Estimable, Small, Testable). If an item fails, split it, rewrite
+it, or mark it `Blocked`.
+
+---
+
+## Bug item shape (`Backlog/Bug-*.md`)
+
+````markdown
+# Bug-001: {Title}
+
+| Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
+|--|--|--|--|--|--|--|--|
+| Bug | [[../SPEC-{ID}-{slug}]] | human \| verifier | blocker \| major \| minor | open | Story-001 / AC-2 | T-0NN | [[../../../../TestResults/IDEA-{ID}/SPEC-{ID}/Story-001-AC-2-Bug-001]] |
+
+## Reproduce
+1. ...
+
+## Expected / Actual
+- Expected: ...
+- Actual: ...
+
+## Impacted Files
+- `src/IDEA-{ID}-{slug}/...` (best guess; the planner confirms)
+````
+
+Status lifecycle: `open -> fixing -> fixed -> verified`, or `wontfix` (human
+decision only), or `blocked`. A spec can't reach `Done` while any `blocker` or
+`major` bug is `open`, `fixing` or `blocked` (`check-run-conformance -Scope bugs`).
+The regression test is written first and must fail before the fix, then pass
+after it.
+
+`blocked` means the fix needs a human ruling: a limit of a framework tool, a change
+to an ADR or guardrail, a layout change outside the Bug's `## Impacted Files`, a
+waiver. The implementer sets it and writes, once, a section
+
+````markdown
+## Ruling needed
+- Blocker: {what stops the fix, in one or two lines}
+- Options: (A) {option, cost} (B) {option, cost} (C) {waive, risk}
+- Recommended: {A|B|C} - {why}
+````
+
+`kcc-run` then opens a `ruling` gate (answers `revise`, `waive`, `escalate`, `abort`)
+without using a retry. `revise`/`escalate` set the Bug back to `open` and add the
+human's ruling under `## Ruling`; `waive` sets `wontfix`. `check-run-conformance`
+reports a blocked Bug as `BUG-006` (owner human, quoting the section) and one
+without the section as `BUG-007` (owner implementer).
+
+---
+
+## ROADMAP.md shape
+
+````markdown
+# Roadmap - IDEA-{ID}: {title}
+
+## Execution Plan
+| Order | Spec | Delivery | Depends on | Lane | Est. tokens | Restore point |
+|--|--|--|--|--|--|--|
+| 1 | [[SPEC-001-{slug}/SPEC-001-{slug}]] | {one line} | None | A | 180k | CP after review |
+| 1 | [[SPEC-002-{slug}/SPEC-002-{slug}]] | {one line} | None | B | 140k | CP after review |
+| 2 | [[SPEC-003-{slug}/SPEC-003-{slug}]] | {one line} | SPEC-001 | A | 220k | CP after review |
+
+## Token Plan
+| Phase | Agent | Model / effort | Per spec | Total |
+|--|--|--|--|--|
+| plan | planner | from orchestrator.json | ... | ... |
+| implement | implementer | from orchestrator.json | ... | ... |
+| verify | verifier | from orchestrator.json | ... | ... |
+| **Total** | | | | {n} (band ±{x}%) |
+
+## Optimisation Notes
+- Specs in the same order number run in parallel lanes (no cross-spec dependency).
+- Take a restore point (`kcc-checkpoint`) after each spec reaches review, and whenever the usage watcher reaches its soft threshold.
+````
+
+Model and effort come from `coordination/orchestrator.json`. Never restate
+them by hand.
+
+---
+
+## Atomic test cases (in `plan.md`)
+
+````markdown
+## Atomic test cases
+| Test ID | Item | AC | Level | Description |
+|--|--|--|--|--|
+| T-001 | Story-001 | AC-1 | unit | {assertion} |
+````
+
+The Test ID appears in the real test's name, annotation, or tag, so
+`check-traceability` can map AC -> Test ID -> test -> result.
+
+---
+
+## Source code layout
+
+Code lives under `src/IDEA-{ID}-{slug}/` with its own `README.md`. See
+[[workspace]] and `.KCC/kernel/cells.md`.
+
+---
+
+## Legacy v5 specs
+
+Specs created before v6 may contain `backlog.md`, `parallelization.md`,
+`budget.md`, and `handovers.md`. Tools and agents read them as fallbacks:
+the backlog table comes from `backlog.md`, and waves come from
+`parallelization.md` when `plan.md` has none. Never create them in new
+specs. To migrate, fold the backlog table into the spec file, move the waves
+into `plan.md`, and delete the retired files.
+
+---
+
+## Top-level MOC: `specs/specs.md`
+
+Per-idea sections (index + roadmap links), a cross-idea dependency table,
+statistics (ideas, specs, in progress, done, blocked), and a link to this
+protocol.
+
+## Related
+
+[[idea-layout]] · [[auto-mode]] · [[parallel-execution]] ·
+[[architecture-governance]] · [[test-results-layout]] · [[session-continuity]] ·
+[[repo-bootstrap]] · [[../contracts/tool-contract|tool-contract]]
