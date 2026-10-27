@@ -37,8 +37,10 @@ function mockApi(responder: Responder) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: string) => {
-      urls.push(input);
       const url = new URL(input, 'http://x');
+      // The trend section (Story-004, T-030..T-035 in TrendChart.test.tsx) is mounted below; keep it out of these counts.
+      if (url.pathname === '/api/dashboard/trend') return json(200, { currency: 'USD', points: [] });
+      urls.push(input);
       if (url.pathname !== '/api/dashboard/spending') throw new Error(`unexpected request ${input}`);
       return responder(url.searchParams.get('month') ?? '', urls.length);
     }),

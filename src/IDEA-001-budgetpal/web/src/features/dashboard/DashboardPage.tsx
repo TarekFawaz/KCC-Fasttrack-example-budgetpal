@@ -4,6 +4,7 @@ import { useSpending } from './api';
 import styles from './dashboard.module.css';
 import { currentMonth, MONTH_PATTERN } from './format';
 import { SpendingByCategory } from './SpendingByCategory';
+import { TrendChart } from './TrendChart';
 
 /** Dashboard page: a month picker (current month by default) and the spending-by-category section. */
 export function DashboardPage() {
@@ -45,6 +46,7 @@ export function DashboardPage() {
           <SpendingByCategory data={spending.data} />
         )}
       </section>
+      {valid ? <TrendChart end={month} /> : null}
     </section>
   );
 }

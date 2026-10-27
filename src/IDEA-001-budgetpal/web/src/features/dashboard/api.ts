@@ -53,6 +53,32 @@ export function spendingUrl(month: string): string {
   return `${SPENDING_URL}?${new URLSearchParams({ month }).toString()}`;
 }
 
+export const TREND_URL = '/api/dashboard/trend';
+
+export interface TrendPoint {
+  month: string;
+  totalMinor: number;
+}
+
+export interface Trend {
+  currency: string;
+  points: TrendPoint[];
+}
+
+export function trendUrl(months: number, end: string): string {
+  return `${TREND_URL}?${new URLSearchParams({ months: String(months), end }).toString()}`;
+}
+
+/** The signed-in user's expense total per month for the `months` months ending at `end` (`YYYY-MM`). */
+export function useTrend(months: number, end: string, enabled = true) {
+  return useQuery({
+    queryKey: [...DASHBOARD_KEY, 'trend', months, end],
+    queryFn: () => getJson<Trend>(trendUrl(months, end)),
+    enabled,
+    retry: false,
+  });
+}
+
 /** The signed-in user's expense total per category for one `YYYY-MM` month. */
 export function useSpending(month: string, enabled = true) {
   return useQuery({
