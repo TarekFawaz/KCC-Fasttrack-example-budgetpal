@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import axe from 'axe-core';
@@ -8,11 +10,10 @@ import type { BudgetItem, BudgetStatus, UnbudgetedItem } from './api';
 import { formatAmount } from './BudgetForm';
 import { BudgetProgress, STATUS_LABEL, barPercent } from './BudgetProgress';
 import { BudgetsPage } from './BudgetsPage';
+import { setMatchMedia } from '../../test/setup';
 
-// Read as text: vitest does not hand CSS modules over as strings, and the tokens are what is under test.
-const readCss = (relative: string) => readFileSync(new URL(relative, import.meta.url), 'utf8');
-const shellCss = readCss('../../kernel/shell.css');
-const progressCss = readCss('./BudgetProgress.module.css');
+// The theme tokens (SPEC-010 D-25) are what the contrast test reads, as text.
+const indexCss = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'index.css'), 'utf8');
 
 const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true } as const;
 // Intl may use no-break spaces; expected text is collapsed the same way as the DOM text.
@@ -65,21 +66,10 @@ function renderPage() {
   );
 }
 
-/** Makes `prefers-color-scheme: dark` match (or not) for code that asks `matchMedia`. */
+/** Makes `prefers-color-scheme: dark` match (or not) and mirrors the scheme as a class for the test. */
 function mockColorScheme(dark: boolean) {
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn((query: string) => ({
-      matches: query.includes('prefers-color-scheme: dark') ? dark : false,
-      media: query,
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  );
+  setMatchMedia({ dark });
+  document.documentElement.classList.toggle('dark', dark);
 }
 
 const seriousViolations = async (container: HTMLElement) => {
@@ -88,31 +78,38 @@ const seriousViolations = async (container: HTMLElement) => {
   return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id);
 };
 
-// ---- contrast on the CSS tokens ----
+// ---- contrast on the theme tokens (index.css) ----
 
 type Tokens = Record<string, string>;
 
-/** `--name: #rrggbb` declarations of one CSS text. */
-function hexTokens(css: string): Tokens {
+/** `--name: H S% L%` declarations of one CSS text. */
+function hslTokens(css: string): Tokens {
   const tokens: Tokens = {};
-  for (const match of css.matchAll(/(--[a-z-]+):\s*(#[0-9a-fA-F]{6})\b/g)) tokens[match[1] as string] = match[2] as string;
+  for (const match of css.matchAll(/--([a-z-]+0?\d?):\s*(\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%)\s*;/g)) {
+    tokens[match[1] as string] = match[2] as string;
+  }
   return tokens;
 }
 
-/** Light tokens come before the dark media block; the dark block overrides them. */
+/** Light tokens come first; the dark media block overrides them. */
 function schemeTokens(css: string, dark: boolean): Tokens {
   const at = css.indexOf('@media (prefers-color-scheme: dark)');
   expect(at).toBeGreaterThan(-1);
-  const light = hexTokens(css.slice(0, at));
-  return dark ? { ...light, ...hexTokens(css.slice(at)) } : light;
+  const light = hslTokens(css.slice(0, at));
+  return dark ? { ...light, ...hslTokens(css.slice(at)) } : light;
 }
 
-function luminance(hex: string): number {
-  const channel = (offset: number) => {
-    const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+function luminance(hsl: string): number {
+  const [h, s, l] = hsl.replace(/%/g, '').split(/\s+/).map(Number) as [number, number, number];
+  const sat = s / 100;
+  const light = l / 100;
+  const a = sat * Math.min(light, 1 - light);
+  const channel = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const value = light - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
     return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
   };
-  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+  return 0.2126 * channel(0) + 0.7152 * channel(8) + 0.0722 * channel(4);
 }
 
 function contrast(foreground: string, background: string): number {
@@ -120,7 +117,13 @@ function contrast(foreground: string, background: string): number {
   return (a + 0.05) / (b + 0.05);
 }
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  document.documentElement.classList.remove('dark');
+});
+
+/** The Progress indicator: the bar fill whose transform shows the used share. */
+const indicator = (bar: HTMLElement) => bar.firstElementChild as HTMLElement;
 
 describe('BudgetProgress row', () => {
   it('T-029 shows category, spent, budget and percent, and a progressbar with a name and aria-valuenow', () => {
@@ -134,7 +137,7 @@ describe('BudgetProgress row', () => {
     expect(bar).toHaveAttribute('aria-valuemin', '0');
     expect(bar).toHaveAttribute('aria-valuemax', '100');
     expect(bar).toHaveAttribute('aria-valuetext', '62% of the budget used');
-    expect(within(bar).getByTestId('progress-fill')).toHaveStyle({ width: '62%' });
+    expect(indicator(bar)).toHaveStyle({ transform: 'translateX(-38%)' });
   });
 
   it('T-029 the page renders each budget as a row with its progressbar and a Remove button', async () => {
@@ -169,7 +172,7 @@ describe('BudgetProgress row', () => {
 
   it('T-031 at 150% spent the bar is capped at full width and the amount over the budget is stated', () => {
     render(<BudgetProgress item={item(10, 'Groceries', 20_000, 30_000, 'over', 150)} currency="USD" />);
-    expect(screen.getByTestId('progress-fill')).toHaveStyle({ width: '100%' });
+    expect(indicator(screen.getByRole('progressbar'))).toHaveStyle({ transform: 'translateX(-0%)' });
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '150% of the budget used');
     expect(screen.getByText('150% used')).toBeInTheDocument();
@@ -181,7 +184,7 @@ describe('BudgetProgress row', () => {
     expect(screen.queryByText(/Over budget by/)).not.toBeInTheDocument();
     rerender(<BudgetProgress item={item(10, 'Groceries', 20_000, 20_000, 'warning', 100)} currency="USD" />);
     expect(screen.queryByText(/Over budget by/)).not.toBeInTheDocument();
-    expect(screen.getByTestId('progress-fill')).toHaveStyle({ width: '100%' });
+    expect(indicator(screen.getByRole('progressbar'))).toHaveStyle({ transform: 'translateX(-0%)' });
   });
 
   it('T-031 barPercent keeps the bar inside its track for any figure', () => {
@@ -250,33 +253,23 @@ describe('budgets page accessibility and layout', () => {
   it.each([
     ['light', false],
     ['dark', true],
-  ])('T-033 every text token pair is at least 4.5:1 and bar colours at least 3:1 (%s)', (_name, dark) => {
-    const shell = schemeTokens(shellCss, dark);
-    const progress = schemeTokens(progressCss, dark);
-    for (const background of [shell['--surface'], shell['--bg']] as string[]) {
-      for (const token of ['--status-ok', '--status-warning', '--status-over']) {
-        expect(contrast(progress[token] as string, background), `${token} on ${background}`).toBeGreaterThanOrEqual(4.5);
+  ])('SPEC-010 T-021 the status tokens meet 4.5:1 for text and 3:1 for the bar (%s)', (_name, dark) => {
+    const tokens = schemeTokens(indexCss, dark);
+    for (const background of [tokens['background'], tokens['card']] as string[]) {
+      expect(contrast(tokens['destructive'] as string, background), `destructive on ${background}`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(tokens['foreground'] as string, background)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(tokens['muted-foreground'] as string, background)).toBeGreaterThanOrEqual(4.5);
+      for (const name of ['ok', 'warning', 'over']) {
+        // The bar fill against the card is a non-text element: 3:1.
+        expect(contrast(tokens[`status-${name}`] as string, background), `status-${name} bar on ${background}`).toBeGreaterThanOrEqual(3);
       }
-      expect(contrast(shell['--text'] as string, background)).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(shell['--text-muted'] as string, background)).toBeGreaterThanOrEqual(4.5);
     }
-    // The bar fill against its track is a non-text element: 3:1.
-    for (const token of ['--status-ok', '--status-warning', '--status-over']) {
-      expect(contrast(progress[token] as string, progress['--track-bg'] as string), token).toBeGreaterThanOrEqual(3);
+    for (const name of ['ok', 'warning', 'over']) {
+      // The badge text sits on the status colour: 4.5:1.
+      expect(
+        contrast(tokens[`status-${name}-foreground`] as string, tokens[`status-${name}`] as string),
+        `badge ${name}`,
+      ).toBeGreaterThanOrEqual(4.5);
     }
-  });
-
-  it('T-034 the CSS is a single column with no fixed width and no horizontal overflow', () => {
-    const css = progressCss.replace(/\/\*[\s\S]*?\*\//g, '');
-    // No fixed pixel/rem width, min-width or horizontal scroll rule anywhere.
-    expect(css).not.toMatch(/(?<![-\w])(?:min-)?width:\s*\d+(?:\.\d+)?(?:px|rem|em)\b/);
-    expect(css).not.toMatch(/overflow(?:-x)?:\s*(?:scroll|auto)/);
-    expect(css).not.toMatch(/grid-template-columns/);
-    expect(css).not.toMatch(/flex-direction:\s*row\b/);
-    // Rows stack in a column, long names wrap and the row can shrink inside a narrow parent.
-    expect(css).toMatch(/\.progress\s*\{[^}]*flex-direction:\s*column/);
-    expect(css).toMatch(/\.progress\s*\{[^}]*min-width:\s*0/);
-    expect(css).toMatch(/\.progress\s*\{[^}]*overflow-wrap:\s*anywhere/);
-    expect(css).toMatch(/\.track\s*\{[^}]*width:\s*100%/);
   });
 });

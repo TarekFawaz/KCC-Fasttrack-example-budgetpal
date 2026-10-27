@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ApiProblem, useSetBudget, type CategoryOption, type FieldProblem } from './api';
-import styles from './BudgetsPage.module.css';
 
 /**
  * Money helpers (D-13, GR-007): amounts are integer minor units. Decimal text is converted by string
@@ -49,6 +51,12 @@ export function formatAmount(minor: number, currency: string = installCurrency()
   // Intl.NumberFormat v3 formats a decimal string exactly; the cast only satisfies the older lib typing.
   return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(decimal as unknown as number);
 }
+
+/** The native category select keeps its role, label and keyboard behaviour; it is dressed like the kit Input. */
+export const SELECT_CLASSES =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive md:text-sm';
+
+const ERROR_CLASSES = 'm-0 text-sm font-semibold text-destructive';
 
 type FieldName = 'category' | 'amount';
 export type FieldErrors = Partial<Record<FieldName, string>>;
@@ -159,15 +167,20 @@ export function BudgetForm({ month, categories, categoryId, onCategoryChange, am
   const amountDescribed = ['budget-amount-hint', amountError ? 'budget-amount-error' : ''].filter(Boolean).join(' ');
 
   return (
-    <form onSubmit={onSubmit} noValidate className={styles.filters} aria-label="Set a budget">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="grid grid-cols-1 gap-4 rounded-lg border bg-card p-4 text-card-foreground md:grid-cols-[1fr_1fr_auto] md:items-start"
+      aria-label="Set a budget"
+    >
       {formError ? (
-        <p role="alert" tabIndex={-1} ref={alertRef} className={styles.error}>
+        <p role="alert" tabIndex={-1} ref={alertRef} className={`${ERROR_CLASSES} md:col-span-3`}>
           <span aria-hidden="true">⚠ </span>
           {formError}
         </p>
       ) : null}
-      <div className={styles.field}>
-        <label htmlFor="budget-category">Category</label>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <Label htmlFor="budget-category">Category</Label>
         <select
           id="budget-category"
           name="category"
@@ -176,7 +189,7 @@ export function BudgetForm({ month, categories, categoryId, onCategoryChange, am
           ref={categoryRef}
           aria-invalid={categoryError ? true : undefined}
           aria-describedby={categoryDescribed}
-          className={styles.control}
+          className={SELECT_CLASSES}
         >
           <option value="">Choose a category</option>
           {categories.map((category) => (
@@ -186,15 +199,15 @@ export function BudgetForm({ month, categories, categoryId, onCategoryChange, am
           ))}
         </select>
         {categoryError ? (
-          <p id="budget-category-error" className={styles.error}>
+          <p id="budget-category-error" className={ERROR_CLASSES}>
             <span aria-hidden="true">⚠ </span>
             {categoryError}
           </p>
         ) : null}
       </div>
-      <div className={styles.field}>
-        <label htmlFor="budget-amount">Budget amount</label>
-        <input
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <Label htmlFor="budget-amount">Budget amount</Label>
+        <Input
           id="budget-amount"
           name="amount"
           type="text"
@@ -205,25 +218,24 @@ export function BudgetForm({ month, categories, categoryId, onCategoryChange, am
           ref={amountInput}
           aria-invalid={amountError ? true : undefined}
           aria-describedby={amountDescribed}
-          className={styles.control}
         />
-        <p id="budget-amount-hint" className={styles.range}>
+        <p id="budget-amount-hint" className="m-0 text-sm text-muted-foreground">
           For example 500.00. Saving again for the same category replaces the amount.
         </p>
         {amountError ? (
-          <p id="budget-amount-error" className={styles.error}>
+          <p id="budget-amount-error" className={ERROR_CLASSES}>
             <span aria-hidden="true">⚠ </span>
             {amountError}
           </p>
         ) : null}
       </div>
-      <div className={styles.field}>
-        <button type="submit" disabled={save.isPending} className={styles.button}>
+      <div className="flex flex-col gap-1.5 md:pt-[1.375rem]">
+        <Button type="submit" disabled={save.isPending}>
           {save.isPending ? 'Saving...' : 'Set budget'}
-        </button>
+        </Button>
       </div>
       {savedNote ? (
-        <p role="status" className={styles.range}>
+        <p role="status" className="m-0 text-sm text-muted-foreground md:col-span-3">
           {savedNote}
         </p>
       ) : null}

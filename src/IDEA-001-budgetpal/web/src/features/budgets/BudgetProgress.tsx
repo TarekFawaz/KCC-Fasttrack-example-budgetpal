@@ -1,12 +1,21 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import type { BudgetItem, BudgetStatus, UnbudgetedItem } from './api';
 import { formatAmount } from './BudgetForm';
-import styles from './BudgetProgress.module.css';
 
 /** Icon and wording per status: colour is never the only signal (WCAG 1.4.1). */
 export const STATUS_LABEL: Record<BudgetStatus, { icon: string; text: string }> = {
   ok: { icon: '✓', text: 'Within budget' },
   warning: { icon: '⚠', text: 'Near limit: 80% used or more' },
   over: { icon: '✕', text: 'Over budget' },
+};
+
+/** Badge variant and bar colour per status; the classes are literal so Tailwind finds them. */
+export const STATUS_STYLE: Record<BudgetStatus, { badge: 'ok' | 'warning' | 'over'; bar: string }> = {
+  ok: { badge: 'ok', bar: 'bg-status-ok' },
+  warning: { badge: 'warning', bar: 'bg-status-warning' },
+  over: { badge: 'over', bar: 'bg-status-over' },
 };
 
 /** The bar never grows past its track; the percent in the text still shows the real figure. */
@@ -23,43 +32,40 @@ export interface BudgetProgressProps {
 
 /**
  * One budget against its spending: category, spent, budget and percent, a progressbar with an accessible
- * name, and the status as an icon plus text. Past 100% the bar stays full and the amount over is written out.
- * The status comes from the api (decided on integers); `percent` is display only.
+ * name, and the status as a Badge with an icon plus text. Past 100% the bar stays full and the amount over
+ * is written out. The status comes from the api (decided on integers); `percent` is display only.
  */
 export function BudgetProgress({ item, currency }: BudgetProgressProps) {
   const status = STATUS_LABEL[item.status];
+  const style = STATUS_STYLE[item.status];
   const overBy = item.spentMinor - item.budgetMinor;
   const width = barPercent(item.percent);
 
   return (
-    <div className={`${styles.progress} ${styles[item.status] ?? ''}`} data-status={item.status}>
-      <div className={styles.head}>
+    <div className="flex min-w-0 flex-1 basis-full flex-col gap-2 [overflow-wrap:anywhere]" data-status={item.status}>
+      <div className="flex min-w-0 flex-col items-start gap-1">
         <strong>{item.categoryName}</strong>
-        <span className={styles.status}>
-          <span aria-hidden="true" className={styles.icon} data-status-icon={item.status}>
+        <Badge variant={style.badge}>
+          <span aria-hidden="true" data-status-icon={item.status}>
             {status.icon}
           </span>
           <span>{status.text}</span>
-        </span>
+        </Badge>
       </div>
-      <div className={styles.figures}>
-        <span className={styles.amount}>Budget: {formatAmount(item.budgetMinor, currency)}</span>
-        <span className={styles.amount}>Spent: {formatAmount(item.spentMinor, currency)}</span>
-        <span className={styles.amount}>{item.percent}% used</span>
+      <div className="flex min-w-0 flex-col gap-1 tabular-nums">
+        <span>Budget: {formatAmount(item.budgetMinor, currency)}</span>
+        <span>Spent: {formatAmount(item.spentMinor, currency)}</span>
+        <span>{item.percent}% used</span>
       </div>
-      <div
-        role="progressbar"
-        className={styles.track}
+      <Progress
         aria-label={`${item.categoryName} budget used`}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={width}
         aria-valuetext={`${item.percent}% of the budget used`}
-      >
-        <div className={styles.fill} style={{ width: `${width}%` }} data-testid="progress-fill" />
-      </div>
+        value={width}
+        indicatorClassName={style.bar}
+        className="h-3 w-full border"
+      />
       {overBy > 0 ? (
-        <p className={styles.overBy}>Over budget by {formatAmount(overBy, currency)}</p>
+        <p className="m-0 font-semibold text-destructive">Over budget by {formatAmount(overBy, currency)}</p>
       ) : null}
     </div>
   );
@@ -76,23 +82,28 @@ export interface UnbudgetedListProps {
 export function UnbudgetedList({ items, currency, onAdd }: UnbudgetedListProps) {
   if (items.length === 0) return null;
   return (
-    <section aria-labelledby="unbudgeted-heading">
-      <h2 id="unbudgeted-heading">Spending without a budget</h2>
-      <ul className={styles.unbudgeted} aria-label="Unbudgeted categories">
+    <section aria-labelledby="unbudgeted-heading" className="flex flex-col gap-3">
+      <h2 id="unbudgeted-heading" className="text-lg font-semibold tracking-tight">
+        Spending without a budget
+      </h2>
+      <ul className="m-0 flex list-none flex-col gap-3 p-0" aria-label="Unbudgeted categories">
         {items.map((entry) => (
-          <li key={entry.categoryId} className={styles.unbudgetedRow}>
-            <div className={styles.unbudgetedText}>
+          <li
+            key={entry.categoryId}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4 text-card-foreground"
+          >
+            <div className="flex min-w-0 flex-col gap-1 [overflow-wrap:anywhere]">
               <strong>{entry.categoryName}</strong>
-              <span className={styles.amount}>Spent: {formatAmount(entry.spentMinor, currency)}</span>
+              <span className="tabular-nums">Spent: {formatAmount(entry.spentMinor, currency)}</span>
             </div>
-            <button
+            <Button
               type="button"
-              className={styles.action}
+              variant="outline"
               aria-label={`Add budget for ${entry.categoryName}`}
               onClick={() => onAdd(entry.categoryId)}
             >
               Add budget
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

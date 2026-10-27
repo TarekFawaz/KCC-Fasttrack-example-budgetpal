@@ -73,6 +73,9 @@ const serious = async (container: HTMLElement) => {
 
 const trendSection = () => screen.getByRole('region', { name: 'Spending trend' });
 
+/** Radix Tabs activates a trigger on mouse down. */
+const selectRange = (name: string) => fireEvent.mouseDown(screen.getByRole('tab', { name }), { button: 0 });
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -107,17 +110,19 @@ describe('TrendChart', () => {
     expect(within(trendSection()).getByTestId('trend-chart')).toBeInTheDocument();
   });
 
-  it('T-032 the selector offers 3, 6 (default) and 12 and a change requests that count', async () => {
+  it('T-032 the range control offers 3, 6 (default) and 12 and a change requests that count', async () => {
     const urls = mockApi((months, end) => json(200, trend(months, end)));
     renderPage();
-    const select = (await screen.findByLabelText('Period')) as HTMLSelectElement;
-    expect([...select.options].map((option) => option.value)).toEqual(['3', '6', '12']);
-    expect(select.value).toBe('6');
+    const list = await screen.findByRole('tablist', { name: 'Period' });
+    const tabs = within(list).getAllByRole('tab');
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Last 3 months', 'Last 6 months', 'Last 12 months']);
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
     await waitFor(() => expect(urls[0]).toMatch(/months=6/));
-    fireEvent.change(select, { target: { value: '12' } });
+    selectRange('Last 12 months');
     await waitFor(() => expect(urls.some((url) => url.includes('months=12'))).toBe(true));
     await waitFor(() => expect(within(trendSection()).getAllByRole('row')).toHaveLength(13));
-    fireEvent.change(select, { target: { value: '3' } });
+    expect(within(list).getByRole('tab', { name: 'Last 12 months' })).toHaveAttribute('aria-selected', 'true');
+    selectRange('Last 3 months');
     await waitFor(() => expect(within(trendSection()).getAllByRole('row')).toHaveLength(4));
   });
 
@@ -156,7 +161,7 @@ describe('TrendChart', () => {
     const { container } = renderPage();
     await within(await screen.findByRole('region', { name: 'Spending trend' })).findByRole('table');
     await screen.findByText('Groceries');
-    expect(screen.getByLabelText('Period').tagName).toBe('SELECT');
+    expect(screen.getByRole('tablist', { name: 'Period' })).toBeInTheDocument();
     expect(await serious(container)).toEqual([]);
   });
 });
