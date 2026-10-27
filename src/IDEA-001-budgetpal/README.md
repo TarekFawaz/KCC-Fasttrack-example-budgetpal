@@ -77,7 +77,8 @@ Delete any `/data/budgetpal.db-wal` and `/data/budgetpal.db-shm` files left from
 
 ## Layout
 
-- `api/` Fastify app, `src/kernel/` (config, logging, errors, db, migrations), `src/modules/*` (auto-loaded), `migrations/` (numbered SQL, `0001-0009` belong to SPEC-001, `0010-0019` to SPEC-002 auth), `openapi.json` (checked-in contract).
+- `api/` Fastify app, `src/kernel/` (config, logging, errors, db, migrations), `src/modules/*` (auto-loaded), `migrations/` (numbered SQL, `0001-0009` belong to SPEC-001, `0010-0019` to SPEC-002 auth, `0040-0049` to SPEC-004 accounts), `openapi.json` (checked-in contract).
 - Auth storage (SPEC-002): `api/src/modules/auth/` holds `auth.repository.ts` (all SQL for `users` and `sessions`), `password.ts` (Argon2id m=19456 KiB, t=2, p=1; 15 to 128 characters; bundled offline `common-passwords.txt`) and `sessions.ts` (256-bit cookie id, only its SHA-256 stored, idle and absolute expiry). `api/src/kernel/validate.ts` and `problem.ts` give every route one zod validation helper and RFC 9457 error bodies.
 - `web/` React shell, `src/kernel/` (registry, shell), `src/features/*` (auto-loaded), `nginx.conf` (static files, SPA fallback, `/api/` proxy, security headers).
 - `test/` workspace and packaging checks.
+- Accounts data layer (SPEC-004): `api/migrations/0040-create-accounts.sql` creates `accounts` (name unique per user ignoring case; `type` limited to checking, savings, credit_card, cash, other; `opening_balance_minor` is an integer in minor units, may be negative, at most 10^12 in absolute value). `api/src/modules/accounts/accounts.repository.ts` holds all SQL, every function takes `userId` first, and it throws `DuplicateName` on a name clash and `InUse` when a transaction still references the account (SQLite RESTRICT foreign key). `accounts.schemas.ts` holds the strict zod input and response schemas.
