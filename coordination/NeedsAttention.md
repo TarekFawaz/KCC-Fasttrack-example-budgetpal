@@ -29,3 +29,15 @@ Written by kcc-run under --silent --assume, which never stops for a human: every
 - todo: install the missing tool and re-run the quality gate: .KCC/tools/quality-gate -Spec SPEC-001
 - links: coordination/gates/GATE-002.md, coordination/run/logs/state-16-SPEC-001-2.log
 
+## [decided] SPEC-002 | quality-deferred-on-exit-3 | state 16 TEST | 2026-10-27T16:57:33Z
+
+- when: 2026-10-27T16:57:33Z
+- spec: SPEC-002
+- state: 16 TEST
+- gate: quality-deferred-on-exit-3
+- status: decided
+- decided: accepted the deferred check by policy (not a pass)
+- why: QG-DEFERRED (human): quality-gate deferred checks QG-SAST, not a pass. missing tools: semgrep. Install them through toolchain-preflight, then re-run quality-gate
+- todo: install the missing tool (semgrep) and re-run the quality gate: .KCC/tools/quality-gate -Spec SPEC-002
+- links: coordination/gates/GATE-001.md, coordination/run/logs/state-16-SPEC-002-3.log
+

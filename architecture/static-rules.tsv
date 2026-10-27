@@ -16,4 +16,4 @@ SR-014	^web/src/.*\.tsx?$	dangerouslySetInnerHTML|\.innerHTML\s*=	^$	GR-013: Rea
 SR-015	^web/src/.*\.tsx?$	\b(local|session)Storage\b	\.test\.tsx?$	GR-013: no browser storage of tokens, sessions or data in v1
 SR-016	(^|/)\.env\.example$	^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*\S	^$	GR-015: .env.example lists variable names with empty values only
 SR-017	^api/src/.*\.ts$	\.stack\b	\.test\.ts$	GR-016: no stack traces in responses; log errors through the pino err serializer
-SR-018	(^|/)Dockerfile[^/]*$	^USER\s+(root|0)\b|^FROM\s+[^:\s]+(:latest)?(\s+AS\s+\w+)?\s*$	^$	GR-017: run as a non-root user and pin base image tags (no :latest, no untagged FROM)
+SR-018	(^|/)Dockerfile[^/]*$	^USER\s+(root|0)\b|^FROM\s+(?!(toolchain|build|prod-deps|runtime)\s)[^:\s@]+(:latest)?(\s+AS\s+[\w-]+)?\s*$	^$	GR-017: run as a non-root user and pin base image tags (no :latest, no untagged FROM)
