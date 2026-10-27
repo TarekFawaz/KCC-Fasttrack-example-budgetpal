@@ -27,13 +27,13 @@ let bobAccount: number;
 let bobCategory: number;
 let logLines: string;
 
-const addAccount = (userId: number): number =>
+const addAccount = (userId: number, name = `acct-${userId}`): number =>
   Number(
     db
       .prepare(
         'INSERT INTO accounts (user_id, name, type, opening_balance_minor, created_at, updated_at) VALUES (?, ?, ?, 0, 1, 1)',
       )
-      .run(userId, `acct-${userId}`, 'checking').lastInsertRowid,
+      .run(userId, name, 'checking').lastInsertRowid,
   );
 const addCategory = (userId: number, name = `cat-${userId}`): number =>
   Number(
@@ -299,5 +299,166 @@ describe('PATCH and DELETE /api/transactions/:id (Story-002)', () => {
     expect(logLines).not.toContain('Coffee beans');
     expect(logLines).not.toContain('765432');
     expect(logLines).not.toContain('1250');
+  });
+});
+
+interface Page {
+  items: StoredTransaction[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+const list = (user: LoggedInUser | undefined, query = '') =>
+  app.inject({ method: 'GET', url: `${PATH}${query}`, ...(user ? { headers: user.headers } : {}) });
+const insertRow = (userId: number, accountId: number, categoryId: number, occurredOn: string, amount = 100): number =>
+  Number(
+    db
+      .prepare(
+        `INSERT INTO transactions (user_id, account_id, category_id, occurred_on, amount_minor, description, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, 'row', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')`,
+      )
+      .run(userId, accountId, categoryId, occurredOn, amount).lastInsertRowid,
+  );
+
+describe('GET /api/transactions (Story-003)', () => {
+  it('T-020 returns {items,total,limit,offset} ordered by date then id descending, default limit 50, paged by offset (AC-1)', async () => {
+    const a = insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-10');
+    const b = insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-20');
+    const c = insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-10');
+    const res = await list(alice);
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as Page;
+    expect(body.items.map((item) => item.id)).toEqual([b, c, a]);
+    expect(body).toMatchObject({ total: 3, limit: 50, offset: 0 });
+    for (let i = 0; i < 60; i += 1) insertRow(alice.id, aliceAccount, aliceCategory, '2026-01-01');
+    const first = (await list(alice)).json() as Page;
+    expect(first.items).toHaveLength(50);
+    expect(first.total).toBe(63);
+    const second = (await list(alice, '?limit=50&offset=50')).json() as Page;
+    expect(second.items).toHaveLength(13);
+    expect(second).toMatchObject({ limit: 50, offset: 50, total: 63 });
+    const ids = new Set([...first.items, ...second.items].map((item) => item.id));
+    expect(ids.size).toBe(63);
+  });
+
+  it('T-021 month, accountId and categoryId filter alone and combined; total counts the filtered set (AC-2)', async () => {
+    const otherAccount = addAccount(alice.id, 'acct-other');
+    const otherCategory = addCategory(alice.id, 'cat-other');
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-01');
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-31');
+    insertRow(alice.id, aliceAccount, otherCategory, '2026-03-15');
+    insertRow(alice.id, otherAccount, aliceCategory, '2026-03-16');
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-04-01');
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-02-28');
+    const totalOf = async (query: string): Promise<number> => ((await list(alice, query)).json() as Page).total;
+    expect(await totalOf('?month=2026-03')).toBe(4);
+    expect(await totalOf(`?accountId=${otherAccount}`)).toBe(1);
+    expect(await totalOf(`?categoryId=${otherCategory}`)).toBe(1);
+    expect(await totalOf(`?month=2026-03&accountId=${aliceAccount}&categoryId=${aliceCategory}`)).toBe(2);
+    const paged = (await list(alice, '?month=2026-03&limit=1')).json() as Page;
+    expect(paged.items).toHaveLength(1);
+    expect(paged.total).toBe(4);
+  });
+
+  it.each([
+    ['limit 201', '?limit=201'],
+    ['limit 0', '?limit=0'],
+    ['a negative offset', '?offset=-1'],
+    ['month 2026-13', '?month=2026-13'],
+    ['a malformed month', '?month=March'],
+    ['an unknown query key', '?bogus=1'],
+  ])('T-022 %s returns 400 problem+json with field errors (AC-3)', async (_label, query) => {
+    const res = await list(alice, query);
+    expect(res.statusCode).toBe(400);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect(((res.json() as Problem).errors ?? []).length).toBeGreaterThan(0);
+  });
+
+  it('T-008 listing without a session returns 401 problem+json (guard applies to GET too)', async () => {
+    const res = await list(undefined);
+    expect(res.statusCode).toBe(401);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+  });
+
+  it("T-023 user A never sees user B's rows, also when filtering by B's account id (AC-4)", async () => {
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-01');
+    const bobRow = insertRow(bob.id, bobAccount, bobCategory, '2026-03-02');
+    const plain = (await list(alice)).json() as Page;
+    expect(plain.items.map((item) => item.id)).not.toContain(bobRow);
+    expect(plain.total).toBe(1);
+    for (const query of [`?accountId=${bobAccount}`, `?categoryId=${bobCategory}`, `?accountId=${bobAccount}&month=2026-03`]) {
+      const body = (await list(alice, query)).json() as Page;
+      expect(body).toMatchObject({ items: [], total: 0 });
+    }
+  });
+
+  it('T-024 a month list over 10,000 rows has p95 under 200 ms (AC-5)', async () => {
+    const insert = db.prepare(
+      `INSERT INTO transactions (user_id, account_id, category_id, occurred_on, amount_minor, description, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'row', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')`,
+    );
+    db.transaction(() => {
+      for (let i = 0; i < 10_000; i += 1) {
+        const month = String((i % 12) + 1).padStart(2, '0');
+        const day = String((i % 28) + 1).padStart(2, '0');
+        insert.run(alice.id, aliceAccount, aliceCategory, `2026-${month}-${day}`, 100 + i);
+      }
+    })();
+    await list(alice, '?month=2026-03'); // warm-up
+    const samples: number[] = [];
+    for (let i = 0; i < 40; i += 1) {
+      const start = performance.now();
+      const res = await list(alice, '?month=2026-03');
+      samples.push(performance.now() - start);
+      expect(res.statusCode).toBe(200);
+    }
+    samples.sort((x, y) => x - y);
+    const p95 = samples[Math.ceil(samples.length * 0.95) - 1] as number;
+    expect(p95).toBeLessThan(200);
+  });
+
+  it('T-025 the month list is served by the (user_id, occurred_on) index (AC-5)', () => {
+    const plan = db
+      .prepare(
+        `EXPLAIN QUERY PLAN SELECT id FROM transactions
+          WHERE user_id = ? AND occurred_on >= ? AND occurred_on < ?
+          ORDER BY occurred_on DESC, id DESC LIMIT 50 OFFSET 0`,
+      )
+      .all(alice.id, '2026-03-01', '2026-03-32') as Array<{ detail: string }>;
+    const detail = plan.map((row) => row.detail).join(' | ');
+    expect(detail).toMatch(/USING (COVERING )?INDEX \w+/);
+    expect(detail).toContain('user_id=?');
+    expect(detail).toContain('occurred_on>?');
+  });
+
+  it('T-026 no match returns items [] and total 0 (AC-6)', async () => {
+    const res = await list(alice, '?month=2030-01');
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ items: [], total: 0, limit: 50, offset: 0 });
+  });
+
+  it('T-027 /docs/json documents POST, GET list, PATCH and DELETE with matching status codes; sampled responses fit (AC-1)', async () => {
+    const doc = (await app.inject({ method: 'GET', url: '/docs/json' })).json() as {
+      paths: Record<string, Record<string, { responses: Record<string, unknown> }>>;
+    };
+    const codes = (path: string, verb: string): string[] => Object.keys(doc.paths[path]?.[verb]?.responses ?? {});
+    expect(codes(PATH, 'get')).toEqual(expect.arrayContaining(['200', '400', '401']));
+    expect(codes(PATH, 'post')).toEqual(expect.arrayContaining(['201', '400', '401']));
+    expect(codes(`${PATH}/{id}`, 'patch')).toEqual(expect.arrayContaining(['200', '400', '401', '404']));
+    expect(codes(`${PATH}/{id}`, 'delete')).toEqual(expect.arrayContaining(['204', '400', '401', '404']));
+    insertRow(alice.id, aliceAccount, aliceCategory, '2026-03-01');
+    const page = (await list(alice)).json() as Page;
+    expect(Object.keys(page).sort()).toEqual(['items', 'limit', 'offset', 'total']);
+    expect(Object.keys(page.items[0] as object).sort()).toEqual([
+      'accountId',
+      'amountMinor',
+      'categoryId',
+      'createdAt',
+      'description',
+      'id',
+      'occurredOn',
+      'updatedAt',
+    ]);
   });
 });

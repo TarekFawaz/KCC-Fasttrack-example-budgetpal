@@ -2,7 +2,12 @@ import type Database from 'better-sqlite3';
 import type { Problem } from '../../kernel/errors.js';
 import { buildProblem, type FieldError } from '../../kernel/problem.js';
 import * as repository from './transactions.repository.js';
-import type { CreateTransactionInput, PatchTransactionInput, Transaction } from './transactions.schemas.js';
+import type {
+  CreateTransactionInput,
+  ListTransactionsQuery,
+  PatchTransactionInput,
+  Transaction,
+} from './transactions.schemas.js';
 
 /** Either the value, or the problem+json body the route must send. */
 export type Outcome<T> = { ok: true; value: T } | { ok: false; problem: Problem };
@@ -64,6 +69,22 @@ export function update(
   }
   const updated = repository.update(db, userId, id, patch);
   return updated ? { ok: true, value: updated } : { ok: false, problem: notFound(instance) };
+}
+
+export interface TransactionPage {
+  items: Transaction[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+/**
+ * One page of the user's transactions, newest first. Filters combine with AND and `total` counts the filtered set.
+ * Only rows with the user's `user_id` can match, so another user's account id as a filter yields an empty page.
+ */
+export function list(db: Database.Database, userId: number, query: ListTransactionsQuery): TransactionPage {
+  const { items, total } = repository.list(db, userId, query);
+  return { items, total, limit: query.limit, offset: query.offset };
 }
 
 /** Deletes one of the user's transactions; unknown and foreign ids are the same 404. */

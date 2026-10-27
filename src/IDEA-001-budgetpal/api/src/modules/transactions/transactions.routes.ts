@@ -5,6 +5,7 @@ import { sendProblem } from '../../kernel/errors.js';
 import { requireUser } from '../../kernel/require-user.js';
 import {
   createTransactionSchema,
+  listTransactionsQuerySchema,
   patchTransactionSchema,
   transactionIdParamsSchema,
   transactionSchema,
@@ -28,7 +29,14 @@ export const problemContent = (description: string) => ({
   content: { 'application/problem+json': { schema: problemSchema } },
 });
 
-const pathOf = (url: string): string => url.split('?')[0] ?? url;
+const transactionPageSchema = z.object({
+  items: z.array(transactionSchema),
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+});
+
+const pathOf =(url: string): string => url.split('?')[0] ?? url;
 
 /**
  * `POST /api/transactions`, `PATCH` and `DELETE /api/transactions/:id`. The session guard runs in
@@ -38,6 +46,27 @@ const pathOf = (url: string): string => url.split('?')[0] ?? url;
  */
 export function registerTransactionRoutes(app: FastifyInstance): void {
   const typed = app.withTypeProvider<ZodTypeProvider>();
+
+  typed.get(
+    TRANSACTIONS_PATH,
+    {
+      onRequest: requireUser,
+      schema: {
+        summary: 'List transactions, newest first',
+        tags: ['transactions'],
+        querystring: listTransactionsQuerySchema,
+        response: {
+          200: transactionPageSchema,
+          400: problemContent('A query value is invalid, or the query has an unknown key'),
+          401: problemContent('There is no valid session'),
+        },
+      },
+    },
+    async (request) => {
+      const userId = (request.user as { id: number }).id;
+      return service.list(app.db, userId, request.query);
+    },
+  );
 
   typed.post(
     TRANSACTIONS_PATH,
