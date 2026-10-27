@@ -36,9 +36,10 @@ describe('openDb', () => {
 describe('runMigrations', () => {
   it('T-018 applies 0001-init.sql, creates app_meta and records name and sha256', () => {
     const db = openDb(join(tmp, 'm.db'));
-    expect(runMigrations(db, realMigrations)).toEqual(['0001-init.sql']);
+    // Later specs add their own files (0010 auth, ...); 0001 is always applied first.
+    expect(runMigrations(db, realMigrations)[0]).toBe('0001-init.sql');
     db.prepare("INSERT INTO app_meta (key, value) VALUES ('k', 'v')").run();
-    const row = db.prepare('SELECT name, sha256 FROM _migrations').get() as { name: string; sha256: string };
+    const row = db.prepare("SELECT name, sha256 FROM _migrations WHERE name = '0001-init.sql'").get() as { name: string; sha256: string };
     expect(row.name).toBe('0001-init.sql');
     expect(row.sha256).toMatch(/^[0-9a-f]{64}$/);
     db.close();

@@ -28,10 +28,19 @@ describe('Enabler-001 workspace scaffold', () => {
     expect(r.status, r.stdout + r.stderr).toBe(0);
   });
 
-  it('T-003 .env.example holds exactly the six names with empty values', () => {
+  it('T-003 .env.example holds exactly the eight names with empty values', () => {
     const env = parseEnvTemplate(readRoot('.env.example'));
     expect([...env.keys()].sort()).toEqual(
-      ['COOKIE_SECURE', 'CURRENCY', 'DATABASE_PATH', 'LOG_LEVEL', 'PORT', 'SESSION_SECRET'],
+      [
+        'COOKIE_SECURE',
+        'CURRENCY',
+        'DATABASE_PATH',
+        'LOG_LEVEL',
+        'PORT',
+        'SESSION_ABSOLUTE_DAYS',
+        'SESSION_IDLE_HOURS',
+        'SESSION_SECRET',
+      ],
     );
     for (const [name, value] of env) expect(value, name).toBe('');
   });

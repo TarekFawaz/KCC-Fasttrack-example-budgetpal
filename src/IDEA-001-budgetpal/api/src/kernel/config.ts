@@ -20,6 +20,9 @@ const envSchema = z.object({
       .default('false')
       .transform((value) => value === 'true'),
   ),
+  // Session lifetimes (D-07, SPEC-002): idle and absolute, both tunable.
+  SESSION_IDLE_HOURS: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(8760).default(24)),
+  SESSION_ABSOLUTE_DAYS: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(3650).default(30)),
 });
 
 export interface Config {
@@ -29,6 +32,8 @@ export interface Config {
   currency: string;
   logLevel: LogLevel;
   cookieSecure: boolean;
+  sessionIdleHours: number;
+  sessionAbsoluteDays: number;
 }
 
 export class ConfigError extends Error {
@@ -58,5 +63,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     currency: parsed.CURRENCY,
     logLevel: parsed.LOG_LEVEL,
     cookieSecure: parsed.COOKIE_SECURE,
+    sessionIdleHours: parsed.SESSION_IDLE_HOURS,
+    sessionAbsoluteDays: parsed.SESSION_ABSOLUTE_DAYS,
   };
 }

@@ -31,7 +31,9 @@ Stop with `docker compose down` (the data volume is kept). The api shuts down on
 | `SESSION_SECRET` | none | At least 32 characters; required from SPEC-002 on, unused here. Generate with `openssl rand -hex 32`. No default exists |
 | `CURRENCY` | `USD` | Three-letter ISO currency code |
 | `LOG_LEVEL` | `info` | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent` |
-| `COOKIE_SECURE` | `false` | `true` when served over HTTPS |
+| `COOKIE_SECURE` | `false` | `true` when served over HTTPS; sets `Secure` on the session cookie |
+| `SESSION_IDLE_HOURS` | `24` | A session unused for this many hours is gone (whole number, at least 1) |
+| `SESSION_ABSOLUTE_DAYS` | `30` | A session ends this many days after login, however often it is used |
 
 ## Development without Docker
 
@@ -75,6 +77,7 @@ Delete any `/data/budgetpal.db-wal` and `/data/budgetpal.db-shm` files left from
 
 ## Layout
 
-- `api/` Fastify app, `src/kernel/` (config, logging, errors, db, migrations), `src/modules/*` (auto-loaded), `migrations/` (numbered SQL, `0001-0009` belong to SPEC-001), `openapi.json` (checked-in contract).
+- `api/` Fastify app, `src/kernel/` (config, logging, errors, db, migrations), `src/modules/*` (auto-loaded), `migrations/` (numbered SQL, `0001-0009` belong to SPEC-001, `0010-0019` to SPEC-002 auth), `openapi.json` (checked-in contract).
+- Auth storage (SPEC-002): `api/src/modules/auth/` holds `auth.repository.ts` (all SQL for `users` and `sessions`), `password.ts` (Argon2id m=19456 KiB, t=2, p=1; 15 to 128 characters; bundled offline `common-passwords.txt`) and `sessions.ts` (256-bit cookie id, only its SHA-256 stored, idle and absolute expiry). `api/src/kernel/validate.ts` and `problem.ts` give every route one zod validation helper and RFC 9457 error bodies.
 - `web/` React shell, `src/kernel/` (registry, shell), `src/features/*` (auto-loaded), `nginx.conf` (static files, SPA fallback, `/api/` proxy, security headers).
 - `test/` workspace and packaging checks.

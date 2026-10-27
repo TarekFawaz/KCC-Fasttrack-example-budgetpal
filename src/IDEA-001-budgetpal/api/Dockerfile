@@ -37,6 +37,8 @@ COPY --from=prod-deps --chown=node:node /app/api/node_modules ./node_modules
 COPY --chown=node:node api/package.json ./package.json
 COPY --from=build --chown=node:node /app/api/dist ./dist
 COPY --chown=node:node api/migrations ./migrations
+# tsc does not copy non-TypeScript files: the bundled common-password list sits beside its module.
+COPY --chown=node:node api/src/modules/auth/common-passwords.txt ./dist/modules/auth/common-passwords.txt
 RUN mkdir -p /data && chown node:node /data
 VOLUME ["/data"]
 USER node
