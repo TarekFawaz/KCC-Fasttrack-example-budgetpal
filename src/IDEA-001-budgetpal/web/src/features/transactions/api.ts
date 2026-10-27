@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 /** The transactions routes of the api (SPEC-005 Story-001..003); same origin, the session cookie rides along. */
 export const TRANSACTIONS_URL = '/api/transactions';
@@ -149,4 +149,56 @@ export function useAccountOptions() {
 /** The user's categories, for the filter select and the form (read through the categories list endpoint). */
 export function useCategoryOptions() {
   return useQuery({ queryKey: CATEGORY_OPTIONS_KEY, queryFn: fetchCategoryOptions, retry: false });
+}
+
+/** The body of a create or patch request; `amountMinor` is integer minor units (never a float). */
+export interface TransactionInput {
+  accountId: number;
+  categoryId: number;
+  occurredOn: string;
+  amountMinor: number;
+  description: string;
+}
+
+const JSON_HEADERS = { 'content-type': 'application/json' } as const;
+
+export async function createTransaction(input: TransactionInput): Promise<Transaction> {
+  const response = await send(TRANSACTIONS_URL, { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(input) });
+  return (await response.json()) as Transaction;
+}
+
+export async function updateTransaction(id: number, input: Partial<TransactionInput>): Promise<Transaction> {
+  const response = await send(`${TRANSACTIONS_URL}/${id}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  });
+  return (await response.json()) as Transaction;
+}
+
+export async function deleteTransaction(id: number): Promise<void> {
+  await send(`${TRANSACTIONS_URL}/${id}`, { method: 'DELETE' });
+}
+
+/** After any change every transactions query (lists and pickers) is fetched again. */
+function useRefreshing<TVariables, TResult>(mutationFn: (variables: TVariables) => Promise<TResult>) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => client.invalidateQueries({ queryKey: TRANSACTIONS_KEY }),
+  });
+}
+
+export function useCreateTransaction() {
+  return useRefreshing((input: TransactionInput) => createTransaction(input));
+}
+
+export function useUpdateTransaction() {
+  return useRefreshing(({ id, input }: { id: number; input: Partial<TransactionInput> }) =>
+    updateTransaction(id, input),
+  );
+}
+
+export function useDeleteTransaction() {
+  return useRefreshing((id: number) => deleteTransaction(id));
 }
