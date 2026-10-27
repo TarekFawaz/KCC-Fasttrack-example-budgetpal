@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { SESSION_KEY, useSession, useSignOut } from '../../kernel/session';
 
 /** The auth routes of the api (SPEC-002 Story-001/002); same origin, the session cookie rides along. */
 export const AUTH_BASE = '/api/auth';
@@ -78,20 +79,9 @@ export async function logIn(credentials: Credentials): Promise<AuthUser> {
   return (await (await send('/login', jsonBody(credentials))).json()) as AuthUser;
 }
 
-export async function logOut(): Promise<void> {
-  await send('/logout', { method: 'POST' });
-}
-
-export async function fetchMe(): Promise<AuthUser> {
-  return (await (await send('/me', { method: 'GET' })).json()) as AuthUser;
-}
-
-export const ME_KEY = ['auth', 'me'] as const;
-
-/** The signed-in user, or an `ApiProblem` with status 401 when there is no session. */
-export function useMe() {
-  return useQuery({ queryKey: ME_KEY, queryFn: fetchMe, retry: false });
-}
+/** The session cache key and reader live in the kernel: one source of "who is signed in". */
+export const ME_KEY = SESSION_KEY;
+export const useMe = useSession;
 
 export function useSignUp() {
   const client = useQueryClient();
@@ -109,11 +99,5 @@ export function useLogIn() {
   });
 }
 
-/** Ends the session and drops every cached server answer, so nothing of the user is left behind. */
-export function useLogOut() {
-  const client = useQueryClient();
-  return useMutation({
-    mutationFn: logOut,
-    onSuccess: () => client.clear(),
-  });
-}
+/** Ends the session and drops every cached server answer; the kernel owns it and treats 401 as signed out. */
+export const useLogOut = useSignOut;

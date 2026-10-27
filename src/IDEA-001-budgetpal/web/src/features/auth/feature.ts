@@ -3,16 +3,13 @@ import { SignUpPage } from './SignUpPage';
 import type { Feature } from '../../kernel/registry';
 
 /**
- * The SPEC-001 registry reads exactly one `Feature` per `features/<x>/feature.ts` (the default
- * export), and the shell turns each into one route plus one nav link. Story-003 needs three
- * (`/login`, `/signup`, and a log-out entry), so only `/login` can be registered from this single
- * file today; the other two are defined here, complete and tested, and wait for the registry to
- * accept more than one feature per module (see the SPEC-002 wave 4 report).
+ * The three auth routes, all `public` so the route guard serves them without a session. One
+ * `features` array export is what the registry accepts for several features in one module.
+ * `/logout` is public but is not a nav entry: the guard keeps public features out of the nav and
+ * puts a log-out control in the shell header instead.
  */
-const feature: Feature = { id: 'auth-login', path: '/login', label: 'Log in', order: 90, component: LoginPage };
-
-export const signUpFeature: Feature = { id: 'auth-signup', path: '/signup', label: 'Sign up', order: 91, component: SignUpPage };
-
-export const logOutFeature: Feature = { id: 'auth-logout', path: '/logout', label: 'Log out', order: 99, component: LogOutPage };
-
-export default feature;
+export const features: Feature[] = [
+  { id: 'auth-login', path: '/login', label: 'Log in', order: 90, component: LoginPage, public: true },
+  { id: 'auth-signup', path: '/signup', label: 'Sign up', order: 91, component: SignUpPage, public: true },
+  { id: 'auth-logout', path: '/logout', label: 'Log out', order: 99, component: LogOutPage, public: true },
+];
