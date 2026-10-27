@@ -126,3 +126,40 @@ a {
     padding: calc(var(--space) * 2);
   }
 }
+
+.shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shell-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem var(--space);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Guard states and the sign-in pages (no header, nav or footer). */
+.gate-main {
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: calc(var(--space) * 2) var(--space);
+}
+
+.gate-button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
