@@ -1,0 +1,14 @@
+api build$ tsc -p tsconfig.json
+web build$ tsc --noEmit -p tsconfig.json && vite build
+api build: Done
+web build: vite v5.4.21 building for production...
+web build: transforming...
+web build: ✓ 92 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                   0.45 kB │ gzip:  0.28 kB
+web build: dist/assets/index-YWgTnnfp.css    3.50 kB │ gzip:  1.13 kB
+web build: dist/assets/index-BdEaWdSr.js   224.85 kB │ gzip: 70.99 kB │ map: 1,017.42 kB
+web build: ✓ built in 1.26s
+web build: Done
+$ pnpm -r --if-present build

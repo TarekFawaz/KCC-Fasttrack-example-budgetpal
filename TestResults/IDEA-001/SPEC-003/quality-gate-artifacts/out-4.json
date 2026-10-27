@@ -1,0 +1,167 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 391[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 171[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (30)[39m
+[2m   Start at [22m 18:35:24
+[2m   Duration [22m 2.54s[2m (transform 120ms, setup 0ms, collect 1.84s, tests 572ms, environment 1ms, prepare 557ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+---------------|---------|----------|---------|---------|-------------------
+File           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------|---------|----------|---------|---------|-------------------
+All files      |     100 |    88.57 |     100 |     100 |                   
+ helpers.ts    |     100 |     87.5 |     100 |     100 | 18                
+ live-stack.ts |     100 |    88.88 |     100 |     100 | 38-39,55          
+---------------|---------|----------|---------|---------|-------------------
+api test:coverage$ vitest run --config vitest.config.ts --coverage
+web test:coverage$ vitest run --config vite.config.ts --coverage
+web test:coverage: 
+web test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal/web
+web test:coverage:       Coverage enabled with v8
+web test:coverage: 
+api test:coverage: 
+api test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal/api
+api test:coverage:       Coverage enabled with v8
+api test:coverage: 
+api test:coverage:  ✓ src/modules/categories/categories.schema.test.ts (4 tests) 9ms
+api test:coverage:  ✓ test/config.test.ts (10 tests) 12ms
+api test:coverage:  ✓ src/modules/categories/categories.repository.test.ts (7 tests) 48ms
+api test:coverage:  ✓ test/db.test.ts (4 tests) 63ms
+api test:coverage:  ✓ src/modules/categories/categories.service.test.ts (4 tests) 8ms
+web test:coverage:  ✓ src/kernel/source-rules.test.ts (4 tests) 6ms
+web test:coverage:  ✓ src/kernel/registry.test.ts (6 tests) 16ms
+api test:coverage:  ✓ test/auth-storage.test.ts (23 tests) 430ms
+api test:coverage:  ✓ src/kernel/validate.test.ts (7 tests) 229ms
+web test:coverage:  ✓ src/features/home/useHealth.test.tsx (3 tests) 327ms
+web test:coverage:  ✓ src/kernel/Shell.test.tsx (4 tests) 339ms
+api test:coverage: {"level":30,"time":1793122531245,"pid":42164,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59075"}
+api test:coverage: {"level":30,"time":1793122531268,"pid":42164,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test:coverage: {"level":30,"time":1793122531287,"pid":42164,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":18.460399999999936,"msg":"request completed"}
+web test:coverage:  ✓ src/features/home/HomePage.test.tsx (7 tests) 491ms
+api test:coverage:  ✓ src/kernel/require-user.test.ts (11 tests) 567ms
+api test:coverage:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 437ms
+api test:coverage:  ✓ test/health.test.ts (5 tests) 594ms
+api test:coverage:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 522ms
+api test:coverage:  ✓ test/app.test.ts (12 tests) 630ms
+api test:coverage:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 413ms
+web test:coverage: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+api test:coverage:  ✓ src/modules/categories/categories.routes.test.ts (27 tests) 916ms
+api test:coverage:    ✓ create and list (Story-001 AC-1) > T-007 POST returns 201 with id, name and kind and GET lists it 510ms
+api test:coverage:  ✓ src/modules/auth/signup.test.ts (13 tests) 898ms
+api test:coverage:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 470ms
+web test:coverage:  ✓ src/features/auth/auth.test.tsx (17 tests) 966ms
+web test:coverage:  ✓ src/features/categories/CategoriesPage.test.tsx (9 tests) 999ms
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+api test:coverage:  ✓ src/modules/auth/login.test.ts (13 tests) 1049ms
+api test:coverage:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 480ms
+api test:coverage: {"level":30,"time":1793122531985,"pid":42164,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59080"}
+api test:coverage: {"level":30,"time":1793122531986,"pid":42164,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+api test:coverage: {"level":30,"time":1793122532070,"pid":42164,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59082"}
+api test:coverage: {"level":30,"time":1793122532070,"pid":42164,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+api test:coverage:  ✓ test/server.test.ts (6 tests | 1 skipped) 1373ms
+api test:coverage:    ✓ start > T-020 migrates, then listens on PORT 548ms
+api test:coverage:    ✓ process > T-021 a failing migration exits non-zero and never listens 636ms
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+web test:coverage: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test:coverage: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test:coverage: 
+api test:coverage: 
+api test:coverage:  Test Files  14 passed (14)
+api test:coverage:       Tests  145 passed | 1 skipped (146)
+api test:coverage:    Start at  18:35:27
+api test:coverage:    Duration  3.19s (transform 1.46s, setup 0ms, collect 6.66s, tests 6.83s, environment 4ms, prepare 6.19s)
+api test:coverage: 
+api test:coverage:  % Coverage report from v8
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: All files          |   98.82 |    91.24 |   98.87 |   98.82 |                   
+api test:coverage:  src               |     100 |      100 |     100 |     100 |                   
+api test:coverage:   app.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/kernel        |   99.64 |    84.84 |     100 |   99.64 |                   
+api test:coverage:   config.ts        |     100 |    91.66 |     100 |     100 | 55                
+api test:coverage:   errors.ts        |     100 |       80 |     100 |     100 | 21,59-68          
+api test:coverage:   log.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:   modules.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   problem.ts       |   98.21 |    76.92 |     100 |   98.21 | 76                
+api test:coverage:   require-user.ts  |     100 |    93.33 |     100 |     100 | 63                
+api test:coverage:   validate.ts      |     100 |       75 |     100 |     100 | 43,58-59,70       
+api test:coverage:  src/kernel/db     |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   migrate.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/modules/auth  |    98.3 |    95.23 |   96.66 |    98.3 |                   
+api test:coverage:   ...repository.ts |    91.3 |    88.88 |    87.5 |    91.3 | 44-45,55-58       
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   login.ts         |   97.72 |    92.85 |     100 |   97.72 | 122-123           
+api test:coverage:   password.ts      |     100 |      100 |     100 |     100 |                   
+api test:coverage:   schemas.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   sessions.ts      |     100 |    93.75 |     100 |     100 | 70,103            
+api test:coverage:   signup.ts        |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...les/categories |   97.88 |    88.13 |     100 |   97.88 |                   
+api test:coverage:   ...repository.ts |    92.4 |    85.71 |     100 |    92.4 | ...,97-98,111-112 
+api test:coverage:   ...ies.routes.ts |     100 |       75 |     100 |     100 | 49,71,96,123      
+api test:coverage:   ...ies.schema.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...es.service.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...modules/health |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...repository.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage:  ✓ src/features/categories/CategoryRow.test.tsx (7 tests) 1519ms
+web test:coverage:    ✓ edit a category (Story-004 AC-1) > T-029 Edit, change name and kind, Save shows the new values 344ms
+web test:coverage:    ✓ keyboard, names, focus and axe (Story-004 AC-5) > T-034 buttons carry the category name; focus moves to the field on Edit and back to the row after Save, Cancel and a refused delete 319ms
+web test:coverage:    ✓ keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states 470ms
+api test:coverage: Done
+web test:coverage:  ✓ src/kernel/build.test.ts (2 tests) 3435ms
+web test:coverage:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 3433ms
+web test:coverage: 
+web test:coverage:  Test Files  9 passed (9)
+web test:coverage:       Tests  59 passed (59)
+web test:coverage:    Start at  18:35:27
+web test:coverage:    Duration  5.04s (transform 414ms, setup 4.17s, collect 2.94s, tests 8.10s, environment 12.55s, prepare 2.00s)
+web test:coverage: 
+web test:coverage:  % Coverage report from v8
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: All files          |   97.45 |    91.56 |      96 |   97.45 |                   
+web test:coverage:  features/auth     |   96.81 |    92.04 |   93.54 |   96.81 |                   
+web test:coverage:   LoginPage.tsx    |   99.37 |    95.12 |     100 |   99.37 | 128               
+web test:coverage:   SignUpPage.tsx   |   95.87 |       84 |     100 |   95.87 | 19-20,36-37       
+web test:coverage:   authApi.ts       |   92.85 |    95.45 |    87.5 |   92.85 | 51,85-87,93-94    
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:  ...res/categories |   97.31 |    89.51 |   97.36 |   97.31 |                   
+web test:coverage:   ...oriesPage.tsx |   97.87 |    88.67 |     100 |   97.87 | 165-168           
+web test:coverage:   CategoryRow.tsx  |   96.06 |    86.95 |    92.3 |   96.06 | ...37,102,184-186 
+web test:coverage:   ...gories.api.ts |   98.85 |       96 |     100 |   98.85 | 56                
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:  features/home     |     100 |      100 |     100 |     100 |                   
+web test:coverage:   HomePage.tsx     |     100 |      100 |     100 |     100 |                   
+web test:coverage:   feature.ts       |     100 |      100 |     100 |     100 |                   
+web test:coverage:   useHealth.ts     |     100 |      100 |     100 |     100 |                   
+web test:coverage:  kernel            |     100 |    95.23 |     100 |     100 |                   
+web test:coverage:   Shell.tsx        |     100 |      100 |     100 |     100 |                   
+web test:coverage:   registry.ts      |     100 |    94.44 |     100 |     100 | 22                
+web test:coverage: -------------------|---------|----------|---------|---------|-------------------
+web test:coverage: Done

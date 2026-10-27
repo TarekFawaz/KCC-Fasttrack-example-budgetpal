@@ -1,0 +1,96 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 395[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[33m 337[2mms[22m[39m
+   [33m[2m✓[22m[39m Enabler-005 compose file[2m > [22mT-032 docker compose config accepts the file and resolves loopback ports [33m325[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (30)[39m
+[2m   Start at [22m 18:35:13
+[2m   Duration [22m 3.29s[2m (transform 93ms, setup 0ms, collect 2.35s, tests 739ms, environment 1ms, prepare 471ms)[22m
+
+Scope: 2 of 3 workspace projects
+api test$ vitest run --config vitest.config.ts
+web test$ vitest run --config vite.config.ts
+api test: 
+api test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal/api
+api test: 
+web test: 
+web test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-003/src/IDEA-001-budgetpal/web
+web test: 
+api test:  ✓ src/modules/categories/categories.schema.test.ts (4 tests) 10ms
+api test:  ✓ test/config.test.ts (10 tests) 16ms
+api test:  ✓ test/db.test.ts (4 tests) 74ms
+api test:  ✓ src/modules/categories/categories.repository.test.ts (7 tests) 76ms
+api test:  ✓ src/modules/categories/categories.service.test.ts (4 tests) 11ms
+api test:  ✓ test/auth-storage.test.ts (23 tests) 505ms
+api test:  ✓ src/kernel/validate.test.ts (7 tests) 328ms
+api test: {"level":30,"time":1793122521013,"pid":8904,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59060"}
+api test: {"level":30,"time":1793122521032,"pid":8904,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test: {"level":30,"time":1793122521052,"pid":8904,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":19.68209999999999,"msg":"request completed"}
+api test:  ✓ test/health.test.ts (5 tests) 773ms
+api test:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 670ms
+api test:  ✓ test/app.test.ts (12 tests) 824ms
+api test:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 553ms
+api test:  ✓ src/kernel/require-user.test.ts (11 tests) 816ms
+api test:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 636ms
+api test:  ✓ src/modules/auth/signup.test.ts (13 tests) 992ms
+api test:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 497ms
+api test:  ✓ src/modules/categories/categories.routes.test.ts (27 tests) 1106ms
+api test:    ✓ create and list (Story-001 AC-1) > T-007 POST returns 201 with id, name and kind and GET lists it 682ms
+api test:  ✓ src/modules/auth/login.test.ts (13 tests) 1310ms
+api test:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 670ms
+api test: {"level":30,"time":1793122521893,"pid":8904,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59065"}
+api test: {"level":30,"time":1793122521894,"pid":8904,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+api test: {"level":30,"time":1793122521973,"pid":8904,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:59067"}
+web test:  ✓ src/kernel/source-rules.test.ts (4 tests) 5ms
+api test: {"level":30,"time":1793122521973,"pid":8904,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+api test:  ✓ test/server.test.ts (6 tests | 1 skipped) 1671ms
+api test:    ✓ start > T-020 migrates, then listens on PORT 703ms
+api test:    ✓ process > T-021 a failing migration exits non-zero and never listens 769ms
+api test: 
+api test:  Test Files  14 passed (14)
+api test:       Tests  145 passed | 1 skipped (146)
+api test:    Start at  18:35:18
+api test:    Duration  3.49s (transform 2.74s, setup 0ms, collect 8.28s, tests 8.51s, environment 3ms, prepare 5.18s)
+api test: 
+api test: Done
+web test:  ✓ src/kernel/registry.test.ts (6 tests) 12ms
+web test:  ✓ src/kernel/Shell.test.tsx (4 tests) 196ms
+web test:  ✓ src/features/home/useHealth.test.tsx (3 tests) 326ms
+web test:  ✓ src/features/home/HomePage.test.tsx (7 tests) 372ms
+web test: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoriesPage.test.tsx > accessibility (Story-003 AC-5) > T-028 axe reports no violations (empty, filled, error), inputs are found by label and tab order reaches the form
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/auth/auth.test.tsx (17 tests) 554ms
+web test:  ✓ src/features/categories/CategoriesPage.test.tsx (9 tests) 652ms
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test: stderr | src/features/categories/CategoryRow.test.tsx > keyboard, names, focus and axe (Story-004 AC-5) > T-035 axe reports no violations in view, edit, confirm and error states
+web test: Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+web test: 
+web test:  ✓ src/features/categories/CategoryRow.test.tsx (7 tests) 921ms
+web test:  ✓ src/kernel/build.test.ts (2 tests) 2566ms
+web test:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 2564ms
+web test: 
+web test:  Test Files  9 passed (9)
+web test:       Tests  59 passed (59)
+web test:    Start at  18:35:18
+web test:    Duration  4.99s (transform 477ms, setup 3.92s, collect 2.61s, tests 5.60s, environment 14.77s, prepare 2.79s)
+web test: 
+web test: Done
