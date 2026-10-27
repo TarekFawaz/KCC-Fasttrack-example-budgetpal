@@ -3,12 +3,14 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { loadConfig } from '../../kernel/config.js';
 import { requireUser } from '../../kernel/require-user.js';
 import { problemContent, spendingQuerySchema, spendingResponseSchema } from './schemas.js';
+import * as service from './spending.service.js';
 
 export const SPENDING_PATH = '/api/dashboard/spending';
 
 /**
- * Scaffold route for `GET /api/dashboard/spending`: guarded, validated and documented. Story-001
- * replaces the placeholder handler with the SQL aggregate (service + repository).
+ * `GET /api/dashboard/spending`: the signed-in user's expense totals per category for one month.
+ * The session guard runs in `onRequest`, so a request without a session is a 401 whatever its query
+ * holds (GR-002). The handler logs the event only: never an amount or a category name (GR-008).
  */
 export function registerSpendingRoutes(app: FastifyInstance): void {
   const typed = app.withTypeProvider<ZodTypeProvider>();
@@ -27,11 +29,11 @@ export function registerSpendingRoutes(app: FastifyInstance): void {
         },
       },
     },
-    async (request) => ({
-      month: request.query.month,
-      currency: loadConfig().currency,
-      totalMinor: 0,
-      categories: [],
-    }),
+    async (request) => {
+      const userId = (request.user as { id: number }).id;
+      const summary = service.spendingForMonth(app.db, userId, request.query.month, loadConfig().currency);
+      request.log.info({ event: 'dashboard.spending' }, 'spending summary served');
+      return summary;
+    },
   );
 }
