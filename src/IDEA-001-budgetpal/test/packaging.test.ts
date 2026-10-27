@@ -1,11 +1,14 @@
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { readRoot, root } from './helpers.js';
+import { probeLiveStack } from './live-stack.js';
 
 /**
  * Enabler-005: Dockerfiles, nginx, compose, README.
- * T-032, T-033, T-036, T-037 read the files; T-031, T-034, T-035 need a running Docker daemon and are
- * skipped (deferred, not passed) when there is none.
+ * T-032, T-033, T-036, T-037 read the files; T-031, T-034, T-035 need a running Docker daemon whose build
+ * container can reach the npm registry, and are skipped (deferred, not passed) when it cannot.
  */
 
 const compose = readRoot('docker-compose.yml');
@@ -13,10 +16,15 @@ const apiDockerfile = readRoot('api/Dockerfile');
 const webDockerfile = readRoot('web/Dockerfile');
 const nginx = readRoot('web/nginx.conf');
 const readme = readRoot('README.md');
+/** The architect's static rules, two levels above the workspace (src/IDEA-001-budgetpal -> repo root). */
+const staticRulesFile = resolve(root, '..', '..', 'architecture', 'static-rules.tsv');
 
-const dockerCli = spawnSync('docker', ['compose', 'version'], { encoding: 'utf8' }).status === 0;
-const dockerDaemon =
-  dockerCli && spawnSync('docker', ['info'], { encoding: 'utf8', timeout: 20_000 }).status === 0;
+/** Daemon up AND a build container can reach the npm registry; otherwise the live stack is deferred. */
+const liveStack = probeLiveStack(webDockerfile);
+const dockerCli = liveStack.cli;
+if (liveStack.skipReason !== null && liveStack.cli) {
+  console.warn(`[live-stack] T-031, T-034, T-035 deferred (not a pass): ${liveStack.skipReason}`);
+}
 
 /** Top-level service block text, up to the next service or top-level key. */
 function serviceBlock(name: string): string {
@@ -109,6 +117,27 @@ describe('Enabler-005 Dockerfiles', () => {
     expect(webParts[webParts.length - 1].from).toMatch(/^FROM nginxinc\/nginx-unprivileged:\d+\.\d+\.\d+-alpine\b/);
     expect(apiDockerfile).toMatch(/^HEALTHCHECK/m);
   });
+
+  // GR-017 / SR-018 as the quality gate enforces it: the rule is read from the architecture file and applied
+  // line by line (comments included) to every Dockerfile. Every FROM must name an external image with a tag.
+  it.skipIf(!existsSync(staticRulesFile))('GR-017 no Dockerfile line hits static rule SR-018', () => {
+    const row = readFileSync(staticRulesFile, 'utf8')
+      .split(/\r?\n/)
+      .map((line) => line.split('\t'))
+      .find((cols) => cols[0] === 'SR-018');
+    expect(row, 'SR-018 is declared in architecture/static-rules.tsv').toBeDefined();
+    const [, files, forbidden] = row as string[];
+    const pattern = new RegExp(forbidden);
+    for (const rel of ['api/Dockerfile', 'web/Dockerfile']) {
+      expect(new RegExp(files).test(rel), `${rel} is in the scope of SR-018`).toBe(true);
+      const hits = readRoot(rel)
+        .split('\n')
+        .map((line, index) => ({ line: index + 1, text: line }))
+        .filter(({ text }) => pattern.test(text))
+        .map(({ line, text }) => `${rel}:${line} ${text.trim()}`);
+      expect(hits, `SR-018 hits in ${rel}`).toEqual([]);
+    }
+  });
 });
 
 describe('Enabler-005 nginx.conf', () => {
@@ -159,7 +188,7 @@ async function waitHealthy(timeoutMs: number): Promise<void> {
   throw new Error('services did not become healthy in time');
 }
 
-describe.skipIf(!dockerDaemon)('Enabler-005 live stack (needs a Docker daemon)', () => {
+describe.skipIf(liveStack.skipReason !== null)('Enabler-005 live stack (needs a Docker daemon and npm registry access)', () => {
   it('T-031 compose up: both services healthy; web page and /api/health answer', async () => {
     const up = dc(['up', '--build', '-d']);
     expect(up.status, String(up.stderr)).toBe(0);

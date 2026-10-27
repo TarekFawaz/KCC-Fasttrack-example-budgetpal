@@ -10,6 +10,8 @@ describe('loadConfig', () => {
       currency: 'USD',
       cookieSecure: false,
       sessionSecret: undefined,
+      sessionIdleHours: 24,
+      sessionAbsoluteDays: 30,
     });
 
     const secret = 's'.repeat(32);
@@ -20,6 +22,8 @@ describe('loadConfig', () => {
       CURRENCY: 'EUR',
       LOG_LEVEL: 'debug',
       COOKIE_SECURE: 'true',
+      SESSION_IDLE_HOURS: '12',
+      SESSION_ABSOLUTE_DAYS: '7',
     });
     expect(parsed).toEqual({
       port: 8081,
@@ -28,6 +32,8 @@ describe('loadConfig', () => {
       currency: 'EUR',
       logLevel: 'debug',
       cookieSecure: true,
+      sessionIdleHours: 12,
+      sessionAbsoluteDays: 7,
     });
   });
 
@@ -39,10 +45,14 @@ describe('loadConfig', () => {
       CURRENCY: '',
       LOG_LEVEL: '',
       COOKIE_SECURE: '',
+      SESSION_IDLE_HOURS: '',
+      SESSION_ABSOLUTE_DAYS: '',
     });
     expect(config.port).toBe(3000);
     expect(config.sessionSecret).toBeUndefined();
     expect(config.cookieSecure).toBe(false);
+    expect(config.sessionIdleHours).toBe(24);
+    expect(config.sessionAbsoluteDays).toBe(30);
   });
 
   it.each([
@@ -52,6 +62,8 @@ describe('loadConfig', () => {
     ['SESSION_SECRET', 'too-short-secret-value'],
     ['COOKIE_SECURE', 'yes'],
     ['CURRENCY', 'dollars'],
+    ['SESSION_IDLE_HOURS', '0'],
+    ['SESSION_ABSOLUTE_DAYS', 'forever'],
   ])('T-006 rejects invalid %s and names the variable, not the value', (name, value) => {
     let thrown: unknown;
     try {

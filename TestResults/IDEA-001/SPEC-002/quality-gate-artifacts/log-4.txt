@@ -1,0 +1,129 @@
+$ vitest run --config vitest.config.ts --coverage && pnpm -r --if-present test:coverage
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-002/src/IDEA-001-budgetpal[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m test/live-stack.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 464[2mms[22m[39m
+[90mstderr[2m | test/packaging.test.ts
+[22m[39m[live-stack] T-031, T-034, T-035 deferred (not a pass): the build container cannot reach the npm registry (npm view pnpm@12.11.2 in node:22-bookworm-slim: UNABLE_TO_VERIFY_LEAF_SIGNATURE)
+
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m10 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 183[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m21 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (24)[39m
+[2m   Start at [22m 17:58:13
+[2m   Duration [22m 2.34s[2m (transform 78ms, setup 0ms, collect 1.66s, tests 651ms, environment 1ms, prepare 391ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+---------------|---------|----------|---------|---------|-------------------
+File           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------|---------|----------|---------|---------|-------------------
+All files      |     100 |    87.09 |     100 |     100 |                   
+ helpers.ts    |     100 |     87.5 |     100 |     100 | 18                
+ live-stack.ts |     100 |    86.95 |     100 |     100 | 33-34,50          
+---------------|---------|----------|---------|---------|-------------------
+api test:coverage$ vitest run --config vitest.config.ts --coverage
+web test:coverage$ vitest run --config vite.config.ts --coverage
+api test:coverage: 
+api test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-002/src/IDEA-001-budgetpal/api
+api test:coverage:       Coverage enabled with v8
+api test:coverage: 
+web test:coverage: 
+web test:coverage:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-002/src/IDEA-001-budgetpal/web
+web test:coverage:       Coverage enabled with v8
+web test:coverage: 
+api test:coverage:  ✓ test/config.test.ts (10 tests) 15ms
+api test:coverage:  ✓ test/db.test.ts (4 tests) 71ms
+api test:coverage:  ✓ test/auth-storage.test.ts (23 tests) 352ms
+api test:coverage:  ✓ src/kernel/validate.test.ts (7 tests) 198ms
+api test:coverage: {"level":30,"time":1793120298684,"pid":42140,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:51269"}
+api test:coverage: {"level":30,"time":1793120298704,"pid":42140,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test:coverage: {"level":30,"time":1793120298716,"pid":42140,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":11.276799999999866,"msg":"request completed"}
+api test:coverage:  ✓ test/health.test.ts (5 tests) 481ms
+api test:coverage:    ✓ GET /health > T-025 returns 200 {status:ok, db:ok} and is documented in OpenAPI 419ms
+api test:coverage:  ✓ src/kernel/require-user.test.ts (11 tests) 491ms
+api test:coverage:    ✓ requireUser denies by default (Enabler-003 AC-1) > T-011 answers 401 problem+json and skips the handler without a cookie 370ms
+api test:coverage:  ✓ test/app.test.ts (12 tests) 544ms
+api test:coverage:    ✓ request logging (Enabler-002 AC-2) > T-007 writes single-line JSON with a request id and no cookie, authorization or body 342ms
+api test:coverage:  ✓ src/modules/auth/signup.test.ts (13 tests) 750ms
+api test:coverage:    ✓ POST /api/auth/signup (Story-001 AC-1) > T-016 answers 201 {id,email}, sets the session cookie and stores an $argon2id$ hash 369ms
+api test:coverage:  ✓ src/modules/auth/login.test.ts (13 tests) 961ms
+api test:coverage:    ✓ POST /api/auth/login (Story-002 AC-1) > T-023 answers 200 {id,email}, sets a new HttpOnly SameSite=Lax Path=/ cookie without Secure and stores a session 423ms
+api test:coverage: {"level":30,"time":1793120299416,"pid":42140,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:51274"}
+api test:coverage: {"level":30,"time":1793120299417,"pid":42140,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+api test:coverage: {"level":30,"time":1793120299495,"pid":42140,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:51276"}
+api test:coverage: {"level":30,"time":1793120299495,"pid":42140,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+web test:coverage:  ✓ src/kernel/source-rules.test.ts (4 tests) 4ms
+api test:coverage:  ✓ test/server.test.ts (6 tests | 1 skipped) 1265ms
+api test:coverage:    ✓ start > T-020 migrates, then listens on PORT 436ms
+api test:coverage:    ✓ process > T-021 a failing migration exits non-zero and never listens 641ms
+api test:coverage: 
+api test:coverage:  Test Files  10 passed (10)
+api test:coverage:       Tests  103 passed | 1 skipped (104)
+api test:coverage:    Start at  17:58:16
+api test:coverage:    Duration  2.77s (transform 839ms, setup 0ms, collect 3.98s, tests 5.13s, environment 3ms, prepare 3.44s)
+api test:coverage: 
+api test:coverage:  % Coverage report from v8
+web test:coverage:  ✓ src/kernel/registry.test.ts (6 tests) 15ms
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: All files          |   99.15 |    91.94 |   98.55 |   99.15 |                   
+api test:coverage:  src               |     100 |      100 |     100 |     100 |                   
+api test:coverage:   app.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/kernel        |   99.64 |    84.84 |     100 |   99.64 |                   
+api test:coverage:   config.ts        |     100 |    91.66 |     100 |     100 | 55                
+api test:coverage:   errors.ts        |     100 |       80 |     100 |     100 | 21,59-68          
+api test:coverage:   log.ts           |     100 |      100 |     100 |     100 |                   
+api test:coverage:   modules.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   problem.ts       |   98.21 |    76.92 |     100 |   98.21 | 76                
+api test:coverage:   require-user.ts  |     100 |    93.33 |     100 |     100 | 63                
+api test:coverage:   validate.ts      |     100 |       75 |     100 |     100 | 43,58-59,70       
+api test:coverage:  src/kernel/db     |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   migrate.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:  src/modules/auth  |    98.3 |    95.23 |   96.66 |    98.3 |                   
+api test:coverage:   ...repository.ts |    91.3 |    88.88 |    87.5 |    91.3 | 44-45,55-58       
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage:   login.ts         |   97.72 |    92.85 |     100 |   97.72 | 122-123           
+api test:coverage:   password.ts      |     100 |      100 |     100 |     100 |                   
+api test:coverage:   schemas.ts       |     100 |      100 |     100 |     100 |                   
+api test:coverage:   sessions.ts      |     100 |    93.75 |     100 |     100 | 70,103            
+api test:coverage:   signup.ts        |     100 |      100 |     100 |     100 |                   
+api test:coverage:  ...modules/health |     100 |      100 |     100 |     100 |                   
+api test:coverage:   ...repository.ts |     100 |      100 |     100 |     100 |                   
+api test:coverage:   index.ts         |     100 |      100 |     100 |     100 |                   
+api test:coverage: -------------------|---------|----------|---------|---------|-------------------
+api test:coverage: Done
+web test:coverage:  ✓ src/features/home/useHealth.test.tsx (3 tests) 332ms
+web test:coverage:  ✓ src/kernel/Shell.test.tsx (4 tests) 216ms
+web test:coverage:  ✓ src/features/home/HomePage.test.tsx (7 tests) 405ms
+web test:coverage:  ✓ src/features/auth/auth.test.tsx (17 tests) 687ms
+web test:coverage:  ✓ src/kernel/build.test.ts (2 tests) 2005ms
+web test:coverage:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 2003ms
+web test:coverage: 
+web test:coverage:  Test Files  7 passed (7)
+web test:coverage:       Tests  43 passed (43)
+web test:coverage:    Start at  17:58:16
+web test:coverage:    Duration  3.96s (transform 229ms, setup 2.22s, collect 1.43s, tests 3.66s, environment 7.50s, prepare 2.06s)
+web test:coverage: 
+web test:coverage:  % Coverage report from v8
+web test:coverage: -----------------|---------|----------|---------|---------|-------------------
+web test:coverage: File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+web test:coverage: -----------------|---------|----------|---------|---------|-------------------
+web test:coverage: All files        |   97.58 |    92.74 |   94.59 |   97.58 |                   
+web test:coverage:  features/auth   |   96.81 |     90.8 |   93.54 |   96.81 |                   
+web test:coverage:   LoginPage.tsx  |   99.37 |     92.5 |     100 |   99.37 | 128               
+web test:coverage:   SignUpPage.tsx |   95.87 |       84 |     100 |   95.87 | 19-20,36-37       
+web test:coverage:   authApi.ts     |   92.85 |    95.45 |    87.5 |   92.85 | 51,85-87,93-94    
+web test:coverage:   feature.ts     |     100 |      100 |     100 |     100 |                   
+web test:coverage:  features/home   |     100 |      100 |     100 |     100 |                   
+web test:coverage:   HomePage.tsx   |     100 |      100 |     100 |     100 |                   
+web test:coverage:   feature.ts     |     100 |      100 |     100 |     100 |                   
+web test:coverage:   useHealth.ts   |     100 |      100 |     100 |     100 |                   
+web test:coverage:  kernel          |     100 |    95.23 |     100 |     100 |                   
+web test:coverage:   Shell.tsx      |     100 |      100 |     100 |     100 |                   
+web test:coverage:   registry.ts    |     100 |    94.44 |     100 |     100 | 22                
+web test:coverage: -----------------|---------|----------|---------|---------|-------------------
+web test:coverage: Done
