@@ -1,0 +1,52 @@
+# BudgetPal local stack. Run from this folder: docker compose up --build
+# Ports are published on loopback only (GR-001). Values come from .env or the
+# defaults below; no secret has a default.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      # The container always listens on 3000; nginx proxies to api:3000.
+      PORT: "3000"
+      DATABASE_PATH: /data/budgetpal.db
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CURRENCY: ${CURRENCY:-USD}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - budgetpal-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    stop_grace_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  budgetpal-data:
