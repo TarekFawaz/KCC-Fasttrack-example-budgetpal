@@ -204,7 +204,18 @@ Totals: 43 (unit 40, integration 3); at most 8 per item.
 | GR-018 | verifier:no CSRF or rate-limit or audit or SBOM dependency appears |
 
 ## Routing
-Written by `kcc route` from the Complexity column above; do not fill it by hand.
+
+Written by `kcc route` from each item's Complexity, its files, its domain and CR-7 risk. `kcc-run` and the orchestrator read it;
+do not edit it by hand (rerun `kcc route`).
+
+| Item | Wave | Tier | Model | Effort | Why |
+|--|--|--|--|--|--|
+| Enabler-001 | 1 | balanced | claude-sonnet-5-5 | medium | agent default: balanced / medium |
+| Enabler-002 | 2 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-001 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-002 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authentication): effort high |
+| Story-003 | 3 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (token): effort high |
+| Story-004 | 4 | balanced | claude-sonnet-5-5 | high | agent default: balanced / medium; security-sensitive (authentication): effort high |
 
 ## Verification Steps
 Run from `src/IDEA-001-budgetpal`:
