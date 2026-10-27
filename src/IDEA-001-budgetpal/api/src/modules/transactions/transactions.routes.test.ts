@@ -35,11 +35,11 @@ const addAccount = (userId: number): number =>
       )
       .run(userId, `acct-${userId}`, 'checking').lastInsertRowid,
   );
-const addCategory = (userId: number): number =>
+const addCategory = (userId: number, name = `cat-${userId}`): number =>
   Number(
     db
       .prepare('INSERT INTO categories (user_id, name, kind, created_at) VALUES (?, ?, ?, ?)')
-      .run(userId, `cat-${userId}`, 'expense', '2026-01-01T00:00:00.000Z').lastInsertRowid,
+      .run(userId, name, 'expense', '2026-01-01T00:00:00.000Z').lastInsertRowid,
   );
 const rowCount = (): number => (db.prepare('SELECT COUNT(*) AS n FROM transactions').get() as { n: number }).n;
 
@@ -157,5 +157,147 @@ describe('POST /api/transactions (Story-001)', () => {
     const operation = doc.paths[PATH]?.post;
     expect(operation).toBeDefined();
     expect(Object.keys(operation?.responses ?? {})).toEqual(expect.arrayContaining(['201', '400', '401']));
+  });
+});
+
+interface StoredTransaction {
+  id: number;
+  accountId: number;
+  categoryId: number;
+  occurredOn: string;
+  amountMinor: number;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const patch = (user: LoggedInUser | undefined, id: number | string, payload: unknown) =>
+  app.inject({
+    method: 'PATCH',
+    url: `${PATH}/${id}`,
+    payload: payload as object,
+    ...(user ? { headers: user.headers } : {}),
+  });
+const del = (user: LoggedInUser | undefined, id: number | string) =>
+  app.inject({ method: 'DELETE', url: `${PATH}/${id}`, ...(user ? { headers: user.headers } : {}) });
+const stored = (id: number): StoredTransaction | undefined =>
+  db
+    .prepare(
+      `SELECT id, account_id AS accountId, category_id AS categoryId, occurred_on AS occurredOn,
+              amount_minor AS amountMinor, description, created_at AS createdAt, updated_at AS updatedAt
+         FROM transactions WHERE id = ?`,
+    )
+    .get(id) as StoredTransaction | undefined;
+/** Creates a row through the API, then back-dates `updated_at` so a later change is visibly later. */
+const seed = async (user: LoggedInUser, payload: unknown): Promise<StoredTransaction> => {
+  const res = await post(user, payload);
+  const { id } = res.json() as { id: number };
+  db.prepare('UPDATE transactions SET updated_at = ? WHERE id = ?').run('2020-01-01T00:00:00.000Z', id);
+  return stored(id) as StoredTransaction;
+};
+
+describe('PATCH and DELETE /api/transactions/:id (Story-002)', () => {
+  it('T-013 PATCH changed fields returns 200 with the updated row and a later updated_at (AC-1)', async () => {
+    const row = await seed(alice, valid());
+    const otherCategory = addCategory(alice.id, 'cat-other');
+    const res = await patch(alice, row.id, { amountMinor: 2000, description: 'Tea', categoryId: otherCategory });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as StoredTransaction;
+    expect(body).toMatchObject({
+      id: row.id,
+      accountId: aliceAccount,
+      categoryId: otherCategory,
+      occurredOn: '2026-03-15',
+      amountMinor: 2000,
+      description: 'Tea',
+    });
+    expect(body.updatedAt > row.updatedAt).toBe(true);
+    expect(body.createdAt).toBe(row.createdAt);
+    expect(stored(row.id)).toEqual(body);
+  });
+
+  it('T-014 DELETE returns 204 and the row is gone (AC-2)', async () => {
+    const row = await seed(alice, valid());
+    const res = await del(alice, row.id);
+    expect(res.statusCode).toBe(204);
+    expect(res.body).toBe('');
+    expect(stored(row.id)).toBeUndefined();
+    expect(rowCount()).toBe(0);
+  });
+
+  it('T-015 another user\'s or an unknown id is a 404 for PATCH and DELETE and the row is unchanged (AC-3)', async () => {
+    const row = await seed(alice, valid());
+    for (const res of [
+      await patch(bob, row.id, { description: 'hijack' }),
+      await del(bob, row.id),
+      await patch(alice, 99_999, { description: 'nothing' }),
+      await del(alice, 99_999),
+    ]) {
+      expect(res.statusCode).toBe(404);
+      expect(res.headers['content-type']).toContain('application/problem+json');
+    }
+    expect(stored(row.id)).toEqual(row);
+    expect(rowCount()).toBe(1);
+  });
+
+  it.each([
+    ['another user\'s account', () => ({ accountId: bobAccount }), 'accountId'],
+    ['an unknown account', () => ({ accountId: 99_999 }), 'accountId'],
+    ['another user\'s category', () => ({ categoryId: bobCategory }), 'categoryId'],
+    ['an unknown category', () => ({ categoryId: 99_999 }), 'categoryId'],
+  ])('T-016 a patch with %s returns 400 naming the field and the row is unchanged (AC-4)', async (_label, payload, field) => {
+    const row = await seed(alice, valid());
+    const res = await patch(alice, row.id, { description: 'changed too', ...payload() });
+    expect(res.statusCode).toBe(400);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect((res.json() as Problem).errors?.some((error) => error.field === field)).toBe(true);
+    expect(stored(row.id)).toEqual(row);
+  });
+
+  it.each([
+    ['an empty patch', {}, '(body)'],
+    ['an invalid amount', { amountMinor: 0 }, 'amountMinor'],
+    ['a fractional amount', { amountMinor: 1.5 }, 'amountMinor'],
+    ['a calendar-impossible date', { occurredOn: '2026-02-30' }, 'occurredOn'],
+    ['a 201-character description', { description: 'x'.repeat(201) }, 'description'],
+    ['an unknown field', { userId: bobCategory }, '(body)'],
+  ])('T-017 %s returns 400 with field errors and the row is unchanged (AC-5)', async (_label, payload, field) => {
+    const row = await seed(alice, valid());
+    const res = await patch(alice, row.id, payload);
+    expect(res.statusCode).toBe(400);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect((res.json() as Problem).errors?.some((error) => error.field === field)).toBe(true);
+    expect(stored(row.id)).toEqual(row);
+  });
+
+  it('T-017 a malformed id is a 400 for PATCH and DELETE (AC-5)', async () => {
+    expect((await patch(alice, 'abc', { description: 'x' })).statusCode).toBe(400);
+    expect((await del(alice, 'abc')).statusCode).toBe(400);
+  });
+
+  it('T-018 PATCH and DELETE without a session return 401 and change nothing (AC-6)', async () => {
+    const row = await seed(alice, valid());
+    const patched = await patch(undefined, row.id, { description: 'anon' });
+    const deleted = await del(undefined, row.id);
+    expect(patched.statusCode).toBe(401);
+    expect(deleted.statusCode).toBe(401);
+    expect(patched.headers['content-type']).toContain('application/problem+json');
+    // The guard runs before validation: even an invalid body is a 401.
+    expect((await patch(undefined, row.id, {})).statusCode).toBe(401);
+    expect(stored(row.id)).toEqual(row);
+  });
+
+  it('T-019 PATCH and DELETE log neither the description nor the amount (AC-1)', async () => {
+    const row = await seed(alice, valid());
+    logLines = '';
+    const patched = await patch(alice, row.id, { amountMinor: 765_432, description: 'Secret-Patched-Note' });
+    expect(patched.statusCode).toBe(200);
+    const deleted = await del(alice, row.id);
+    expect(deleted.statusCode).toBe(204);
+    expect(logLines.length).toBeGreaterThan(0);
+    expect(logLines).not.toContain('Secret-Patched-Note');
+    expect(logLines).not.toContain('Coffee beans');
+    expect(logLines).not.toContain('765432');
+    expect(logLines).not.toContain('1250');
   });
 });
