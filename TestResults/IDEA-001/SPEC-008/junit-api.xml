@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="23" failures="0" errors="0" time="1.539">
+    <testsuite name="src/modules/dashboard/dashboard.module.test.ts" timestamp="2026-10-27T19:38:22.569Z" hostname="Tika" tests="3" failures="0" errors="0" skipped="0" time="0.4704298">
+        <testcase classname="src/modules/dashboard/dashboard.module.test.ts" name="dashboard module scaffold (Enabler-001) &gt; T-001 both dashboard routes are routed by the module loader: 401, not 404 (AC-1)" time="0.431586">
+        </testcase>
+        <testcase classname="src/modules/dashboard/dashboard.module.test.ts" name="dashboard module scaffold (Enabler-001) &gt; T-002 migration 0080 creates idx_transactions_dashboard on (user_id, occurred_on) and re-running changes nothing (AC-2)" time="0.0162381">
+        </testcase>
+        <testcase classname="src/modules/dashboard/dashboard.module.test.ts" name="dashboard module scaffold (Enabler-001) &gt; T-005 the OpenAPI document lists both dashboard paths with query and response schemas (AC-4)" time="0.0218896">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/dashboard/schemas.test.ts" timestamp="2026-10-27T19:38:22.573Z" hostname="Tika" tests="2" failures="0" errors="0" skipped="0" time="0.0032819">
+        <testcase classname="src/modules/dashboard/schemas.test.ts" name="dashboard query schemas (Enabler-001) &gt; T-003 rejects bad month, months and end values, defaults months to 6, rejects unknown keys (AC-3)" time="0.0023567">
+        </testcase>
+        <testcase classname="src/modules/dashboard/schemas.test.ts" name="dashboard query schemas (Enabler-001) &gt; T-004 monthRange is half-open, rolls December over and handles leap February (AC-3)" time="0.000324">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/dashboard/spending.test.ts" timestamp="2026-10-27T19:38:22.574Z" hostname="Tika" tests="9" failures="0" errors="0" skipped="0" time="0.5152548">
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="spending service (Story-001) &gt; T-006 totalMinor equals the sum of the category rows, rows keep their descending order, amounts are integers (AC-1)" time="0.3646252">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-007 seeded expenses return month, currency, totalMinor and categories sorted descending that sum to the total (AC-1)" time="0.0360651">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-008 income categories and other months, including the 02-28 and 04-01 boundaries, are not counted (AC-2)" time="0.0118008">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-009 a month without expenses is 200 with totalMinor 0 and no categories (AC-3)" time="0.0115934">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-010 user B sees totalMinor 0 and none of A&apos;s category names (AC-4, QG-ISOLATION)" time="0.0170289">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-010 a category id owned by another user never joins another user&apos;s transactions (AC-4)" time="0.0128003">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-011 no cookie is 401; a bad month and an unknown field are 400 problem+json with the field (AC-5)" time="0.0142466">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-012 10,000 seeded rows are answered by one call within a generous bound and the plan uses the (user_id, occurred_on) index" time="0.0326054">
+        </testcase>
+        <testcase classname="src/modules/dashboard/spending.test.ts" name="GET /api/dashboard/spending (Story-001) &gt; T-013 a spending request logs neither amounts nor category names (AC-1, GR-008)" time="0.0136659">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/dashboard/trend.test.ts" timestamp="2026-10-27T19:38:22.575Z" hostname="Tika" tests="9" failures="0" errors="0" skipped="0" time="0.5210774">
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="trend service (Story-002) &gt; T-014 months=6,end=2026-03 yields 2025-10..2026-03 oldest first across a year boundary (AC-1)" time="0.3639765">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="trend service (Story-002) &gt; T-015 gap months are zero-filled with totalMinor 0 (AC-2)" time="0.0099358">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="trend service (Story-002) &gt; T-016 no months or end gives 6 points ending in the current month (fake clock) (AC-3)" time="0.0137616">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-017 seeded expenses over several months give exactly 6 points with correct sums and the currency (AC-1)" time="0.0339638">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-017 without months and end the response has 6 points ending in the current month (AC-3)" time="0.0157247">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-018 user B gets all-zero points and A&apos;s figures never appear (AC-4, QG-ISOLATION)" time="0.0133937">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-019 no session is 401; months=25 and end=2026-99 are 400 problem+json; income is excluded (AC-5)" time="0.0150355">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-020 10,000 seeded rows with months=24 are answered under a generous bound using the index" time="0.0387309">
+        </testcase>
+        <testcase classname="src/modules/dashboard/trend.test.ts" name="GET /api/dashboard/trend (Story-002) &gt; T-021 a trend request logs no amounts or category names (AC-1, GR-008)" time="0.0153724">
+        </testcase>
+    </testsuite>
+</testsuites>
