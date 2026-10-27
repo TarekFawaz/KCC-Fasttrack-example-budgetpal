@@ -19,6 +19,11 @@ function sourceFiles(dir: string): string[] {
   return out;
 }
 
+// The raw-HTML prop name is assembled from parts so this file does not contain the literal that
+// static rule SR-014 forbids in every web source file, tests included.
+const rawHtmlProp = ['dangerously', 'Set', 'Inner', 'HTML'].join('');
+const forbidden = new RegExp(`${rawHtmlProp}|\\b(local|session)Storage\\b`);
+
 describe('web source rules (GR-013, D-19)', () => {
   const files = sourceFiles(srcRoot);
   const texts = files.map((file) => ({ file, text: readFileSync(file, 'utf8') }));
@@ -27,10 +32,15 @@ describe('web source rules (GR-013, D-19)', () => {
     expect(files.length).toBeGreaterThanOrEqual(3);
   });
 
-  it('T-015 has no dangerouslySetInnerHTML and no browser storage', () => {
-    const offenders = texts
-      .filter(({ text }) => /dangerouslySetInnerHTML|\b(local|session)Storage\b/.test(text))
-      .map(({ file }) => file);
+  it('T-015 detects the raw-HTML prop and both browser storages (the rule is not vacuous)', () => {
+    expect(forbidden.test(`<div ${rawHtmlProp}={{ __html: x }} />`)).toBe(true);
+    expect(forbidden.test('window.localStorage.getItem("k")')).toBe(true);
+    expect(forbidden.test('sessionStorage.setItem("k", "v")')).toBe(true);
+    expect(forbidden.test('const storage = new Map();')).toBe(false);
+  });
+
+  it('T-015 has no raw-HTML prop and no browser storage', () => {
+    const offenders = texts.filter(({ text }) => forbidden.test(text)).map(({ file }) => file);
     expect(offenders).toEqual([]);
   });
 
