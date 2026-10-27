@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ApiProblem, useSignUp } from './authApi';
-import { AuthField, authStyles, safeTarget, useFocusFirstError, type FieldErrors } from './LoginPage';
+import { AuthField, authStyles, useFocusFirstError, type FieldErrors } from './LoginPage';
 
 export const MIN_PASSWORD_LENGTH = 15;
 export const MAX_PASSWORD_LENGTH = 128;
@@ -39,8 +39,6 @@ function fromProblem(problem: unknown): { fields: FieldErrors; form: string | nu
 }
 
 export function SignUpPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const signUp = useSignUp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,16 +52,12 @@ export function SignUpPage() {
     const next = validateSignUp(email, password);
     setErrors(next);
     if (next.email || next.password) return;
-    const target = safeTarget(location.state);
-    // Promise form: the session turns authenticated first and unmounts this page (see LoginPage).
-    signUp.mutateAsync({ email: email.trim(), password }).then(
-      () => navigate(target, { replace: true }),
-      (problem: unknown) => {
-        const mapped = fromProblem(problem);
-        setErrors(mapped.fields);
-        setFormError(mapped.form);
-      },
-    );
+    // On success the session turns authenticated and `AuthGate` owns the move (see LoginPage).
+    signUp.mutateAsync({ email: email.trim(), password }).catch((problem: unknown) => {
+      const mapped = fromProblem(problem);
+      setErrors(mapped.fields);
+      setFormError(mapped.form);
+    });
   }
 
   return (

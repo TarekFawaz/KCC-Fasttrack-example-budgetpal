@@ -8,6 +8,35 @@ import { useSession, useSignOut } from './session';
 /** The only pages an anonymous visitor may open; every other URL goes to `/login`. */
 const ANONYMOUS_PATHS = ['/login', '/signup'];
 
+/** Pages a user must never be sent back to after signing in. */
+const NEVER_RETURN_TO = [...ANONYMOUS_PATHS, '/logout'];
+
+/**
+ * Where to go once signed in: the `from` this gate left in router state when it sent the visitor to
+ * `/login`, but only when it is a same-origin path (one leading slash, not `//host`, no backslash,
+ * no scheme) that is not an auth page. Anything else, including a missing `from`, lands on `/`.
+ * Router state only: nothing is read from the URL or from browser storage (SR-015, GR-013).
+ */
+export function safeTarget(state: unknown): string {
+  const from = (state as { from?: { pathname?: unknown; search?: unknown } } | null | undefined)?.from;
+  if (typeof from !== 'object' || from === null) return '/';
+  const { pathname, search } = from;
+  if (typeof pathname !== 'string' || !isPlainPath(pathname)) return '/';
+  if (!pathname.startsWith('/') || pathname.startsWith('//')) return '/';
+  if (NEVER_RETURN_TO.includes(pathname.replace(/\/+$/, '') || '/')) return '/';
+  if (search === undefined || search === '') return pathname;
+  if (typeof search !== 'string' || !search.startsWith('?') || !isPlainPath(search)) return '/';
+  return `${pathname}${search}`;
+}
+
+/** No backslash (browsers read `/\host` as `//host`) and no control character. */
+function isPlainPath(value: string): boolean {
+  for (const char of value) {
+    if (char === '\\' || char.charCodeAt(0) < 32) return false;
+  }
+  return true;
+}
+
 interface AuthGateProps {
   features: Feature[];
 }
@@ -98,11 +127,14 @@ export function AuthGate({ features }: AuthGateProps) {
   }
 
   const protectedFeatures = features.filter((feature) => !isPublic(feature));
+  // The one owner of the post-sign-in navigation: the pages only flip the session, and this redirect
+  // (decided in the same render that sees the session turn authenticated) is the only move.
+  const afterSignIn = safeTarget(location.state);
   return (
     <Routes>
       {publicFeatures.map((feature) =>
         ANONYMOUS_PATHS.includes(feature.path) ? (
-          <Route key={feature.id} path={feature.path} element={<Navigate to="/" replace />} />
+          <Route key={feature.id} path={feature.path} element={<Navigate to={afterSignIn} replace />} />
         ) : (
           <Route
             key={feature.id}

@@ -2,16 +2,16 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import axe from 'axe-core';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AuthGate } from '../../kernel/AuthGate';
+import { AuthGate, safeTarget } from '../../kernel/AuthGate';
 import { createAppQueryClient } from '../../kernel/queryClient';
 import { buildRegistry, features, isPublic, type Feature } from '../../kernel/registry';
 import { SESSION_KEY } from '../../kernel/session';
 import { mockSession } from '../../test/session';
-import { LOGIN_FAILED_MESSAGE, LoginPage, LogOutPage, safeTarget } from './LoginPage';
+import { LOGIN_FAILED_MESSAGE, LoginPage, LogOutPage } from './LoginPage';
 import { SignUpPage } from './SignUpPage';
 import { features as authFeatures } from './feature';
 
@@ -39,11 +39,12 @@ function mockApi(handlers: Record<string, () => Response>) {
   return calls;
 }
 
-function renderApp(path: string) {
+/** The pages alone, without the gate: the post-sign-in navigation belongs to the gate, not to them. */
+function renderApp(entry: string | { pathname: string; state?: unknown }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[path]} future={routerFuture}>
+      <MemoryRouter initialEntries={[entry]} future={routerFuture}>
         <Routes>
           <Route path="/" element={<p>home page</p>} />
           <Route path="/signup" element={<SignUpPage />} />
@@ -59,17 +60,28 @@ function fill(label: string, value: string) {
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 }
 
+/** The JSON bodies a `mockSession` stub saw POSTed to `url`, in order. */
+function postedBodies(stub: ReturnType<typeof mockSession>, url: string): unknown[] {
+  return stub.mock.calls
+    .filter(([input, init]) => input === url && init?.method === 'POST')
+    .map(([, init]) => JSON.parse(String(init?.body)));
+}
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe('SignUpPage', () => {
-  it('T-030 a valid submit calls signup with the credentials, then lands on the home page', async () => {
-    const calls = mockApi({ 'POST /api/auth/signup': () => json(201, { id: 1, email: 'ana@example.com' }) });
-    renderApp('/signup');
+  it('T-030 a valid submit calls signup with the credentials, then the gate lands on the dashboard', async () => {
+    const stub = mockSession('anonymous', (url, init) =>
+      url === '/api/auth/signup' && init?.method === 'POST' ? json(201, { id: 1, email: 'ana@example.com' }) : undefined,
+    );
+    renderGuarded('/signup');
+    expect(await screen.findByRole('heading', { name: 'Sign up' })).toBeInTheDocument();
     fill('Email', ' ana@example.com ');
     fill('Password', GOOD_PASSWORD);
     fireEvent.click(screen.getByRole('button', { name: 'Sign up' }));
-    expect(await screen.findByText('home page')).toBeInTheDocument();
-    expect(calls).toEqual([{ key: 'POST /api/auth/signup', body: { email: 'ana@example.com', password: GOOD_PASSWORD } }]);
+    expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
+    expect(where()).toBe('/');
+    expect(postedBodies(stub, '/api/auth/signup')).toEqual([{ email: 'ana@example.com', password: GOOD_PASSWORD }]);
   });
 
   it('T-031 invalid input shows inline errors tied to the labelled inputs and focuses the first one', async () => {
@@ -144,14 +156,18 @@ describe('LoginPage', () => {
     expect(screen.queryByText('home page')).not.toBeInTheDocument();
   });
 
-  it('T-032 correct credentials log in and land on the home page', async () => {
-    const calls = mockApi({ 'POST /api/auth/login': () => json(200, { id: 1, email: 'ana@example.com' }) });
-    renderApp('/login');
+  it('T-032 correct credentials log in and the gate lands on the dashboard', async () => {
+    const stub = mockSession('anonymous', (url, init) =>
+      url === '/api/auth/login' && init?.method === 'POST' ? json(200, { id: 1, email: 'ana@example.com' }) : undefined,
+    );
+    renderGuarded('/login');
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument();
     fill('Email', 'ana@example.com');
     fill('Password', GOOD_PASSWORD);
     fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
-    expect(await screen.findByText('home page')).toBeInTheDocument();
-    expect(calls[0]).toEqual({ key: 'POST /api/auth/login', body: { email: 'ana@example.com', password: GOOD_PASSWORD } });
+    expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
+    expect(where()).toBe('/');
+    expect(postedBodies(stub, '/api/auth/login')).toEqual([{ email: 'ana@example.com', password: GOOD_PASSWORD }]);
   });
 
   it('T-032 empty fields are caught on the page without a request', async () => {
@@ -305,6 +321,49 @@ const fromBudgets = { from: { pathname: '/budgets', search: '?month=2026-10' } }
 const userBody = () => json(200, { id: 1, email: 'ana@example.com' });
 const where = () => screen.getByTestId('where').textContent;
 
+/** Lets every pending microtask and zero-delay timer run, so a late second navigation would show. */
+const flush = () => act(async () => new Promise<void>((done) => setTimeout(done, 25)));
+
+describe('single owner of the post-sign-in navigation (Bug-001)', () => {
+  it.each(['/login', '/signup'])(
+    'T-022 the gate alone sends a signed-in visitor at %s with a remembered target to that target',
+    async (path) => {
+      mockSession('authenticated');
+      renderGuarded({ pathname: path, state: fromBudgets });
+      expect(await screen.findByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
+      await flush();
+      expect(where()).toBe('/budgets?month=2026-10');
+    },
+  );
+
+  it.each(['/login', '/signup'])(
+    'T-023 the gate alone sends a signed-in visitor at %s with an unsafe remembered target to /',
+    async (path) => {
+      mockSession('authenticated');
+      renderGuarded({ pathname: path, state: { from: { pathname: '//evil.example', search: '' } } });
+      expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
+      await flush();
+      expect(where()).toBe('/');
+    },
+  );
+
+  it.each([
+    ['log-in', '/login', 'POST /api/auth/login', 'Log in'],
+    ['sign-up', '/signup', 'POST /api/auth/signup', 'Sign up'],
+  ])('T-022 the %s page does not navigate itself after success: the gate owns where the user lands', async (_name, path, key, button) => {
+    const calls = mockApi({ [key]: () => json(200, { id: 1, email: 'ana@example.com' }) });
+    renderApp({ pathname: path, state: fromBudgets });
+    fill('Email', 'ana@example.com');
+    fill('Password', GOOD_PASSWORD);
+    fireEvent.click(screen.getByRole('button', { name: button }));
+    await waitFor(() => expect(calls.map((call) => call.key)).toEqual([key]));
+    await flush();
+    // No gate here, so a page that navigated would leave its own route (to the target or to /).
+    expect(screen.queryByText('home page')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: button })).toBeInTheDocument();
+  });
+});
+
 describe('return to the target after sign-in', () => {
   it('T-022 a visitor sent from /budgets?month=2026-10 lands there after logging in', async () => {
     mockSession('anonymous', (url, init) => (url === '/api/auth/login' && init?.method === 'POST' ? userBody() : undefined));
@@ -315,7 +374,9 @@ describe('return to the target after sign-in', () => {
     fill('Password', GOOD_PASSWORD);
     fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
     expect(await screen.findByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
+    await flush();
     expect(where()).toBe('/budgets?month=2026-10');
+    expect(screen.getByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
   });
 
   it('T-022 a visitor sent from /budgets?month=2026-10 lands there after signing up', async () => {
@@ -328,7 +389,9 @@ describe('return to the target after sign-in', () => {
     fill('Password', GOOD_PASSWORD);
     fireEvent.click(screen.getByRole('button', { name: 'Sign up' }));
     expect(await screen.findByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
+    await flush();
     expect(where()).toBe('/budgets?month=2026-10');
+    expect(screen.getByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
   });
 
   it('T-022 with no remembered target, login and sign-up land on /', async () => {
@@ -366,6 +429,7 @@ describe('return to the target after sign-in', () => {
       fill('Password', GOOD_PASSWORD);
       fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
       expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
+      await flush();
       expect(where()).toBe('/');
     },
   );
@@ -446,9 +510,12 @@ describe('log out inside the guarded app', () => {
 
 describe('target and storage rules', () => {
   it('T-027 the target is read from router state and no auth source touches browser storage', () => {
-    const login = readFileSync(resolve(here, 'LoginPage.tsx'), 'utf8');
-    expect(login).toMatch(/location\.state/);
-    expect(login).not.toMatch(/URLSearchParams|document\.cookie|location\.hash/);
+    // The gate owns the post-sign-in move (Bug-001), so it is the one place that reads the target.
+    const gate = readFileSync(resolve(here, '../../kernel/AuthGate.tsx'), 'utf8');
+    expect(gate).toMatch(/location\.state/);
+    expect(gate).not.toMatch(/URLSearchParams|document\.cookie|location\.hash/);
+    const pages = ['LoginPage.tsx', 'SignUpPage.tsx'].map((file) => readFileSync(resolve(here, file), 'utf8')).join('\n');
+    expect(pages).not.toMatch(/location\.state|URLSearchParams|document\.cookie|location\.hash/);
     // Assembled from parts so this file does not contain the literals static rule SR-014 forbids.
     const storage = new RegExp(`\\b(${['local', 'session'].join('|')})Storage\\b`);
     for (const file of ['LoginPage.tsx', 'SignUpPage.tsx', 'authApi.ts', 'feature.ts']) {
