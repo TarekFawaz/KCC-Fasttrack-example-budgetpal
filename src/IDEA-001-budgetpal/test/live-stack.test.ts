@@ -26,12 +26,20 @@ const tlsFailure: RunResult = {
     'npm error code UNABLE_TO_VERIFY_LEAF_SIGNATURE\nnpm error request to https://registry.npmjs.org/pnpm failed\n',
 };
 
+const poolsExhausted: RunResult = {
+  status: 1,
+  stdout: '',
+  stderr:
+    'Error response from daemon: all predefined address pools have been fully subnetted\n',
+};
+
 /** Fake docker: answers by subcommand and records every call. */
-function fakeDocker(answers: { compose?: RunResult; info?: RunResult; run?: RunResult }) {
+function fakeDocker(answers: { compose?: RunResult; info?: RunResult; run?: RunResult; network?: RunResult }) {
   const calls: string[][] = [];
   const run: Runner = (command, args) => {
     calls.push([command, ...args]);
-    const sub = args[0] === 'compose' ? 'compose' : args[0] === 'info' ? 'info' : 'run';
+    const sub =
+      args[0] === 'compose' ? 'compose' : args[0] === 'info' ? 'info' : args[0] === 'network' ? 'network' : 'run';
     return answers[sub] ?? ok;
   };
   return { run, calls };
@@ -103,6 +111,29 @@ describe('live-stack gate: probeLiveStack', () => {
   it('runs the live stack (no skip reason) when the daemon answers and the registry is reachable', () => {
     const probe = probeLiveStack(dockerfile, fakeDocker({}).run);
     expect(probe).toEqual({ cli: true, daemon: true, registry: true, skipReason: null });
+  });
+
+  it('skips and says so when Docker cannot create a network (address pools used up), without probing the registry', () => {
+    const docker = fakeDocker({ network: poolsExhausted });
+    const probe = probeLiveStack(dockerfile, docker.run);
+    expect(probe.cli).toBe(true);
+    expect(probe.daemon).toBe(true);
+    expect(probe.registry).toBeNull();
+    expect(probe.skipReason).toMatch(/cannot create a network/i);
+    expect(probe.skipReason).toContain('all predefined address pools have been fully subnetted');
+    expect(docker.calls.some((call) => call[1] === 'run')).toBe(false);
+    expect(docker.calls.some((call) => call[1] === 'network' && call[2] === 'rm')).toBe(false);
+  });
+
+  it('creates one throwaway network and removes the same one again when the probe passes', () => {
+    const docker = fakeDocker({});
+    probeLiveStack(dockerfile, docker.run);
+    const create = docker.calls.find((call) => call[1] === 'network' && call[2] === 'create');
+    const remove = docker.calls.find((call) => call[1] === 'network' && call[2] === 'rm');
+    expect(create).toBeDefined();
+    expect(remove).toBeDefined();
+    expect(remove![3]).toBe(create![3]);
+    expect(create![3]).toMatch(/^budgetpal-probe-/);
   });
 
   it('does not probe the registry when the Dockerfile downloads nothing', () => {
