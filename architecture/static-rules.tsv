@@ -1,0 +1,19 @@
+id	files	forbidden	allowed_in	message
+SR-001	(^|/)(docker-)?compose[^/]*\.ya?ml$	^\s*-\s*["']?(0\.0\.0\.0:)?\d{1,5}:\d{1,5}|^\s*published:	^$	GR-001: publish ports on 127.0.0.1 only ("127.0.0.1:3000:3000"); a bare or 0.0.0.0 port mapping exposes the app to the network
+SR-002	^api/src/.*\.ts$	\.(prepare|exec)\(	(\.repository\.ts$|^api/src/kernel/db/|\.test\.ts$)	GR-002/GR-003: SQL runs only in *.repository.ts files or api/src/kernel/db/, always scoped by userId
+SR-003	^api/src/.*\.ts$	\.(prepare|exec)\(\s*(`[^`]*\$\{|["'][^"']*["']\s*\+)	\.test\.ts$	GR-003: no string-built SQL; use ? or @name placeholders
+SR-004	^api/src/.*\.ts$	httpOnly:\s*false|sameSite:\s*["']?([Nn]one|false)	\.test\.ts$	GR-005: session cookie must be HttpOnly and SameSite=Lax
+SR-005	^(api/src/.*\.ts|web/nginx[^/]*\.conf(\.template)?)$	@fastify/cors|fastify-cors|Access-Control-Allow-Origin	^$	GR-005: no CORS; the web reaches the api same-origin through the nginx proxy
+SR-006	^api/src/modules/[^/]+/[^/]+\.ts$	from\s+["']\.\./[^.'"]|from\s+["']\.\./\.\./modules/	^$	GR-006: a module must not import from another module; use api/src/kernel/
+SR-007	^web/src/features/[^/]+/[^/]+\.tsx?$	from\s+["']\.\./[^.'"]|from\s+["']\.\./\.\./features/	^$	GR-006: a feature must not import from another feature; use web/src/kernel/
+SR-008	/migrations/[^/]+\.sql$	\b(REAL|real|FLOAT|float|DOUBLE|double|DECIMAL|decimal|NUMERIC|numeric)\b	^$	GR-007: money is INTEGER minor units; no floating-point or decimal columns
+SR-009	^(api|web)/src/.*\.tsx?$	\bparseFloat\(|\.toFixed\(	\.test\.tsx?$	GR-007: no floating-point money handling; use integer minor units and Intl for display
+SR-010	^api/src/.*\.ts$	\b(log|logger|console)\w*\.(trace|debug|info|warn|error|fatal|log)\(.*(password|passwd|[Hh]ash|cookie|sessionId|session_id|description|csv|amount)	\.test\.ts$	GR-008: never log passwords, hashes, cookies, session ids, CSV content, descriptions or amounts
+SR-011	^api/src/modules/.*\.ts$	\b(writeFile|writeFileSync|createWriteStream|appendFile|appendFileSync|copyFile)\b	\.test\.ts$	GR-009: uploads are processed in memory and never written to disk
+SR-012	^api/src/modules/.*\.ts$	csv-stringify|Content-Disposition	\.test\.ts$	GR-009: no CSV export in v1 (formula-injection risk deferred)
+SR-013	^api/src/.*\.ts$	["'](md5|sha1)["']|createCipher\(|Math\.random\(	\.test\.ts$	GR-010: no weak or custom crypto; use argon2 for passwords and crypto.randomBytes for ids
+SR-014	^web/src/.*\.tsx?$	dangerouslySetInnerHTML|\.innerHTML\s*=	^$	GR-013: React output encoding only; never inject raw HTML
+SR-015	^web/src/.*\.tsx?$	\b(local|session)Storage\b	\.test\.tsx?$	GR-013: no browser storage of tokens, sessions or data in v1
+SR-016	(^|/)\.env\.example$	^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*\S	^$	GR-015: .env.example lists variable names with empty values only
+SR-017	^api/src/.*\.ts$	\.stack\b	\.test\.ts$	GR-016: no stack traces in responses; log errors through the pino err serializer
+SR-018	(^|/)Dockerfile[^/]*$	^USER\s+(root|0)\b|^FROM\s+[^:\s]+(:latest)?(\s+AS\s+\w+)?\s*$	^$	GR-017: run as a non-root user and pin base image tags (no :latest, no untagged FROM)
