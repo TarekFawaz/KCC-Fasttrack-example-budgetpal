@@ -1,0 +1,118 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.5);
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Single column by default (360 px); the form spreads over a row from 768 px. */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space);
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.control {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  min-height: 2.75rem;
+  width: 100%;
+}
+
+.error {
+  margin: 0;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.button:focus-visible,
+.control:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.range {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .filters {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: start;
+  }
+}
