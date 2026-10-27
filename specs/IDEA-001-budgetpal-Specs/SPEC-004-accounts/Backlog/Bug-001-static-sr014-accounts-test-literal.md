@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-004-accounts]] | verifier | major | fixed | Story-003 / AC-6 | T-023 | [[../../../../TestResults/IDEA-001/SPEC-004/Story-003-AC-6-Bug-001]] |
+| Bug | [[../SPEC-004-accounts]] | verifier | major | verified | Story-003 / AC-6 | T-023 | [[../../../../TestResults/IDEA-001/SPEC-004/Story-003-AC-6-Bug-001]] |
 
 ## Reproduce
 1. Run `.KCC/tools/quality-gate -Spec SPEC-004`.
