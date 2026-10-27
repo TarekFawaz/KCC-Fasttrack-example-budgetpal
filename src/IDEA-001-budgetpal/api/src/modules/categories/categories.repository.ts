@@ -24,8 +24,6 @@ interface CategoryRow {
   created_at: string;
 }
 
-const COLUMNS = 'id, name, kind, created_at';
-
 const toCategory = (row: CategoryRow): Category => ({
   id: row.id,
   name: row.name,
@@ -45,7 +43,7 @@ const FK_CODES = ['SQLITE_CONSTRAINT_FOREIGNKEY', 'SQLITE_CONSTRAINT_TRIGGER'];
 /** The caller's categories, ordered by name (case-insensitive). */
 export function list(db: Database.Database, userId: number): Category[] {
   const rows = db
-    .prepare(`SELECT ${COLUMNS} FROM categories WHERE user_id = ? ORDER BY name COLLATE NOCASE, id`)
+    .prepare('SELECT id, name, kind, created_at FROM categories WHERE user_id = ? ORDER BY name COLLATE NOCASE, id')
     .all(userId) as CategoryRow[];
   return rows.map(toCategory);
 }
@@ -53,7 +51,7 @@ export function list(db: Database.Database, userId: number): Category[] {
 /** `undefined` when the id does not exist or belongs to another user. */
 export function findById(db: Database.Database, userId: number, id: number): Category | undefined {
   const row = db
-    .prepare(`SELECT ${COLUMNS} FROM categories WHERE id = ? AND user_id = ?`)
+    .prepare('SELECT id, name, kind, created_at FROM categories WHERE id = ? AND user_id = ?')
     .get(id, userId) as CategoryRow | undefined;
   return row ? toCategory(row) : undefined;
 }

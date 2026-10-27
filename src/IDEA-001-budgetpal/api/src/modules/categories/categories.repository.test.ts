@@ -4,7 +4,6 @@ import type Database from 'better-sqlite3';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openDb } from '../../kernel/db/index.js';
 import { runMigrations } from '../../kernel/db/migrate.js';
-import { insertUser } from '../auth/auth.repository.js';
 import {
   CategoryInUseError,
   DuplicateNameError,
@@ -21,11 +20,14 @@ let db: Database.Database;
 let userA: number;
 let userB: number;
 
-const addUser = (email: string): number => {
-  const user = insertUser(db, { email, passwordHash: 'not-a-real-hash', now: Date.now() });
-  if (!user) throw new Error('user exists');
-  return user.id;
-};
+// A plain row in the kernel-owned schema: a module must not import another module (GR-006), and
+// these tests only need a users row for the categories.user_id foreign key.
+const addUser = (email: string): number =>
+  Number(
+    db
+      .prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)')
+      .run(email, 'not-a-real-hash', Date.now()).lastInsertRowid,
+  );
 
 beforeEach(() => {
   db = openDb(':memory:');
