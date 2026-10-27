@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { loadConfig, type Config } from '../../kernel/config.js';
 import { registerProblemHandler } from '../../kernel/problem.js';
 import { registerSessionStore } from '../../kernel/require-user.js';
+import { registerLogin } from './login.js';
 import { createSessionStore } from './sessions.js';
 import { registerSignUp } from './signup.js';
 
@@ -22,6 +23,7 @@ export function createAuthModule(options: AuthModuleOptions = {}): FastifyPlugin
     registerProblemHandler(app);
 
     registerSignUp(app, { sessions, config, now: options.now });
+    registerLogin(app, { sessions, config });
   };
 }
 
