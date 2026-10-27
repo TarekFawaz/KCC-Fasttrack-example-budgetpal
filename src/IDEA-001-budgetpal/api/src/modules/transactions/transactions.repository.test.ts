@@ -70,6 +70,7 @@ describe('transactions migration', () => {
         'amount_minor',
         'category_id',
         'created_at',
+        'dedupe_key', // added by SPEC-006 migration 0060
         'description',
         'id',
         'occurred_on',

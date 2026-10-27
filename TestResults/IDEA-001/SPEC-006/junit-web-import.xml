@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="19" failures="0" errors="0" time="3.17">
+    <testsuite name="src/features/import/ImportPage.test.tsx" timestamp="2026-10-27T19:49:27.220Z" hostname="Tika" tests="19" failures="0" errors="0" skipped="0" time="1.3656793">
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 feature.ts exports the Import entry and the registry lists it" time="0.0011332">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 the shell shows an &quot;Import&quot; nav entry that leads to the page" time="0.0851984">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 the empty state shows the file picker, the 5 MB / 5000-row limits and the UTF-8 note" time="0.0238595">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="import feature registration and empty state (AC-1) &gt; T-031 with no account the page points to Accounts and disables the picker" time="0.0168941">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 uploading asks for a preview, pre-fills the selects from the suggestion and asks again with the mapping" time="0.0597124">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 changing a select asks for a new preview with the new value" time="0.0984266">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="mapping (AC-2) &gt; T-032 without a suggestion the selects start empty and no rows are requested until all three are chosen" time="0.0864001">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="preview (AC-3) &gt; T-033 valid rows show in a table, invalid rows by line with the reason, and Import is enabled" time="0.0668551">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="preview (AC-3) &gt; T-033 Import is disabled while no valid row exists" time="0.0458459">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="result (AC-4) &gt; T-034 confirming sends the commit and shows imported, skipped and invalid as text with an icon, the invalid lines and a link" time="0.0888789">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="result (AC-4) &gt; T-034 &quot;Import another file&quot; returns to the empty state" time="0.1097279">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 400 with a field error shows it inline next to that control" time="0.0621444">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 400 on the file shows next to the picker; a 404 shows next to the account select" time="0.0451003">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a 404 shows an inline error next to the account select" time="0.063469">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 HTML and spreadsheet formulas in a cell render as plain text" time="0.0465022">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="errors and plain text (AC-5) &gt; T-035 a failing commit shows its field error and stays on the preview" time="0.0915849">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-036 axe finds no serious violations on the empty, mapping, preview and result steps" time="0.2027989">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-037 every control has a label and the tab order follows the page" time="0.0637316">
+        </testcase>
+        <testcase classname="src/features/import/ImportPage.test.tsx" name="accessibility (AC-6) &gt; T-037 focus moves to the Preview heading, then to the result heading" time="0.1061744">
+        </testcase>
+    </testsuite>
+</testsuites>

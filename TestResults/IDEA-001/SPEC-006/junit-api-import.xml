@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="88" failures="0" errors="0" time="1.523">
+    <testsuite name="src/modules/import/import.commit.test.ts" timestamp="2026-10-27T19:49:22.523Z" hostname="Tika" tests="15" failures="0" errors="0" skipped="0" time="0.6259659">
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-023 a 10-row file returns {imported, skipped, invalid, invalidRows} and stores a formula description verbatim (AC-1)" time="0.3888484">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-024 importing the same file twice imports 0 the second time and skips every valid row (AC-2)" time="0.0143913">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-024 a duplicate inside one file counts as skipped, whatever the case and spacing of its description" time="0.0100899">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-025 invalid rows are reported by line and never stored; the valid ones are (AC-3)" time="0.0120247">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-025 a row whose sign has no category chosen is reported invalid and not stored (A-1)" time="0.0100704">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-026 another user&apos;s account is a 404 problem+json and nothing is written (AC-4)" time="0.010222">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-026 a category that is not the caller&apos;s is a 400 and nothing is written" time="0.0097192">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-027 two users importing the same rows each keep their own and see only their own (AC-4)" time="0.0152448">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-028 bad input and no session write nothing (AC-5) &gt; a 6 MB file is a 400 problem+json naming the file" time="0.0138564">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-028 bad input and no session write nothing (AC-5) &gt; 5001 rows is a 400 and stores none of them" time="0.0271665">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-028 bad input and no session write nothing (AC-5) &gt; a request without a mapping or a date format is a 400 (commit needs both)" time="0.0133732">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-028 bad input and no session write nothing (AC-5) &gt; invalid UTF-8 and a missing file are 400s" time="0.0139927">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-028 bad input and no session write nothing (AC-5) &gt; no session is a 401 problem+json whatever the body holds" time="0.007422">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-029 a 5000-row commit finishes in under 10 s and the rows appear in GET /transactions by account and month (AC-6)" time="0.0534876">
+        </testcase>
+        <testcase classname="src/modules/import/import.commit.test.ts" name="POST /api/import/commit (Story-002) &gt; T-030 the log holds counts and no row content, and /api/import/commit is in the OpenAPI document (AC-7)" time="0.0250644">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/import/import.parser.test.ts" timestamp="2026-10-27T19:49:22.529Z" hostname="Tika" tests="43" failures="0" errors="0" skipped="0" time="0.0452148">
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-001 parseCsv reads RFC 4180 text (Enabler-001 AC-1) &gt; T-001 quoted commas and quotes, CRLF, header detected" time="0.0034792">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-001 parseCsv reads RFC 4180 text (Enabler-001 AC-1) &gt; T-001 strips a BOM and handles an empty file" time="0.0005354">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-001 parseCsv reads RFC 4180 text (Enabler-001 AC-1) &gt; T-001 a file with no header row gets generated column names and keeps its first row" time="0.0003982">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-001 parseCsv reads RFC 4180 text (Enabler-001 AC-1) &gt; T-001 reports the line a record starts on when a cell holds a line break" time="0.0002592">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-002 parseCsv enforces the caps (Enabler-001 AC-2) &gt; T-002 more than 5000 data rows" time="0.0166794">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-002 parseCsv enforces the caps (Enabler-001 AC-2) &gt; T-002 exactly 5000 data rows is accepted" time="0.0135409">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-002 parseCsv enforces the caps (Enabler-001 AC-2) &gt; T-002 more than 5 MB" time="0.0002695">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-002 parseCsv enforces the caps (Enabler-001 AC-2) &gt; T-002 invalid UTF-8" time="0.0001989">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-002 parseCsv enforces the caps (Enabler-001 AC-2) &gt; T-002 malformed quoting never leaks file content in the message" time="0.0006123">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-003 dates (Enabler-001 AC-3) &gt; T-003 ISO, DD/MM/YYYY and MM/DD/YYYY become YYYY-MM-DD" time="0.0003508">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-003 dates (Enabler-001 AC-3) &gt; T-003 31/02 and a wrong format are invalid" time="0.0001571">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-003 dates (Enabler-001 AC-3) &gt; T-003 a row yields date, amount and description, or its 1-based line" time="0.0005065">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 -12.50 -&gt; -1250" time="0.0001261">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 12,5 -&gt; 1250" time="0.0000906">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 1000 -&gt; 100000" time="0.0000524">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 +0.07 -&gt; 7" time="0.0000606">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 0,99 -&gt; 99" time="0.0000397">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 19.99 -&gt; 1999" time="0.000039">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 1.1 -&gt; 110" time="0.0000386">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 9999999999.99 -&gt; 999999999999" time="0.0000597">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-004 amounts convert exactly (Enabler-001 AC-4) &gt; T-004 values that float arithmetic would get wrong stay exact" time="0.0001764">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;1.234&quot; is invalid" time="0.0001206">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;abc&quot; is invalid" time="0.0000437">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;1.234,56&quot; is invalid" time="0.0000508">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;1,234.56&quot; is invalid" time="0.0000449">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;&quot; is invalid" time="0.0000656">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;12.&quot; is invalid" time="0.0000762">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;.5&quot; is invalid" time="0.0001095">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;1e3&quot; is invalid" time="0.0000725">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;0&quot; is invalid" time="0.00011">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;0.00&quot; is invalid" time="0.0000655">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;-0&quot; is invalid" time="0.0000686">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 amount &quot;10000000000&quot; is invalid" time="0.0000991">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 empty or long description, missing column" time="0.0003099">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 a formula in a description is kept as plain text" time="0.0001433">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-005 invalid amounts and descriptions (Enabler-001 AC-4) &gt; T-005 suggests a mapping from header names" time="0.0003693">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-006 dedupe key (Enabler-001 AC-5) &gt; T-006 equal for case and whitespace variants, 64 hex characters" time="0.0006379">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-006 dedupe key (Enabler-001 AC-5) &gt; T-006 differs when user, account, date, amount or description changes" time="0.0003764">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-006 dedupe key (Enabler-001 AC-5) &gt; T-006 field boundaries cannot be shifted to forge a match" time="0.0001696">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-007 contract schemas (Enabler-001 AC-6) &gt; T-007 request schemas reject extra fields" time="0.0013851">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-007 contract schemas (Enabler-001 AC-6) &gt; T-007 commit needs mapping and date format" time="0.0002223">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-007 contract schemas (Enabler-001 AC-6) &gt; T-007 response schemas parse samples and reject extra keys" time="0.0012189">
+        </testcase>
+        <testcase classname="src/modules/import/import.parser.test.ts" name="T-007 contract schemas (Enabler-001 AC-6) &gt; T-007 the schemas are registered for OpenAPI" time="0.0004076">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/import/import.preview.test.ts" timestamp="2026-10-27T19:49:22.535Z" hostname="Tika" tests="16" failures="0" errors="0" skipped="0" time="0.5848452">
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-015 with a mapping returns headers, suggested mapping, counts, the first 20 valid rows and invalid rows by line (AC-1)" time="0.389698">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-015 a negative row without an expense category (A-1) is reported invalid by line, a positive one without income too" time="0.0124637">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-015 a category that is not the caller&apos;s, or has the wrong kind, is a 400 naming the field (A-1)" time="0.0134597">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-016 without a mapping returns the headers and a suggested mapping by name and validates no row (AC-2)" time="0.0108869">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-016 a header-less file gets Column n names and no suggested mapping" time="0.0102841">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-017 a preview inserts nothing and writes no file (AC-3)" time="0.0087351">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-018 without a session returns 401 problem+json before the body is read (AC-4)" time="0.0094431">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-019 another user&apos;s account id is a 404 and nothing of the caller changes (AC-4)" time="0.0144279">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; a 6 MB file" time="0.0159102">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; 5001 rows" time="0.0243238">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; a mapping that names a column the file does not have" time="0.0125687">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; a mapping that is not JSON, an unknown field, a bad date format and a bad account id" time="0.0162441">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; a mapping without a date format, a missing file and invalid UTF-8" time="0.009955">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-020 bad input is a 400 problem+json with field errors and no stack (AC-5) &gt; a malformed multipart body and a request that is not multipart" time="0.0086438">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-021 /docs/json lists POST /api/import/preview with its status codes (AC-6)" time="0.0161562">
+        </testcase>
+        <testcase classname="src/modules/import/import.preview.test.ts" name="POST /api/import/preview (Story-001) &gt; T-022 captured log output holds no CSV text, descriptions or amounts (AC-6)" time="0.0106884">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/modules/import/import.repository.test.ts" timestamp="2026-10-27T19:49:22.537Z" hostname="Tika" tests="14" failures="0" errors="0" skipped="0" time="0.0463713">
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-008 migration 0060 (Enabler-002 AC-1) &gt; T-008 adds dedupe_key and the partial unique index, leaving older rows untouched" time="0.018111">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-008 migration 0060 (Enabler-002 AC-1) &gt; T-008 several rows with a NULL key do not collide" time="0.0019514">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-009 accountBelongsToUser (Enabler-002 AC-2) &gt; T-009 true for the owner, false for another user and for an unknown id" time="0.0018185">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-010 insertBatch reports per-row outcomes (Enabler-002 AC-3) &gt; T-010 in-batch and cross-batch duplicates" time="0.00205">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-010 insertBatch reports per-row outcomes (Enabler-002 AC-3) &gt; T-010 stores integer minor units, the account and the dedupe key" time="0.0029848">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-010 insertBatch reports per-row outcomes (Enabler-002 AC-3) &gt; T-010 an empty batch is a no-op" time="0.0017346">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-011 insertBatch is atomic (Enabler-002 AC-3) &gt; T-011 a failing row rolls back every earlier row" time="0.0024235">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-012 the key is per user (Enabler-002 AC-4) &gt; T-012 the same row for two users stores two rows" time="0.0018798">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-012 the key is per user (Enabler-002 AC-4) &gt; T-012 an identical stored key under two users is allowed, under one user it is not" time="0.0016714">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-013 static layout (Enabler-002 AC-5) &gt; T-013 the migration uses INTEGER money and no REAL, FLOAT or DECIMAL" time="0.0018091">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-013 static layout (Enabler-002 AC-5) &gt; T-013 the repository binds values with placeholders only" time="0.0018623">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-013 static layout (Enabler-002 AC-5) &gt; T-013 no .prepare outside *.repository.ts in the module" time="0.0026361">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-013 static layout (Enabler-002 AC-5) &gt; T-013 the repository does not import another module (GR-006)" time="0.0026317">
+        </testcase>
+        <testcase classname="src/modules/import/import.repository.test.ts" name="T-014 categoryHasKind (Enabler-002 A-1) &gt; T-014 true only for an own category of the asked kind" time="0.0016994">
+        </testcase>
+    </testsuite>
+</testsuites>
