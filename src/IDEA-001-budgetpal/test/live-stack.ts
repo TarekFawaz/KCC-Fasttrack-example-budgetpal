@@ -40,6 +40,27 @@ const defaultRunner: Runner = (command, args, timeoutMs) => {
   };
 };
 
+/** Set to `1` (or `true`) to run the Docker live-stack tests; without it they are deferred. */
+export const LIVE_STACK_ENV = 'BUDGETPAL_LIVE_STACK';
+
+/**
+ * Human decision H-001: the Docker steps that need a registry, a free network and the fixed host ports 3000 and 8080
+ * (compose up, the containers, the smoke checks) are an accepted deferral, never a pass. They also cannot be trusted
+ * on a shared daemon: parallel lanes use the same compose project name and the same ports, so a stack started in one
+ * lane starves the others (services never turn healthy and the suite fails after the 180 s wait). The live stack is
+ * therefore opt-in. Returns why it is deferred, or null when the environment opts in.
+ */
+export function liveStackDeferral(env: Record<string, string | undefined>): string | null {
+  const value = (env[LIVE_STACK_ENV] ?? '').trim().toLowerCase();
+  if (value === '1' || value === 'true') return null;
+  return `accepted-deferred by human decision H-001 (docker compose up, containers and smoke checks are not run; set ${LIVE_STACK_ENV}=1 to run them)`;
+}
+
+/** `docker compose` is installed. Asks nothing of the daemon, the registry or the network. */
+export function composeCliAvailable(run: Runner = defaultRunner): boolean {
+  return run('docker', ['compose', 'version'], 20_000).status === 0;
+}
+
 /** The base image of the first stage and the package spec of its first `npm install -g`, or null if none. */
 export function buildProbe(dockerfile: string): { image: string; spec: string } | null {
   const image = dockerfile.match(/^FROM\s+(?:--\S+\s+)*(\S+)/m)?.[1];
@@ -69,7 +90,7 @@ function networkFailure(run: Runner): string | null {
 }
 
 export function probeLiveStack(dockerfile: string, run: Runner = defaultRunner): LiveStackProbe {
-  if (run('docker', ['compose', 'version'], 20_000).status !== 0) {
+  if (!composeCliAvailable(run)) {
     return { cli: false, daemon: false, registry: null, network: null, skipReason: 'docker compose is not installed' };
   }
   if (run('docker', ['info'], 20_000).status !== 0) {

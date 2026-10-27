@@ -86,7 +86,7 @@ All under `W/`. Migration `api/migrations/0080-dashboard-transactions-index.sql`
 | Story-001 | `src/IDEA-001-budgetpal/api/src/modules/dashboard/spending.test.ts` |
 | Story-002 | `src/IDEA-001-budgetpal/api/src/modules/dashboard/trend.test.ts` |
 | Story-003 | `src/IDEA-001-budgetpal/web/package.json`, `src/IDEA-001-budgetpal/pnpm-lock.yaml`, `src/IDEA-001-budgetpal/web/src/features/dashboard/format.ts`, `src/IDEA-001-budgetpal/web/src/features/dashboard/DashboardPage.test.tsx`, `src/IDEA-001-budgetpal/web/src/features/dashboard/SpendingByCategory.test.tsx`, `src/IDEA-001-budgetpal/web/src/features/dashboard/format.test.ts` |
-| Story-004 | `src/IDEA-001-budgetpal/web/src/features/dashboard/TrendChart.test.tsx` |
+| Story-004 | `src/IDEA-001-budgetpal/web/src/features/dashboard/TrendChart.test.tsx`, `src/IDEA-001-budgetpal/web/src/features/dashboard/TrendChart.tsx`, `src/IDEA-001-budgetpal/web/src/features/dashboard/api.ts`, `src/IDEA-001-budgetpal/web/src/features/dashboard/DashboardPage.tsx`, `src/IDEA-001-budgetpal/web/src/features/dashboard/DashboardPage.test.tsx` |
 
 ## Risk Flags
 - **R1 column name.** The spec text says `date` and index `(user_id, date)`; the SPEC-005 contract names the column `occurred_on`. Plan uses `occurred_on` everywhere; confirm against the merged `0050-transactions.sql` before coding. A mismatch is a stop-and-report, not a guess.

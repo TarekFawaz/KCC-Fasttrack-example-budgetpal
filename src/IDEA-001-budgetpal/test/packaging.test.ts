@@ -3,12 +3,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { readRoot, root } from './helpers.js';
-import { probeLiveStack } from './live-stack.js';
+import { composeCliAvailable, liveStackDeferral, probeLiveStack } from './live-stack.js';
 
 /**
  * Enabler-005: Dockerfiles, nginx, compose, README.
- * T-032, T-033, T-036, T-037 read the files; T-031, T-034, T-035 need a running Docker daemon whose build
- * container can reach the npm registry, and are skipped (deferred, not passed) when it cannot.
+ * T-032, T-033, T-036, T-037 read the files; T-031, T-034, T-035 are opt-in (BUDGETPAL_LIVE_STACK=1) and need a
+ * running Docker daemon whose build container can reach the npm registry. Without the opt-in, or when the
+ * environment cannot run them, they are skipped (deferred, not passed).
  */
 
 const compose = readRoot('docker-compose.yml');
@@ -19,11 +20,16 @@ const readme = readRoot('README.md');
 /** The architect's static rules, two levels above the workspace (src/IDEA-001-budgetpal -> repo root). */
 const staticRulesFile = resolve(root, '..', '..', 'architecture', 'static-rules.tsv');
 
-/** Daemon up AND a build container can reach the npm registry; otherwise the live stack is deferred. */
-const liveStack = probeLiveStack(webDockerfile);
-const dockerCli = liveStack.cli;
-if (liveStack.skipReason !== null && liveStack.cli) {
-  console.warn(`[live-stack] T-031, T-034, T-035 deferred (not a pass): ${liveStack.skipReason}`);
+/**
+ * The live stack is opt-in (H-001: an accepted deferral, never a pass). Without BUDGETPAL_LIVE_STACK=1 nothing is
+ * asked of the daemon, the registry or the network. With it, the daemon must be up AND a build container must reach
+ * the npm registry AND a network must be creatable; otherwise it is deferred with that reason.
+ */
+const deferral = liveStackDeferral(process.env);
+const dockerCli = composeCliAvailable();
+const liveSkipReason = deferral ?? (dockerCli ? probeLiveStack(webDockerfile).skipReason : 'docker compose is not installed');
+if (liveSkipReason !== null) {
+  console.warn(`[live-stack] T-031, T-034, T-035 deferred (not a pass): ${liveSkipReason}`);
 }
 
 /** Top-level service block text, up to the next service or top-level key. */
@@ -188,7 +194,7 @@ async function waitHealthy(timeoutMs: number): Promise<void> {
   throw new Error('services did not become healthy in time');
 }
 
-describe.skipIf(liveStack.skipReason !== null)('Enabler-005 live stack (needs a Docker daemon, npm registry access and a free Docker network)', () => {
+describe.skipIf(liveSkipReason !== null)('Enabler-005 live stack (opt-in via BUDGETPAL_LIVE_STACK=1; needs a Docker daemon, npm registry access and a free Docker network)', () => {
   it('T-031 compose up: both services healthy; web page and /api/health answer', async () => {
     const up = dc(['up', '--build', '-d']);
     expect(up.status, String(up.stderr)).toBe(0);

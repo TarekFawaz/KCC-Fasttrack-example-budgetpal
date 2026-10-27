@@ -1,0 +1,170 @@
+.page {
+  --chart-1: #1f5fbf;
+  --chart-2: #b45309;
+  --chart-3: #146c2e;
+  --chart-4: #8e24aa;
+  --chart-5: #c62828;
+  --chart-6: #00796b;
+  --chart-7: #5d4037;
+  --chart-8: #546e7a;
+
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.5);
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --chart-1: #8ab4f8;
+    --chart-2: #fdba74;
+    --chart-3: #81c995;
+    --chart-4: #d7a8f0;
+    --chart-5: #f28b82;
+    --chart-6: #5eead4;
+    --chart-7: #d7b8a8;
+    --chart-8: #b0bec5;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 16rem;
+}
+
+.control {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  min-height: 2.75rem;
+  width: 100%;
+}
+
+.button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.button:focus-visible,
+.control:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space);
+}
+
+.error {
+  margin: 0;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.empty a {
+  color: var(--link);
+}
+
+.spending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space);
+}
+
+.chart {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.slice {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.chart text {
+  fill: var(--text);
+  font-weight: 700;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tfoot th,
+.table tfoot td {
+  font-weight: 700;
+  border-top: 2px solid var(--border);
+}
+
+.table .amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-right: 0.5rem;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

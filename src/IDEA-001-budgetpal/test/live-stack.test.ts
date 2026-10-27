@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildProbe, probeLiveStack, type RunResult, type Runner } from './live-stack.js';
+import {
+  buildProbe,
+  composeCliAvailable,
+  LIVE_STACK_ENV,
+  liveStackDeferral,
+  probeLiveStack,
+  type RunResult,
+  type Runner,
+} from './live-stack.js';
 
 /**
  * Gate for the Docker live-stack tests in packaging.test.ts (T-031, T-034, T-035).
@@ -46,6 +54,38 @@ function fakeDocker(answers: { compose?: RunResult; info?: RunResult; run?: RunR
 }
 
 const networkCalls = (calls: string[][]): string[][] => calls.filter((call) => call[1] === 'network');
+
+describe('live-stack gate: opt-in (human decision H-001)', () => {
+  it('defers the live stack by default and names the decision and the switch', () => {
+    const reason = liveStackDeferral({});
+    expect(reason).toMatch(/accepted-deferred/);
+    expect(reason).toContain('H-001');
+    expect(reason).toContain(`${LIVE_STACK_ENV}=1`);
+  });
+
+  it.each(['', '0', 'false', 'yes', ' '])('keeps the live stack deferred for %j', (value) => {
+    expect(liveStackDeferral({ [LIVE_STACK_ENV]: value })).not.toBeNull();
+  });
+
+  it.each(['1', 'true', 'TRUE', ' 1 '])('runs the live stack when opted in with %j', (value) => {
+    expect(liveStackDeferral({ [LIVE_STACK_ENV]: value })).toBeNull();
+  });
+
+  it('reads only the opt-in variable', () => {
+    expect(liveStackDeferral({ CI: '1', DOCKER_HOST: 'x' })).not.toBeNull();
+  });
+
+  it('checks for the compose CLI with a single call and asks nothing else of Docker', () => {
+    const docker = fakeDocker({});
+    expect(composeCliAvailable(docker.run)).toBe(true);
+    expect(docker.calls).toEqual([['docker', 'compose', 'version']]);
+  });
+
+  it('reports the compose CLI as missing when `docker compose version` fails', () => {
+    const docker = fakeDocker({ compose: { status: null, stdout: '', stderr: 'spawn docker ENOENT' } });
+    expect(composeCliAvailable(docker.run)).toBe(false);
+  });
+});
 
 describe('live-stack gate: buildProbe', () => {
   it('reads the first base image and the first global npm install', () => {

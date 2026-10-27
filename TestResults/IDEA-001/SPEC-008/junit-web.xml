@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="29" failures="0" errors="0" time="3.403">
+    <testsuite name="src/features/dashboard/DashboardPage.test.tsx" timestamp="2026-10-27T19:38:34.116Z" hostname="Tika" tests="12" failures="0" errors="0" skipped="0" time="0.658419">
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 feature.ts exports the Dashboard entry for /dashboard and the registry lists it" time="0.0015133">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 the shell shows a &quot;Dashboard&quot; nav entry that opens /dashboard with the current month selected" time="0.1259016">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="dashboard feature registration &gt; T-022 the month picker starts on the current month" time="0.0105631">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-024 shows the pie chart and the table once the data arrives" time="0.0298328">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-025 changing the month refetches that month and updates chart and table" time="0.0655705">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-025 a cleared month does not call the api" time="0.0454031">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-026 an empty month shows the empty state with a link to transactions and no chart" time="0.0343518">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-027 shows a loading state while the request is pending" time="0.027916">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-027 a failure shows an error message and Retry fetches again" time="0.0319973">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-028 the month picker has an accessible label and axe finds no serious or critical violation" time="0.0977768">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-028 axe is clean for the empty, loading and error states too" time="0.1535416">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardPage.test.tsx" name="DashboardPage &gt; T-029 every category on the page is a table row with text, not colour alone" time="0.0330687">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/format.test.ts" timestamp="2026-10-27T19:38:34.125Z" hostname="Tika" tests="6" failures="0" errors="0" skipped="0" time="0.0161831">
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 shares add up to exactly 100.0% (largest remainder) and keep input order" time="0.0012482">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 a zero or empty total is safe (no division by zero, no NaN)" time="0.000195">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 shares are formatted from integers" time="0.0001037">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 money is formatted with Intl in the response currency from integer minor units" time="0.0121993">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 the current month is YYYY-MM in local time and matches the month pattern" time="0.0003052">
+        </testcase>
+        <testcase classname="src/features/dashboard/format.test.ts" name="dashboard format helpers &gt; T-023 dashboard sources use no toFixed and no parseFloat (GR-007)" time="0.0013246">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/SpendingByCategory.test.tsx" timestamp="2026-10-27T19:38:34.127Z" hostname="Tika" tests="4" failures="0" errors="0" skipped="0" time="0.197105">
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-024 renders a Recharts pie with one slice per category" time="0.0663686">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-024 renders a table of category, formatted amount and share with a total row" time="0.0900318">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-029 every slice is also a table row carrying its number, name and share as text" time="0.0264905">
+        </testcase>
+        <testcase classname="src/features/dashboard/SpendingByCategory.test.tsx" name="SpendingByCategory &gt; T-029 shares of the rows add up to the total share" time="0.0133831">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/TrendChart.test.tsx" timestamp="2026-10-27T19:38:34.129Z" hostname="Tika" tests="7" failures="0" errors="0" skipped="0" time="0.5983301">
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-030 renders one chart point per month, oldest first, ending at the selected month" time="0.2345046">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-031 a table with month and formatted amount sits alongside the chart" time="0.0504125">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-032 the selector offers 3, 6 (default) and 12 and a change requests that count" time="0.1034517">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-033 all-zero points show the trend empty state and no chart" time="0.0229207">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-034 trend loading does not blank the category section" time="0.0122029">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-034 a trend failure shows its own error, Retry refetches, categories stay" time="0.0480749">
+        </testcase>
+        <testcase classname="src/features/dashboard/TrendChart.test.tsx" name="TrendChart &gt; T-035 axe finds no serious or critical violation with the trend section rendered" time="0.1259956">
+        </testcase>
+    </testsuite>
+</testsuites>
