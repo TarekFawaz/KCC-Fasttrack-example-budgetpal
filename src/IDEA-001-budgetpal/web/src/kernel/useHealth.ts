@@ -13,7 +13,7 @@ export async function fetchHealth(): Promise<Health> {
   return { status: 'ok', db: 'ok' };
 }
 
-/** Server state for the home status line; one attempt per page load (no retry delay for a status check). */
+/** Server state for the status dot; one attempt per page load (no retry delay for a status check). */
 export function useHealth() {
   return useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: false });
 }

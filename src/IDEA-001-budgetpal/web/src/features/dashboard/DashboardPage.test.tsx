@@ -1,6 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import axe from 'axe-core';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Shell } from '../../kernel/Shell';
@@ -52,7 +55,7 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
+      <MemoryRouter initialEntries={['/']} future={routerFuture}>
         <DashboardPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -71,14 +74,14 @@ afterEach(() => {
 });
 
 describe('dashboard feature registration', () => {
-  it('T-022 feature.ts exports the Dashboard entry for /dashboard and the registry lists it', () => {
-    expect(feature).toMatchObject({ id: 'dashboard', path: '/dashboard', label: 'Dashboard' });
+  it('T-022 feature.ts exports the Dashboard entry for / and the registry lists it', () => {
+    expect(feature).toMatchObject({ id: 'dashboard', path: '/', label: 'Dashboard' });
     expect(typeof feature.order).toBe('number');
     expect(feature.component).toBe(DashboardPage);
     expect(features.find((entry) => entry.id === 'dashboard')).toBe(feature);
   });
 
-  it('T-022 the shell shows a "Dashboard" nav entry that opens /dashboard with the current month selected', async () => {
+  it('T-022 the shell shows a "Dashboard" nav entry that opens / with the current month selected', async () => {
     const urls = mockApi((month) => json(200, spending(month)));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
@@ -89,7 +92,7 @@ describe('dashboard feature registration', () => {
       </QueryClientProvider>,
     );
     const link = within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', { name: 'Dashboard' });
-    expect(link).toHaveAttribute('href', '/dashboard');
+    expect(link).toHaveAttribute('href', '/');
     fireEvent.click(link);
     const picker = (await screen.findByLabelText('Month')) as HTMLInputElement;
     expect(picker.value).toBe(currentMonth());
@@ -211,5 +214,45 @@ describe('DashboardPage', () => {
       expect(row, name).toBeDefined();
       expect(row?.textContent).toMatch(/\d+\.\d%/);
     }
+  });
+});
+
+describe('dashboard is the landing page (SPEC-009 Story-004)', () => {
+  it('T-035 feature.ts is path /, order 0, first in the registry, and /dashboard is no route', () => {
+    expect(feature).toMatchObject({ path: '/', label: 'Dashboard', order: 0 });
+    expect(features[0]).toBe(feature);
+    expect(features.some((entry) => entry.path === '/dashboard')).toBe(false);
+  });
+
+  it('T-036 the dashboard shows at / with the current month selected', async () => {
+    const urls = mockApi((month) => json(200, spending(month)));
+    renderPage();
+    expect((screen.getByLabelText('Month') as HTMLInputElement).value).toBe(currentMonth());
+    await waitFor(() => expect(urls).toContain(`/api/dashboard/spending?month=${currentMonth()}`));
+  });
+
+  it('T-037 no Home feature, no "API: ok" text and no home id remain', () => {
+    const srcRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+    expect(existsSync(join(srcRoot, 'features', 'home'))).toBe(false);
+    expect(features.some((entry) => entry.id === 'home')).toBe(false);
+    const walk = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? walk(join(dir, e.name)) : /\.(ts|tsx)$/.test(e.name) ? [join(dir, e.name)] : [],
+      );
+    const needle = ['API', ': ok'].join('');
+    const hits = walk(srcRoot).filter((f) => !f.endsWith('DashboardPage.test.tsx') && readFileSync(f, 'utf8').includes(needle));
+    expect(hits).toEqual([]);
+  });
+
+  it('T-040 an unknown /dashboard path shows "Page not found" inside the shell', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
+          <Shell features={features} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
   });
 });
