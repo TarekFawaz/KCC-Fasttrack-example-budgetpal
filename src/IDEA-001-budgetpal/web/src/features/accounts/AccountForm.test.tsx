@@ -143,3 +143,43 @@ describe('AccountForm', () => {
     ).toEqual({ fields: { openingBalance: 'a', name: 'b' }, rest: ['c'] });
   });
 });
+
+describe('AccountForm edit mode', () => {
+  const existing = { id: 7, name: 'Main', type: 'savings' as const, openingBalanceMinor: 123450, createdAt: 1, updatedAt: 1 };
+
+  function renderEdit(onSaved: () => void) {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    return render(
+      <QueryClientProvider client={client}>
+        <AccountForm account={existing} onSaved={onSaved} />
+      </QueryClientProvider>,
+    );
+  }
+
+  it('T-024 starts with the account values, PUTs integer minor units and reports success', async () => {
+    const calls = mockFetch(() => json(200, { ...existing, openingBalanceMinor: 500 }));
+    const onSaved = vi.fn();
+    renderEdit(onSaved);
+    expect(screen.getByLabelText('Name')).toHaveValue('Main');
+    expect(screen.getByLabelText('Type')).toHaveValue('savings');
+    expect(screen.getByLabelText('Opening balance')).toHaveValue('1234.50');
+    fill('Opening balance', '5');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(calls).toContainEqual({
+      method: 'PUT',
+      url: '/api/accounts/7',
+      body: { name: 'Main', type: 'savings', openingBalanceMinor: 500 },
+    });
+  });
+
+  it('T-025 a 400 keeps the form open with the error beside the field and does not report success', async () => {
+    mockFetch(() => problem(400, 'The request did not pass validation.', [{ field: 'name', message: 'Too long' }]));
+    const onSaved = vi.fn();
+    renderEdit(onSaved);
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(screen.getByLabelText('Name')).toHaveFocus());
+    expect(screen.getByLabelText('Name')).toHaveAccessibleDescription(/Too long/);
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+});

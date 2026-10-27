@@ -4,11 +4,13 @@ import {
   ACCOUNT_TYPE_LABELS,
   ApiProblem,
   useCreateAccount,
+  useUpdateAccount,
+  type Account,
   type AccountType,
   type FieldProblem,
 } from './accounts.api';
 import styles from './accounts.module.css';
-import { minorDigits, toMinorUnits } from './money';
+import { fromMinorUnits, minorDigits, toMinorUnits } from './money';
 
 type FieldName = 'name' | 'type' | 'openingBalance';
 export type FieldErrors = Partial<Record<FieldName, string>>;
@@ -35,12 +37,13 @@ interface FieldProps {
   label: string;
   error?: string;
   hint?: string;
+  idPrefix: string;
   children: (props: { id: string; describedBy: string | undefined; invalid: true | undefined }) => React.ReactNode;
 }
 
 /** A labelled control; its error (text, never colour alone) is tied to it with aria-describedby. */
-function Field({ name, label, error, hint, children }: FieldProps) {
-  const id = `account-${name}`;
+function Field({ name, label, error, hint, idPrefix, children }: FieldProps) {
+  const id = `${idPrefix}-${name}`;
   const describedBy = [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined;
   return (
     <div className={styles.field}>
@@ -61,12 +64,27 @@ function Field({ name, label, error, hint, children }: FieldProps) {
   );
 }
 
-/** Add-account form. Decimal text becomes integer minor units by string math before it is sent. */
-export function AccountForm() {
+interface AccountFormProps {
+  /** Edit mode: the account to change; the fields start with its values. Absent means add mode. */
+  account?: Account;
+  /** Edit mode: called after a successful save. */
+  onSaved?: () => void;
+  /** Edit mode: called when the user gives up. */
+  onCancel?: () => void;
+}
+
+/**
+ * Add or edit form. Decimal text becomes integer minor units by string math before it is sent, and an
+ * existing balance is shown back as decimal text.
+ */
+export function AccountForm({ account, onSaved, onCancel }: AccountFormProps = {}) {
   const create = useCreateAccount();
-  const [name, setName] = useState('');
-  const [type, setType] = useState<AccountType>('checking');
-  const [balance, setBalance] = useState('');
+  const update = useUpdateAccount();
+  const editing = account !== undefined;
+  const idPrefix = editing ? 'account-edit' : 'account';
+  const [name, setName] = useState(account?.name ?? '');
+  const [type, setType] = useState<AccountType>(account?.type ?? 'checking');
+  const [balance, setBalance] = useState(account ? fromMinorUnits(account.openingBalanceMinor, minorDigits()) : '');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const refs = useRef<Partial<Record<FieldName, HTMLInputElement | HTMLSelectElement | null>>>({});
@@ -101,37 +119,43 @@ export function AccountForm() {
     setErrors(next);
     if (next.name || next.openingBalance || openingBalanceMinor === null) return;
 
-    create.mutate(
-      { name: trimmed, type, openingBalanceMinor },
-      {
-        onSuccess: () => {
-          setName('');
-          setType('checking');
-          setBalance('');
-          setErrors({});
-        },
-        onError: (problem) => {
-          if (problem instanceof ApiProblem && (problem.status === 400 || problem.status === 409)) {
-            const { fields, rest } = splitProblem(problem.errors);
-            setErrors(fields);
-            if (Object.keys(fields).length === 0) setFormError(rest[0] ?? problem.message);
-          } else {
-            setFormError('Could not save the account right now. Try again.');
-          }
-        },
+    const input = { name: trimmed, type, openingBalanceMinor };
+    const handlers = {
+      onSuccess: () => {
+        if (editing) {
+          onSaved?.();
+          return;
+        }
+        setName('');
+        setType('checking');
+        setBalance('');
+        setErrors({});
       },
-    );
+      onError: (problem: Error) => {
+        if (problem instanceof ApiProblem && (problem.status === 400 || problem.status === 409)) {
+          const { fields, rest } = splitProblem(problem.errors);
+          setErrors(fields);
+          if (Object.keys(fields).length === 0) setFormError(rest[0] ?? problem.message);
+        } else {
+          setFormError('Could not save the account right now. Try again.');
+        }
+      },
+    };
+    if (account) update.mutate({ id: account.id, input }, handlers);
+    else create.mutate(input, handlers);
   }
 
+  const pending = create.isPending || update.isPending;
+
   return (
-    <form onSubmit={onSubmit} noValidate className={styles.form} aria-label="Add an account">
+    <form onSubmit={onSubmit} noValidate className={styles.form} aria-label={editing ? `Edit account ${account.name}` : 'Add an account'}>
       {formError ? (
         <p role="alert" tabIndex={-1} ref={alertRef} className={styles.error}>
           <span aria-hidden="true">⚠ </span>
           {formError}
         </p>
       ) : null}
-      <Field name="name" label="Name" error={errors.name}>
+      <Field idPrefix={idPrefix} name="name" label="Name" error={errors.name}>
         {({ id, describedBy, invalid }) => (
           <input
             id={id}
@@ -150,7 +174,7 @@ export function AccountForm() {
           />
         )}
       </Field>
-      <Field name="type" label="Type" error={errors.type}>
+      <Field idPrefix={idPrefix} name="type" label="Type" error={errors.type}>
         {({ id, describedBy, invalid }) => (
           <select
             id={id}
@@ -173,6 +197,7 @@ export function AccountForm() {
         )}
       </Field>
       <Field
+        idPrefix={idPrefix}
         name="openingBalance"
         label="Opening balance"
         error={errors.openingBalance}
@@ -196,9 +221,14 @@ export function AccountForm() {
           />
         )}
       </Field>
-      <button type="submit" disabled={create.isPending} className={styles.button}>
-        {create.isPending ? 'Adding...' : 'Add account'}
+      <button type="submit" disabled={pending} className={styles.button}>
+        {editing ? (pending ? 'Saving...' : 'Save changes') : pending ? 'Adding...' : 'Add account'}
       </button>
+      {editing ? (
+        <button type="button" onClick={onCancel} className={styles.button}>
+          Cancel
+        </button>
+      ) : null}
     </form>
   );
 }

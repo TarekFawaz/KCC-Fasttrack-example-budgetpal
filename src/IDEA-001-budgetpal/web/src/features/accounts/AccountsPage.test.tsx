@@ -185,3 +185,190 @@ describe('AccountsPage', () => {
     }
   });
 });
+
+const problem = (status: number, detail: string, errors?: { field: string; message: string }[]) =>
+  new Response(JSON.stringify({ type: 'about:blank', title: 'Problem', status, detail, errors }), {
+    status,
+    headers: { 'content-type': 'application/problem+json' },
+  });
+
+type Handler = (method: string, url: string) => Response | undefined;
+
+/** Like mockApi, plus PUT/DELETE on /api/accounts/:id; `override` can answer a call first. */
+function mockCrud(initial: Account[], override: Handler = () => undefined) {
+  const store = [...initial];
+  const calls: { method: string; url: string; body: unknown }[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string, init?: RequestInit) => {
+      const method = init?.method ?? 'GET';
+      const body = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined;
+      calls.push({ method, url, body });
+      const forced = override(method, url);
+      if (forced) return forced;
+      if (method === 'GET' && url === '/api/accounts') return json(200, store);
+      const id = Number(url.split('/').pop());
+      const index = store.findIndex((entry) => entry.id === id);
+      if (method === 'PUT') {
+        store[index] = { ...store[index]!, ...body };
+        return json(200, store[index]);
+      }
+      if (method === 'DELETE') {
+        store.splice(index, 1);
+        return new Response(null, { status: 204 });
+      }
+      throw new Error(`unexpected request ${method} ${url}`);
+    }),
+  );
+  return calls;
+}
+
+const rows = [account(1, 'Main', 'checking', 123450), account(2, 'Card', 'credit_card', -2000)];
+
+describe('AccountsPage edit and delete', () => {
+  it('T-024 Edit prefills the decimal balance; saving PUTs minor units and the row updates', async () => {
+    const calls = mockCrud(rows);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Main' }));
+    const form = screen.getByRole('form', { name: 'Edit account Main' });
+    expect(within(form).getByLabelText('Name')).toHaveValue('Main');
+    expect(within(form).getByLabelText('Type')).toHaveValue('checking');
+    expect(within(form).getByLabelText('Opening balance')).toHaveValue('1234.50');
+    fireEvent.change(within(form).getByLabelText('Name'), { target: { value: 'Main account' } });
+    fireEvent.change(within(form).getByLabelText('Opening balance'), { target: { value: '99.9' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => expect(screen.queryByRole('form', { name: /Edit account/ })).not.toBeInTheDocument());
+    expect(calls).toContainEqual({
+      method: 'PUT',
+      url: '/api/accounts/1',
+      body: { name: 'Main account', type: 'checking', openingBalanceMinor: 9990 },
+    });
+    const table = await screen.findByRole('table');
+    await waitFor(() => expect(table).toHaveTextContent('Main account'));
+    expect(table).toHaveTextContent(currency(99.9));
+    expect(screen.getByRole('form', { name: 'Add an account' })).toBeInTheDocument();
+  });
+
+  it('T-024 Cancel leaves the row and sends nothing', async () => {
+    const calls = mockCrud(rows);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Card' }));
+    expect(screen.getByLabelText('Opening balance')).toHaveValue('-20.00');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('form', { name: /Edit account/ })).not.toBeInTheDocument();
+    expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(0);
+  });
+
+  it('T-025 a 409 duplicate name and a 400 on save show inline errors and the row is unchanged', async () => {
+    mockCrud(rows, (method) =>
+      method === 'PUT'
+        ? problem(409, 'An account with this name already exists.', [
+            { field: 'name', message: 'You already have an account with this name.' },
+          ])
+        : undefined,
+    );
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Main' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Card' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    const name = screen.getByLabelText('Name');
+    await waitFor(() => expect(name).toHaveFocus());
+    expect(name).toHaveAccessibleDescription(/You already have an account with this name\./);
+    expect(within(screen.getByRole('table')).getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
+    expect(screen.getByRole('table')).toHaveTextContent(currency(1234.5));
+    vi.unstubAllGlobals();
+
+    mockCrud(rows, (method) =>
+      method === 'PUT'
+        ? problem(400, 'The request did not pass validation.', [
+            { field: 'openingBalanceMinor', message: 'Opening balance is out of range' },
+          ])
+        : undefined,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(screen.getByLabelText('Opening balance')).toHaveFocus());
+    expect(screen.getByLabelText('Opening balance')).toHaveAccessibleDescription(/out of range/);
+  });
+
+  it('T-026 Delete opens an accessible dialog; confirming a 204 removes the row', async () => {
+    const calls = mockCrud(rows);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Card' }));
+    const dialog = screen.getByRole('dialog', { name: 'Delete Card?' });
+    expect(dialog).toHaveAccessibleDescription(/cannot be undone/);
+    expect(within(dialog).getByRole('button', { name: 'Cancel' })).toHaveFocus();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete account' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(calls).toContainEqual({ method: 'DELETE', url: '/api/accounts/2', body: undefined });
+    await waitFor(() => expect(screen.queryByRole('rowheader', { name: 'Card' })).not.toBeInTheDocument());
+    expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
+  });
+
+  it('T-026 Cancel and Escape close the dialog without a request', async () => {
+    const calls = mockCrud(rows);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
+    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(calls.filter((call) => call.method === 'DELETE')).toHaveLength(0);
+  });
+
+  it('T-027 a 409 on DELETE closes the dialog, keeps the row and says the account is in use', async () => {
+    mockCrud(rows, (method) =>
+      method === 'DELETE' ? problem(409, 'The account is used by transactions and cannot be deleted.') : undefined,
+    );
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete account' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Main is in use by transactions and cannot be deleted.');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
+    expect(alert).toHaveFocus();
+  });
+
+  it('T-027 another failure on DELETE gives a generic message and keeps the row', async () => {
+    mockCrud(rows, (method) => (method === 'DELETE' ? json(500, { detail: 'internal' }) : undefined));
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete account' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not delete Main right now. Try again.');
+    expect(screen.getByRole('rowheader', { name: 'Main' })).toBeInTheDocument();
+  });
+
+  it('T-028 Edit and Delete are buttons in the tab order, named with the account, and axe is clean', async () => {
+    mockCrud(rows);
+    const { container } = renderPage();
+    await screen.findByRole('table');
+    const buttons = within(screen.getByRole('table')).getAllByRole('button');
+    expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Edit Main',
+      'Delete Main',
+      'Edit Card',
+      'Delete Card',
+    ]);
+    for (const button of buttons) {
+      expect(button.tabIndex).toBeGreaterThanOrEqual(0);
+      expect(button).toHaveAccessibleName(/Main|Card/);
+    }
+    expect(await serious(container)).toEqual([]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Main' }));
+    expect(await serious(container)).toEqual([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Main' }));
+    expect(await serious(container)).toEqual([]);
+  });
+});

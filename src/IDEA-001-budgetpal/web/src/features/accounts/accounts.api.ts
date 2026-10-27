@@ -93,6 +93,19 @@ export async function createAccount(input: AccountInput): Promise<Account> {
   return (await response.json()) as Account;
 }
 
+export async function updateAccount(id: number, input: AccountInput): Promise<Account> {
+  const response = await send(`/${id}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  return (await response.json()) as Account;
+}
+
+export async function deleteAccount(id: number): Promise<void> {
+  await send(`/${id}`, { method: 'DELETE' });
+}
+
 /** The signed-in user's accounts, ordered by name by the api. */
 export function useAccounts() {
   return useQuery({ queryKey: ACCOUNTS_KEY, queryFn: fetchAccounts, retry: false });
@@ -103,6 +116,24 @@ export function useCreateAccount() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: createAccount,
+    onSuccess: () => client.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
+  });
+}
+
+/** Replaces an account's name, type and opening balance and refreshes the list. */
+export function useUpdateAccount() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: AccountInput }) => updateAccount(id, input),
+    onSuccess: () => client.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
+  });
+}
+
+/** Deletes an account (the api answers 409 while transactions use it) and refreshes the list. */
+export function useDeleteAccount() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => deleteAccount(id),
     onSuccess: () => client.invalidateQueries({ queryKey: ACCOUNTS_KEY }),
   });
 }
