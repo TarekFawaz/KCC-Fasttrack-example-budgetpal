@@ -11,7 +11,7 @@ profile: fasttrack
 Code root `R` = `src/IDEA-001-budgetpal/`. The backlog's Impacted Files (`api/...`, `web/...`, `docker-compose.yml`, `README.md`, `package.json`) are relative to `R`; every path below is written in full.
 
 ## Dependency Check
-SPEC-001 has no dependencies (`depends_on: []`); it blocks SPEC-002. Every `Accepted` and `Accepted (assumed)` Decision it uses is settled. D-22 (loopback binding) is `Proposed`, but the human stated the scope and GR-001 applies it. It blocks no item here, so no STOP. It is listed in Risk Flags.
+SPEC-001 has no dependencies (`depends_on: []`); it blocks SPEC-002. Every `Accepted` and `Accepted (assumed)` Decision it uses is settled. D-22 (loopback binding) is `Proposed`, but the human stated the scope and GR-001 applies it. It blocks no item here, so no STOP. It is listed in Risk Flags. D-25 (shadcn/ui) and D-26 (sign-in first) came after this plan was built; SPEC-009 and SPEC-010 change this spec's Home page and shell, so the plan stays as built (plain CSS, D-19 as first written).
 
 ## Architecture Gate Check
 Source: `architecture/architecture.md` (fast track: `## Decisions`, `## Toolchain`, embedded C2 diagram; no `arch.md`, no `c4-*.md`).
@@ -39,7 +39,7 @@ Source: `architecture/architecture.md` (fast track: `## Decisions`, `## Toolchai
    - Change: deps `fastify`, `fastify-type-provider-zod`, `zod`, `@asteasolutions/zod-to-openapi`, `@fastify/swagger`, `@fastify/swagger-ui`, `pino`, plus `better-sqlite3` and `@types/better-sqlite3` (installed here because Enabler-004's Impacted Files exclude `api/package.json`), devDeps `tsx`, `vitest`, `typescript`; scripts `dev`, `build` (`tsc`), `start` (`node dist/server.js`), `test`. `@fastify/cookie` is left out (SPEC-002 adds it, GR-012). `loadConfig(env)` parses once with zod (defaults, errors name variables only). `buildApp(config, { db? })` decorates `app.db`, uses `fastify-type-provider-zod` compilers, pino logger with request id and redaction of cookie, authorization and bodies, a not-found/validation/error handler that returns problem+json (no `.stack`, SR-017), `onSend` security headers, `@fastify/swagger` with `openapi: '3.1.0'` and `/docs`, and `modules.ts` auto-loading `src/modules/*/index.ts` (skip with a warning when `index` is missing). No CORS plugin.
    - Why: spec AC-3, AC-4, AC-6, AC-7, AC-9; Enabler-002 AC-1..6. Depends on: 1.
 3. **Enabler-003** `R/web/package.json`, `R/web/vite.config.ts`, `R/web/index.html`, `R/web/src/main.tsx`, `R/web/src/kernel/registry.ts` (+ allowances).
-   - Change: deps `react`, `react-dom`, `react-router-dom@^6` (the v6 DOM binding of D-19's `react-router@^6`), `@tanstack/react-query`, devDeps `vite`, `@vitejs/plugin-react`, `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `axe-core`, `typescript`; `registry.ts` exports `buildRegistry(modules)` (sort by `order`, throw on duplicate `id`) and the `import.meta.glob('../features/*/feature.ts', { eager: true })` call; `Shell.tsx` (header + `nav`, `main`, focus style); `shell.css` tokens for light/dark and a 768 px breakpoint; one `QueryClient`; vite dev proxy `/api` -> `http://127.0.0.1:3000` with the prefix rewritten away; coverage setting in vite config.
+   - Change: deps `react`, `react-dom`, `react-router-dom@^6` (D-19), `@tanstack/react-query`, devDeps `vite`, `@vitejs/plugin-react`, `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `axe-core`, `typescript`; `registry.ts` exports `buildRegistry(modules)` (sort by `order`, throw on duplicate `id`) and the `import.meta.glob('../features/*/feature.ts', { eager: true })` call; `Shell.tsx` (header + `nav`, `main`, focus style); `shell.css` tokens for light/dark and a 768 px breakpoint; one `QueryClient`; vite dev proxy `/api` -> `http://127.0.0.1:3000` with the prefix rewritten away; coverage setting in vite config.
    - Why: spec AC-6, AC-11 (shell); Enabler-003 AC-1..4. Depends on: 1.
 4. **Enabler-004** `R/api/src/kernel/db/index.ts`, `R/api/src/kernel/db/migrate.ts`, `R/api/migrations/0001-init.sql`, `R/api/src/server.ts`.
    - Change: `openDb(path)` (mkdir parent, WAL, `foreign_keys=ON`); `runMigrations(db, dir)` (names `^\d{4}-[a-z0-9-]+\.sql$`, numeric order, one transaction per file, `_migrations(name, sha256, applied_at)`, checksum mismatch throws naming the file); `0001-init.sql` creates `app_meta`; `server.ts` exports `start()` and `registerShutdown(app, db, exit)` and runs `start()` when executed: config, openDb, migrate, `buildApp(config, { db })`, listen on `PORT` at `0.0.0.0` inside the container, SIGTERM/SIGINT close the server and the db then exit 0, and a migration failure exits non-zero before listening. The SQL files sit in `kernel/db/` rather than the spec's `kernel/db.ts` and `kernel/migrate.ts` because SR-002 allows SQL calls only in `*.repository.ts` and `api/src/kernel/db/` (GR-003); see Risk Flags.
@@ -89,7 +89,7 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | react | ^18 |
 | react-dom | ^18 |
 | vite | ^5 |
-| react-router | ^6 |
+| react-router-dom | ^6 |
 | @tanstack/react-query | ^5 |
 | vitest | ^2 |
 | @testing-library/react | ^16 |
@@ -113,10 +113,10 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 - **`api/package.json` ownership.** `better-sqlite3` is installed by Enabler-002 for Enabler-004 (listed in Enabler-002's Ordered Change; no library is left to the implementer).
 - **Lockfile in a parallel wave.** Wave 2 items both change `pnpm-lock.yaml`; it is regenerated after merge, not merged by hand.
 - **D-22 `Proposed`.** Loopback binding is applied as the human's stated scope (GR-001); no item waits on it.
-- **react-router.** D-19 names `react-router@^6`; the DOM bindings ship as `react-router-dom@^6`, which depends on `react-router@^6`. The verifier's GR-012 comparison should accept it.
+- **Bugs.** Bug-001 and Bug-002 are verified post-review fixes in files this plan already covers (regression T-015 and T-030, wrapper T-011); they are not waves and need no rebuild.
 - **Native build.** `better-sqlite3` must compile (or fetch a prebuilt binary) in `node:22-bookworm-slim`; the fallback `node:sqlite` needs a new Decisions row, so stop and re-architect.
-- **Windows host.** SIGTERM through `child.kill` does not run handlers on win32. T-022 tests shutdown in-process with an injected `exit`; T-023 spawns the real process only on non-win32, and QG-SMOKE covers the container (`docker stop` sends SIGTERM).
-- **Docker/axe in CI.** T-031..T-036 need Docker; without it, `toolchain-preflight` defers them (not passes). jsdom cannot compute colour contrast, so dark-scheme contrast is a verifier visual check.
+- **Windows host.** SIGTERM through `child.kill` does not run handlers on win32, so T-022 tests shutdown in-process with an injected `exit`. The real-process and container stop checks are descoped (H-001, see the last section), not passed.
+- **Docker/axe.** Every check that needs Docker is descoped (H-001); the static compose, Dockerfile and README tests (T-032, T-033, T-036, T-037) stay. jsdom cannot compute colour contrast, so dark-scheme contrast is a verifier visual check.
 - **Hidden impact.** SPEC-002..008 add their own `api/migrations/00NN-*.sql`, module and feature folders only; no shared file may be edited by them (checked by AC-6 tests).
 
 ## Atomic test cases
@@ -160,7 +160,7 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | Standard | Verifier check | Covered by |
 |--|--|--|
 | api-standards | Checked-in OpenAPI 3.x document, Swagger UI served, routes match the document | T-011, T-025, T-030, file `api/openapi.json` |
-| security (headers, errors, config) | `nosniff`, `Referrer-Policy`, CSP; problem+json without stack; zod env config | T-003, T-006, T-009, T-010, T-034 |
+| security (headers, errors, config) | `nosniff`, `Referrer-Policy`, CSP; problem+json without stack; zod env config | T-003, T-006, T-009, T-010, verifier:web headers read from `web/nginx.conf` (live web check descoped H-001) |
 | data (migrations) | Forward-only numbered migrations with checksums, rollback path documented | T-018, T-019, T-036 |
 | operations (logging, health, containers) | JSON logs without secrets, `/health` with DB check, non-root pinned images, graceful shutdown | T-007, T-025, T-026, T-033, T-022 |
 | supply chain | Committed lockfile, `pnpm audit` | T-002, check:QG-LOCK, check:QG-DEPS |
@@ -172,30 +172,30 @@ All under `src/IDEA-001-budgetpal/`: the Impacted Files above plus `pnpm-lock.ya
 | QG-ARCH-CONFORMANCE | verifier:compare the Decisions and Toolchain tables with `package.json` manifests and imports |
 | QG-TRACE | check:QG-TEST, verifier:check-traceability -Spec exits 0 |
 | QG-SCOPE | check:QG-TEST |
-| QG-QUALITY | check:QG-LOCK, check:QG-BUILD, check:QG-LINT, check:QG-TEST, check:QG-COV, check:QG-SECRETS, check:QG-DEPS, check:QG-SAST |
+| QG-QUALITY | check:QG-LOCK, check:QG-BUILD, check:QG-LINT, check:QG-TEST, check:QG-COV, check:QG-SECRETS, check:QG-DEPS, verifier:QG-SAST accepted-deferred by human H-001 (semgrep not run or installed and never a pass) |
 | QG-STATIC | check:QG-STATIC, T-015, T-037 |
 | QG-API-CONFORMANCE | T-011, T-025, T-030 |
 | QG-VALIDATION | T-009 |
 | QG-A11Y | T-014, T-028, verifier:visual review of the dark theme contrast and 360 px width |
-| QG-SMOKE | T-031, T-035, T-037 |
-| QG-PROD-1 | T-025, T-026, T-031, T-032 |
+| QG-SMOKE | T-037, verifier:compose up and live smoke accepted-deferred by human H-001 (registry steps skipped and never a pass) |
+| QG-PROD-1 | T-025, T-026, T-032, verifier:container healthcheck run accepted-deferred by human H-001 |
 | QG-PROD-2 | T-007 |
 | QG-PROD-3 | T-003, T-005, T-006, check:QG-SECRETS |
-| QG-PROD-4 | T-022, T-023 |
+| QG-PROD-4 | T-022, verifier:real SIGTERM and container stop accepted-deferred by human H-001 |
 | QG-PROD-5 | T-019, T-036 |
 | QG-PROD-6 | T-036 |
 | QG-BUGS | verifier:check-run-conformance -Scope bugs |
-| GR-001 | static-rules:SR-001, T-037, T-031 |
+| GR-001 | static-rules:SR-001, T-037 |
 | GR-002 | n/a: no data routes or user tables here and the only route is the deliberately public health check |
 | GR-003 | static-rules:SR-002 SR-003, T-017 |
 | GR-004 | T-009, verifier:every route (`/health`) declares a zod `schema` |
-| GR-005 | static-rules:SR-005, T-010, T-034 |
+| GR-005 | static-rules:SR-005, T-010, verifier:`web/nginx.conf` has no CORS header (live check descoped H-001) |
 | GR-006 | static-rules:SR-006 SR-007, T-008, T-013 |
 | GR-007 | static-rules:SR-008 SR-009 |
 | GR-008 | static-rules:SR-010, T-007 |
 | GR-009 | n/a: no CSV import in this spec |
 | GR-010 | n/a: no passwords or tokens in this spec |
-| GR-011 | T-010, T-034 |
+| GR-011 | T-010, verifier:`web/nginx.conf` sets nosniff and Referrer-Policy and a self-only CSP (live check descoped H-001) |
 | GR-012 | verifier:compare the Decisions table with manifests and imports and confirm every package this spec adds is in the lockfile and imported |
 | GR-013 | static-rules:SR-014 SR-015, T-015 |
 | GR-014 | verifier:only `0001-init.sql` in range 0001-0009 under `api/migrations`, T-018, T-019 |
@@ -221,20 +221,20 @@ do not edit it by hand (rerun `kcc route`).
 ## Verification Steps
 1. `pnpm install --frozen-lockfile` (T-002, QG-LOCK).
 2. `pnpm -r build` and `pnpm lint` (QG-BUILD, QG-LINT).
-3. `pnpm test` with coverage at or above `quality.coverage_min_pct` 80 (T-001..T-030, T-032, T-033, T-036, T-037; QG-TEST, QG-COV).
-4. `pnpm audit --prod` shows no high-severity advisory (QG-DEPS); gitleaks finds no secret (QG-SECRETS); semgrep (QG-SAST).
+3. `pnpm test` with coverage at or above `quality.coverage_min_pct` 80 (T-001..T-022, T-024..T-030, T-032, T-033, T-036, T-037; QG-TEST, QG-COV).
+4. `pnpm audit --prod` shows no high-severity advisory (QG-DEPS); gitleaks finds no secret (QG-SECRETS). Semgrep (QG-SAST): accepted-deferred (H-001), not run, not a pass.
 5. `UPDATE_OPENAPI=1` once, then confirm `api/openapi.json` is committed and T-030 passes.
-6. `docker compose up --build -d`, `docker compose ps` shows both healthy, `curl http://127.0.0.1:8080/api/health` (T-031, T-034, T-035; spec AC-1, AC-10).
-7. `docker stop` the api container and check exit code 0 (spec AC-8, QG-PROD-4).
+6. Accepted-deferred (H-001), never a pass: `docker compose up --build -d`, `docker compose ps` healthy, `curl http://127.0.0.1:8080/api/health` (spec AC-1, AC-10 live part).
+7. Accepted-deferred (H-001): `docker stop` the api container, exit code 0 (spec AC-8 container part, QG-PROD-4).
 8. Run `quality-gate` and confirm the QG-STATIC rules matched files under `src/IDEA-001-budgetpal/` (Risk Flags).
-9. `docker image ls` shows the api image under 400 MB.
+9. Accepted-deferred (H-001): `docker image ls` shows the api image under 400 MB.
 10. Verifier visual check: home page in light and dark schemes at 360 px.
 
 ## Scope
 Large (about 32 files across 6 items).
 
 ## Confidence
-Confidence: 93%
+Confidence: 95%
 
 ## Related
 - Epic spec: [[SPEC-001-walking-skeleton]]
@@ -242,5 +242,5 @@ Confidence: 93%
 - Idea-specs index: [[IDEA-001-budgetpal-Specs]]
 
 ## Descoped by human decision (2026-10-27)
-The human removed the Docker-registry steps from SPEC-001. These Test IDs are no longer part of the plan, were never run, and are not counted as passes: T-023 (real SIGTERM, win32), T-031 (compose smoke), T-034 (live web proxy and headers), T-035 (volume persistence). The static compose and Dockerfile checks (T-032, T-033, T-037) and the in-process shutdown test (T-022) stay in scope.
+The human removed the Docker-registry steps from SPEC-001. These Test IDs are no longer part of the plan, were never run, and are not counted as passes: T-023 (real SIGTERM, win32), T-031 (compose smoke), T-034 (live web proxy and headers), T-035 (volume persistence). The static compose and Dockerfile checks (T-032, T-033, T-037) and the in-process shutdown test (T-022) stay in scope. Hint H-001 (same day) adds: Docker steps and SAST/semgrep are accepted-deferred (never a pass, semgrep is not installed, nothing is retried or parked for them), and SR-018 is waived for this spec.
 
