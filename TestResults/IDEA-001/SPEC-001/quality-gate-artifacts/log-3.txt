@@ -1,0 +1,56 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-001/src/IDEA-001-budgetpal[39m
+
+ [32m✓[39m test/workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 432[2mms[22m[39m
+ [32m✓[39m test/packaging.test.ts [2m([22m[2m9 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[33m 349[2mms[22m[39m
+   [33m[2m✓[22m[39m Enabler-005 compose file[2m > [22mT-032 docker compose config accepts the file and resolves loopback ports [33m345[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (13)[39m
+[2m   Start at [22m 17:01:20
+[2m   Duration [22m 1.44s[2m (transform 45ms, setup 0ms, collect 580ms, tests 781ms, environment 0ms, prepare 223ms)[22m
+
+Scope: 2 of 3 workspace projects
+web test$ vitest run --config vite.config.ts
+api test$ vitest run --config vitest.config.ts
+api test: 
+api test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-001/src/IDEA-001-budgetpal/api
+api test: 
+web test: 
+web test:  RUN  v2.1.9 E:/Tikasway.dev/TestRounds/round-14-budgetpal/.kcc-lanes/SPEC-001/src/IDEA-001-budgetpal/web
+web test: 
+api test:  ✓ test/config.test.ts (8 tests) 9ms
+api test:  ✓ test/db.test.ts (4 tests) 35ms
+api test: {"level":30,"time":1793116883853,"pid":39596,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:64798"}
+api test: {"level":30,"time":1793116883868,"pid":39596,"hostname":"Tika","reqId":"req-1","req":{"method":"GET","url":"/docs/json"},"msg":"incoming request"}
+api test: {"level":30,"time":1793116883875,"pid":39596,"hostname":"Tika","reqId":"req-1","res":{"statusCode":200},"responseTime":6.882600000000139,"msg":"request completed"}
+api test:  ✓ test/health.test.ts (5 tests) 317ms
+api test:  ✓ test/app.test.ts (12 tests) 437ms
+api test: {"level":30,"time":1793116884520,"pid":39596,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:64803"}
+api test: {"level":30,"time":1793116884521,"pid":39596,"hostname":"Tika","signal":"SIGTERM","msg":"shutting down"}
+web test:  ✓ src/kernel/source-rules.test.ts (4 tests) 2ms
+api test: {"level":30,"time":1793116884595,"pid":39596,"hostname":"Tika","msg":"Server listening at http://127.0.0.1:64805"}
+api test: {"level":30,"time":1793116884595,"pid":39596,"hostname":"Tika","signal":"SIGINT","msg":"shutting down"}
+api test:  ✓ test/server.test.ts (6 tests | 1 skipped) 1069ms
+api test:    ✓ process > T-021 a failing migration exits non-zero and never listens 593ms
+web test:  ✓ src/kernel/registry.test.ts (6 tests) 11ms
+api test: 
+api test:  Test Files  5 passed (5)
+api test:       Tests  34 passed | 1 skipped (35)
+api test:    Start at  17:01:22
+api test:    Duration  2.15s (transform 337ms, setup 0ms, collect 1.27s, tests 1.87s, environment 1ms, prepare 1.30s)
+api test: 
+api test: Done
+web test:  ✓ src/kernel/Shell.test.tsx (4 tests) 138ms
+web test:  ✓ src/features/home/useHealth.test.tsx (3 tests) 318ms
+web test:  ✓ src/features/home/HomePage.test.tsx (7 tests) 369ms
+web test:  ✓ src/kernel/build.test.ts (2 tests) 1836ms
+web test:    ✓ vite build and dev proxy (Enabler-003 AC-4) > T-016 vite build exits 0 and emits dist/index.html with a script bundle 1834ms
+web test: 
+web test:  Test Files  6 passed (6)
+web test:       Tests  26 passed (26)
+web test:    Start at  17:01:22
+web test:    Duration  3.27s (transform 163ms, setup 1.53s, collect 897ms, tests 2.67s, environment 4.54s, prepare 1.08s)
+web test: 
+web test: Done
+$ vitest run --config vitest.config.ts && pnpm -r --if-present test

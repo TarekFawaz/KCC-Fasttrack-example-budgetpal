@@ -1,0 +1,104 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BudgetPal API",
+    "version": "0.1.0"
+  },
+  "components": {
+    "schemas": {}
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "API and database health",
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    },
+                    "db": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "db"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The database is not available",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "instance": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
