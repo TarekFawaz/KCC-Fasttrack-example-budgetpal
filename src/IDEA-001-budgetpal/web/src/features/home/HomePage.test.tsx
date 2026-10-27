@@ -99,7 +99,7 @@ describe('home feature registration', () => {
     for (const entry of readdirSync(join(webSrc, 'kernel'))) {
       if (/\.tsx?$/.test(entry) && !/\.test\./.test(entry)) shared.push(join(webSrc, 'kernel', entry));
     }
-    const offenders = shared.filter((file) => /features\/home|HomePage|useHealth/.test(readFileSync(file, 'utf8')));
+    const offenders = shared.filter((file) => /features\/home|HomePage/.test(readFileSync(file, 'utf8')));
     expect(offenders).toEqual([]);
   });
 });

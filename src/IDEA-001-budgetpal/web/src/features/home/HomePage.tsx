@@ -1,4 +1,4 @@
-import { useHealth } from './useHealth';
+import { useHealth } from '../../kernel/useHealth';
 
 /** Status is never colour-only: each state has an icon and text, announced in a status region. */
 export function HomePage() {

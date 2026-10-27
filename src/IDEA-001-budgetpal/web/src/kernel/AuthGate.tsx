@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { HealthDot } from './HealthDot';
 import { Shell } from './Shell';
 import { isPublic, type Feature } from './registry';
 import { useSession, useSignOut } from './session';
@@ -114,7 +115,7 @@ export function AuthGate({ features }: AuthGateProps) {
           />
         ),
       )}
-      <Route path="*" element={<Shell features={protectedFeatures} actions={<LogOutControl />} />} />
+      <Route path="*" element={<Shell features={protectedFeatures} actions={<LogOutControl />} footer={<HealthDot />} />} />
     </Routes>
   );
 }
