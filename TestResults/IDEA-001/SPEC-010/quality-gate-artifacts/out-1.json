@@ -1,0 +1,18 @@
+api build$ tsc -p tsconfig.json
+web build$ tsc --noEmit -p tsconfig.json && vite build
+api build: Done
+web build: vite v5.4.21 building for production...
+web build: transforming...
+web build: ✓ 2931 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                   0.45 kB │ gzip:   0.28 kB
+web build: dist/assets/index-D5CqFdIl.css   32.46 kB │ gzip:   6.97 kB
+web build: dist/assets/index-BLa2PjMD.js   875.61 kB │ gzip: 254.21 kB │ map: 3,883.21 kB
+web build: 
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: ✓ built in 4.92s
+web build: Done

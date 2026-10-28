@@ -2,7 +2,7 @@
 
 | Type | Parent | Source | Severity | Status | Story / AC | Regression test | Evidence |
 |--|--|--|--|--|--|--|--|
-| Bug | [[../SPEC-010-shadcn-ui]] | verifier | major | fixed | Story-003 / AC-1, AC-2 (spec AC-6) | T-029, T-030 | [[../../../../TestResults/IDEA-001/SPEC-010/Story-003-AC-1-Bug-001]] |
+| Bug | [[../SPEC-010-shadcn-ui]] | verifier | major | verified | Story-003 / AC-1, AC-2 (spec AC-6) | T-029, T-030 | [[../../../../TestResults/IDEA-001/SPEC-010/Story-003-AC-1-Bug-001]] |
 
 ## Reproduce
 1. `grep -rn "<select" src/IDEA-001-budgetpal/web/src/features --include=*.tsx` lists native selects in `TransactionsPage.tsx` (lines 164, 180: account and category filters) and `TransactionForm.tsx` (277, 298: account and category in the add/edit form).
