@@ -1,3 +1,33 @@
+<p align="center">
+  <a href="https://tikasway.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/logo/tikasway-logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="docs/logo/tikasway-logo-light.svg">
+      <img src="docs/logo/tikasway-logo-light.svg" alt="Tika's Way: Doctrine. Engineering. Humanity." width="420">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/TarekFawaz/kcc-agentic-framework"><img src="https://img.shields.io/badge/built_with-KCC_0.6.0-0E6F72" alt="Built with KCC"></a>
+  <a href="https://github.com/TarekFawaz/kcc-agentic-framework"><img src="https://img.shields.io/badge/KCC-auto_fasttrack-3B8F88" alt="KCC auto fast-track"></a>
+  <img src="https://img.shields.io/badge/mode-silent_%2B_assume-555555" alt="Mode: silent and assume">
+  <img src="https://img.shields.io/badge/human_interventions-minimal-2ea44f" alt="Human interventions: minimal">
+  <img src="https://img.shields.io/badge/specs-10%2F10_approved-2ea44f" alt="Specs: 10 of 10 approved">
+  <img src="https://img.shields.io/badge/tests-891_passing-2ea44f?logo=vitest&logoColor=white" alt="Tests: 891 passing">
+  <img src="https://img.shields.io/badge/harness-Claude_Code-D97757?logo=anthropic&logoColor=white" alt="Harness: Claude Code">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Node.js-22--24-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js 22 to 24">
+  <img src="https://img.shields.io/badge/pnpm-monorepo-F69220?logo=pnpm&logoColor=white" alt="pnpm monorepo">
+  <img src="https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white" alt="Fastify 5">
+  <img src="https://img.shields.io/badge/React-18-087EA4?logo=react&logoColor=white" alt="React 18">
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite 5">
+  <img src="https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3.4">
+  <img src="https://img.shields.io/badge/shadcn%2Fui-Radix-000000?logo=shadcnui&logoColor=white" alt="shadcn/ui">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
+</p>
+
 # BudgetPal: a KCC Auto Fasttrack example
 
 BudgetPal is a small personal budgeting web app. It is also a **worked example of the [KCC framework](https://github.com/TarekFawaz/kcc-agentic-framework)**: one paragraph of idea text went in, and the app, its specs, architecture, tests and reviews came out of a single unattended `kcc run --fasttrack --silent --assume` run, with as few human interventions as possible.

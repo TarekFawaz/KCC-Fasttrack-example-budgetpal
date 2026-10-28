@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 150" width="560" height="150" role="img" aria-label="Tika's Way. Doctrine. Engineering. Humanity.">
+  <title>Tika's Way - Doctrine. Engineering. Humanity.</title>
+  <style>
+    .accent-s { stroke: #3B8F88; }
+    .accent-f { fill: #3B8F88; }
+    .fg-s { stroke: #FAF7F2; }
+    .fg-f { fill: #FAF7F2; }
+    .bg-f { fill: #16161F; }
+    .tagline { fill: #A7A7B5; }
+    .word { font-family: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif; font-weight: 500; font-size: 58px; }
+    .tagline { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; }
+  </style>
+
+  <!-- Orbital mark (paths from the Tika's Way site logo, viewBox 70 60 360 350) -->
+  <g transform="translate(8 10) scale(0.39) translate(-70 -60)" fill="none">
+    <g class="accent-s" stroke-linecap="round">
+      <path d="M141 325C100 236 128 134 214 91" stroke-width="8.28"/>
+      <path d="M248 83C292 78 334 89 370 112" stroke-width="5.22"/>
+      <path d="M397 157C418 199 421 247 406 290" stroke-width="5.22"/>
+      <path d="M393 337C356 384 294 407 233 391" stroke-width="8.28"/>
+      <path d="M197 384C176 377 157 366 140 351" stroke-width="8.28"/>
+    </g>
+    <g class="fg-s" stroke-width="5.04" stroke-linecap="round" opacity="0.9">
+      <path d="M256 222L331 124"/>
+      <path d="M222 273L145 363"/>
+      <path d="M274 272L351 355"/>
+    </g>
+    <circle class="bg-f fg-s" cx="247" cy="246" r="67" stroke-width="3.96"/>
+    <circle class="fg-f" cx="247" cy="246" r="47" opacity="0.96"/>
+    <circle class="accent-f" cx="340" cy="112" r="24" opacity="0.9"/>
+    <circle class="accent-f" cx="131" cy="363" r="24" opacity="0.9"/>
+    <circle class="accent-f" cx="365" cy="364" r="24" opacity="0.9"/>
+  </g>
+
+  <text class="word fg-f" x="170" y="82">Tika’s Way</text>
+  <text class="tagline" x="172" y="116">Doctrine<tspan class="accent-f"> . </tspan>Engineering<tspan class="accent-f"> . </tspan>Humanity</text>
+</svg>
