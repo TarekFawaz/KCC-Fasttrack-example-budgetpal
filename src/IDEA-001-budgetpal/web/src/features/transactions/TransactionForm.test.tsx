@@ -226,7 +226,7 @@ describe('DeleteTransaction (AC-5)', () => {
     const onDeleted = vi.fn();
     const { invalidate } = renderUi(<DeleteTransaction transaction={existing} onDeleted={onDeleted} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete Weekly shop' }));
-    expect(screen.getByRole('alertdialog')).toHaveTextContent('Weekly shop');
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent('Weekly shop');
     fireEvent.click(screen.getByRole('button', { name: 'Confirm delete' }));
 
     await waitFor(() => expect(onDeleted).toHaveBeenCalledTimes(1));
@@ -246,13 +246,13 @@ describe('DeleteTransaction (AC-5)', () => {
     const cancel = screen.getByRole('button', { name: 'Cancel' });
     await waitFor(() => expect(cancel).toHaveFocus());
     fireEvent.click(cancel);
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus();
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus());
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete Weekly shop' }));
-    fireEvent.keyDown(screen.getByRole('alertdialog'), { key: 'Escape' });
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus();
+    fireEvent.keyDown(await screen.findByRole('alertdialog'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus());
     expect(writes(calls)).toHaveLength(0);
   });
 

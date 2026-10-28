@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   ApiProblem,
   DATE_FORMATS,
@@ -15,7 +19,49 @@ import {
   type InvalidRow,
   type PreviewResponse,
 } from './importApi';
-import styles from './ImportPage.module.css';
+
+/** The one look of an inline error: text with an icon, never colour alone. */
+const ERROR_CLASSES = 'm-0 text-sm font-semibold text-destructive';
+const HINT_CLASSES = 'm-0 text-sm text-muted-foreground';
+const EMPTY_CLASSES = 'm-0 rounded-md border border-dashed p-4 text-muted-foreground';
+const CARD_CLASSES = 'flex flex-col gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm';
+const FIELD_CLASSES = 'flex flex-col gap-1.5';
+const ACTION_CLASSES = 'flex flex-wrap items-center gap-3';
+const LINE_LIST_CLASSES = 'm-0 flex list-none flex-col gap-1 p-0 text-sm [overflow-wrap:anywhere]';
+
+/** Native selects keep their role, label and keyboard behaviour; they are dressed like the kit Input. */
+const SELECT_CLASSES =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive md:text-sm';
+
+/** The steps of the wizard, in order. The current one carries aria-current="step"; none is a button. */
+const STEPS = ['Choose a file', 'Map the columns', 'Preview and import', 'Result'] as const;
+
+function Stepper({ current }: { current: number }) {
+  return (
+    <nav aria-label="Import steps">
+      <ol className="m-0 flex list-none flex-wrap gap-2 p-0 text-sm">
+        {STEPS.map((step, index) => {
+          const state = index < current ? 'done' : index === current ? 'current' : 'todo';
+          return (
+            <li
+              key={step}
+              aria-current={state === 'current' ? 'step' : undefined}
+              className={
+                state === 'current'
+                  ? 'rounded-full border border-primary bg-primary px-3 py-1 font-semibold text-primary-foreground'
+                  : 'rounded-full border px-3 py-1 text-muted-foreground'
+              }
+            >
+              <span aria-hidden="true">{state === 'done' ? '✓' : index + 1}. </span>
+              {step}
+              {state === 'done' ? <span className="sr-only"> (done)</span> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
 
 /** Invalid lines listed on screen; the rest are summarised so a 5000-line file stays readable. */
 const INVALID_LINES_SHOWN = 200;
@@ -76,11 +122,11 @@ interface SelectFieldProps {
 function SelectField({ id, label, value, onChange, options, placeholder, error }: SelectFieldProps) {
   const errorId = `${id}-error`;
   return (
-    <div className={styles.field}>
-      <label htmlFor={id}>{label}</label>
+    <div className={FIELD_CLASSES}>
+      <Label htmlFor={id}>{label}</Label>
       <select
         id={id}
-        className={styles.control}
+        className={SELECT_CLASSES}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
@@ -94,7 +140,7 @@ function SelectField({ id, label, value, onChange, options, placeholder, error }
         ))}
       </select>
       {error ? (
-        <p id={errorId} className={styles.error}>
+        <p id={errorId} className={ERROR_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           {error}
         </p>
@@ -107,9 +153,9 @@ function InvalidLines({ rows, title }: { rows: InvalidRow[]; title: string }) {
   if (rows.length === 0) return null;
   const shown = rows.slice(0, INVALID_LINES_SHOWN);
   return (
-    <div>
-      <h3>{title}</h3>
-      <ul className={styles.invalidList}>
+    <div className="flex flex-col gap-2">
+      <h3 className="m-0 text-base font-semibold">{title}</h3>
+      <ul className={LINE_LIST_CLASSES}>
         {shown.map((row) => (
           <li key={row.line}>
             Line {row.line}: {row.reason}
@@ -124,34 +170,34 @@ function InvalidLines({ rows, title }: { rows: InvalidRow[]; title: string }) {
 function PreviewTable({ preview }: { preview: PreviewResponse }) {
   if (preview.validRows.length === 0) return null;
   return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <caption className={styles.caption}>First {preview.validRows.length} valid rows</caption>
-        <thead>
-          <tr>
-            <th scope="col">Line</th>
-            <th scope="col">Date</th>
-            <th scope="col">Description</th>
-            <th scope="col" className={styles.amount}>
+    <div className="rounded-md border">
+      <Table>
+        <TableCaption className="mb-2 mt-2 text-muted-foreground">First {preview.validRows.length} valid rows</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">Line</TableHead>
+            <TableHead scope="col">Date</TableHead>
+            <TableHead scope="col">Description</TableHead>
+            <TableHead scope="col" className="text-right">
               Amount
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {preview.validRows.map((row) => (
-            <tr key={row.line}>
-              <td>{row.line}</td>
-              <td>{row.date}</td>
-              <td>{row.description}</td>
-              <td className={styles.amount}>
+            <TableRow key={row.line}>
+              <TableCell>{row.line}</TableCell>
+              <TableCell className="whitespace-nowrap">{row.date}</TableCell>
+              <TableCell className="[overflow-wrap:anywhere]">{row.description}</TableCell>
+              <TableCell className="whitespace-nowrap text-right tabular-nums">
                 <span aria-hidden="true">{row.amountMinor < 0 ? '↓ ' : '↑ '}</span>
                 {formatMinor(row.amountMinor)}
-                <span className={styles.visuallyHidden}>{row.amountMinor < 0 ? ' (expense)' : ' (income)'}</span>
-              </td>
-            </tr>
+                <span className="sr-only">{row.amountMinor < 0 ? ' (expense)' : ' (income)'}</span>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -166,11 +212,16 @@ function ResultView({
   headingRef: RefObject<HTMLHeadingElement>;
 }) {
   return (
-    <section aria-labelledby="import-result-title" className={styles.card}>
-      <h2 id="import-result-title" ref={headingRef} tabIndex={-1}>
+    <section aria-labelledby="import-result-title" className={CARD_CLASSES}>
+      <h2
+        id="import-result-title"
+        ref={headingRef}
+        tabIndex={-1}
+        className="m-0 text-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+      >
         Import result
       </h2>
-      <ul className={styles.results}>
+      <ul className="m-0 flex list-none flex-col gap-1 p-0">
         <li>
           <span aria-hidden="true">✓ </span>Imported: {result.imported}
         </li>
@@ -182,13 +233,13 @@ function ResultView({
         </li>
       </ul>
       <InvalidLines rows={result.invalidRows} title="Invalid lines" />
-      <div className={styles.actions}>
-        <Link className={styles.linkButton} to="/transactions">
+      <div className={ACTION_CLASSES}>
+        <Link className={buttonVariants()} to="/transactions">
           View transactions
         </Link>
-        <button type="button" className={styles.button} onClick={onAnother}>
+        <Button type="button" variant="outline" onClick={onAnother}>
           Import another file
-        </button>
+        </Button>
       </div>
     </section>
   );
@@ -331,57 +382,63 @@ export function ImportPage() {
   }));
   const noAccounts = accounts.isSuccess && accountList.length === 0;
 
+  const step = result ? 3 : shown && mappingComplete ? 2 : shown ? 1 : 0;
+
   const doCommit = () => {
     if (!canImport || params === null) return;
     commit.mutate(params, { onSuccess: (outcome) => setResult(outcome) });
   };
 
   return (
-    <section className={styles.page} aria-labelledby="import-title">
-      <h1 id="import-title">Import transactions</h1>
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-6" aria-labelledby="import-title">
+      <h1 id="import-title" className="text-2xl font-semibold tracking-tight">
+        Import transactions
+      </h1>
+      <Stepper current={step} />
 
       {result ? (
         <ResultView result={result} onAnother={startOver} headingRef={resultHeading} />
       ) : (
         <>
-          <section aria-labelledby="import-upload-title" className={styles.card}>
-            <h2 id="import-upload-title">Choose a CSV file</h2>
-            <p id="import-limits" className={styles.hint}>
+          <section aria-labelledby="import-upload-title" className={CARD_CLASSES}>
+            <h2 id="import-upload-title" className="m-0 text-lg font-semibold tracking-tight">
+              Choose a CSV file
+            </h2>
+            <p id="import-limits" className={HINT_CLASSES}>
               Up to {MAX_FILE_MB} MB and {MAX_ROWS} rows. The file must be UTF-8 text with commas between columns.
               Nothing is saved until you choose Import.
             </p>
             {noAccounts ? (
-              <p role="status" className={styles.empty}>
+              <p role="status" className={EMPTY_CLASSES}>
                 You have no account yet. <Link to="/accounts">Create an account</Link> first.
               </p>
             ) : null}
-            <div className={styles.field}>
-              <label htmlFor="import-file">CSV file</label>
-              <input
+            <div className={FIELD_CLASSES}>
+              <Label htmlFor="import-file">CSV file</Label>
+              <Input
                 key={inputKey}
                 id="import-file"
                 type="file"
                 accept=".csv,text/csv"
-                className={styles.control}
                 onChange={onFile}
                 disabled={noAccounts}
                 aria-describedby={problem.fields['file'] ? 'import-limits import-file-error' : 'import-limits'}
                 aria-invalid={problem.fields['file'] ? true : undefined}
               />
               {problem.fields['file'] ? (
-                <p id="import-file-error" className={styles.error}>
+                <p id="import-file-error" className={ERROR_CLASSES}>
                   <span aria-hidden="true">⚠ </span>
                   {problem.fields['file']}
                 </p>
               ) : null}
             </div>
             {loading && !shown ? (
-              <p role="status" className={styles.hint}>
+              <p role="status" className={HINT_CLASSES}>
                 Reading the file…
               </p>
             ) : null}
             {problem.general ? (
-              <p role="alert" className={styles.error}>
+              <p role="alert" className={ERROR_CLASSES}>
                 <span aria-hidden="true">⚠ </span>
                 {problem.general}
               </p>
@@ -390,9 +447,11 @@ export function ImportPage() {
 
           {shown ? (
             <>
-              <section aria-labelledby="import-map-title" className={styles.card}>
-                <h2 id="import-map-title">Map the columns</h2>
-                <div className={styles.grid}>
+              <section aria-labelledby="import-map-title" className={CARD_CLASSES}>
+                <h2 id="import-map-title" className="m-0 text-lg font-semibold tracking-tight">
+                  Map the columns
+                </h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <SelectField
                     id="import-col-date"
                     label="Date column"
@@ -429,11 +488,11 @@ export function ImportPage() {
                     placeholder="Choose a column"
                     error={problem.fields['mapping.description']}
                   />
-                  <div className={styles.field}>
-                    <label htmlFor="import-date-format">Date format</label>
+                  <div className={FIELD_CLASSES}>
+                    <Label htmlFor="import-date-format">Date format</Label>
                     <select
                       id="import-date-format"
-                      className={styles.control}
+                      className={SELECT_CLASSES}
                       value={dateFormat}
                       onChange={(event) => {
                         touch();
@@ -449,7 +508,7 @@ export function ImportPage() {
                       ))}
                     </select>
                     {problem.fields['dateFormat'] ? (
-                      <p id="import-date-format-error" className={styles.error}>
+                      <p id="import-date-format-error" className={ERROR_CLASSES}>
                         <span aria-hidden="true">⚠ </span>
                         {problem.fields['dateFormat']}
                       </p>
@@ -498,14 +557,19 @@ export function ImportPage() {
                 </div>
               </section>
 
-              <section aria-labelledby="import-preview-title" className={styles.card}>
-                <h2 id="import-preview-title" ref={previewHeading} tabIndex={-1}>
+              <section aria-labelledby="import-preview-title" className={CARD_CLASSES}>
+                <h2
+                  id="import-preview-title"
+                  ref={previewHeading}
+                  tabIndex={-1}
+                  className="m-0 text-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                >
                   Preview
                 </h2>
                 {!mappingComplete ? (
-                  <p className={styles.hint}>Choose the date, amount and description columns to see a preview.</p>
+                  <p className={HINT_CLASSES}>Choose the date, amount and description columns to see a preview.</p>
                 ) : previewFailed ? (
-                  <p className={styles.hint}>Fix the highlighted fields to see a preview.</p>
+                  <p className={HINT_CLASSES}>Fix the highlighted fields to see a preview.</p>
                 ) : (
                   <>
                     <p role="status">
@@ -515,12 +579,12 @@ export function ImportPage() {
                     <InvalidLines rows={shown.invalidRows} title="Invalid rows" />
                   </>
                 )}
-                <div className={styles.actions}>
-                  <button type="button" className={styles.button} disabled={!canImport} onClick={doCommit}>
+                <div className={ACTION_CLASSES}>
+                  <Button type="button" disabled={!canImport} onClick={doCommit}>
                     Import
-                  </button>
+                  </Button>
                   {commit.isPending ? (
-                    <span role="status" className={styles.hint}>
+                    <span role="status" className={HINT_CLASSES}>
                       Importing…
                     </span>
                   ) : null}

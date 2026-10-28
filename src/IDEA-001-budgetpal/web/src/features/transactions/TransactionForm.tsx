@@ -1,5 +1,19 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
   ApiProblem,
   useAccountOptions,
   useCategoryOptions,
@@ -10,7 +24,16 @@ import {
   type Transaction,
 } from './api';
 import { formatForInput, minorDigits, parseAmount } from './money';
-import styles from './TransactionsPage.module.css';
+
+/** The one look of an inline error: text with an icon, never colour alone. */
+export const ERROR_CLASSES = 'm-0 text-sm font-semibold text-destructive';
+
+/** An empty or blocked state: a dashed box with plain words. */
+export const EMPTY_CLASSES = 'm-0 rounded-md border border-dashed p-4 text-muted-foreground';
+
+/** Native selects keep their role, label and keyboard behaviour; they are dressed like the kit Input. */
+export const SELECT_CLASSES =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive md:text-sm';
 
 type FieldName = 'occurredOn' | 'amount' | 'description' | 'accountId' | 'categoryId';
 export type FieldErrors = Partial<Record<FieldName, string>>;
@@ -52,16 +75,16 @@ function Field({ name, label, error, hint, idPrefix, children }: FieldProps) {
   const id = `${idPrefix}-${name}`;
   const describedBy = [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined;
   return (
-    <div className={styles.field}>
-      <label htmlFor={id}>{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
       {children({ id, describedBy, invalid: error ? true : undefined })}
       {hint ? (
-        <p id={`${id}-hint`} className={styles.range}>
+        <p id={`${id}-hint`} className="m-0 text-sm text-muted-foreground">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={`${id}-error`} className={styles.error}>
+        <p id={`${id}-error`} className={ERROR_CLASSES}>
           <span aria-hidden="true">⚠ </span>
           {error}
         </p>
@@ -122,7 +145,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
   if (!categories.data || categories.data.length === 0) missing.push('a category');
   if (missing.length > 0) {
     return (
-      <p className={styles.empty} role="status">
+      <p className={EMPTY_CLASSES} role="status">
         To add a transaction you first need {missing.join(' and ')}. Create {missing.length > 1 ? 'them' : 'it'} on the{' '}
         {missing.length > 1 ? 'Accounts and Categories pages' : missing[0] === 'an account' ? 'Accounts page' : 'Categories page'}
         , then come back.
@@ -169,6 +192,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
         setAccountId('');
         setCategoryId('');
         setErrors({});
+        onSaved?.();
       },
       onError: (problem: Error) => {
         if (problem instanceof ApiProblem && problem.status === 400) {
@@ -193,18 +217,18 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
     <form
       onSubmit={onSubmit}
       noValidate
-      className={styles.filters}
+      className="grid grid-cols-1 gap-4 md:grid-cols-2"
       aria-label={editing ? `Edit transaction ${transaction.description}` : 'Add a transaction'}
     >
       {formError ? (
-        <p role="alert" tabIndex={-1} ref={alertRef} className={styles.error}>
+        <p role="alert" tabIndex={-1} ref={alertRef} className={`${ERROR_CLASSES} md:col-span-2`}>
           <span aria-hidden="true">⚠ </span>
           {formError}
         </p>
       ) : null}
       <Field idPrefix={idPrefix} name="occurredOn" label="Date" error={errors.occurredOn}>
         {({ id, describedBy, invalid }) => (
-          <input
+          <Input
             id={id}
             name="occurredOn"
             type="date"
@@ -213,13 +237,12 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
             ref={setRef('occurredOn')}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
           />
         )}
       </Field>
       <Field idPrefix={idPrefix} name="amount" label="Amount" error={errors.amount} hint="For example 12.50.">
         {({ id, describedBy, invalid }) => (
-          <input
+          <Input
             id={id}
             name="amount"
             type="text"
@@ -230,13 +253,12 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
             ref={setRef('amount')}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
           />
         )}
       </Field>
       <Field idPrefix={idPrefix} name="description" label="Description" error={errors.description}>
         {({ id, describedBy, invalid }) => (
-          <input
+          <Input
             id={id}
             name="description"
             type="text"
@@ -247,7 +269,6 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
             ref={setRef('description')}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
           />
         )}
       </Field>
@@ -261,7 +282,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
             ref={setRef('accountId')}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
+            className={SELECT_CLASSES}
           >
             <option value="">Choose an account</option>
             {(accounts.data ?? []).map((account) => (
@@ -282,7 +303,7 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
             ref={setRef('categoryId')}
             aria-invalid={invalid}
             aria-describedby={describedBy}
-            className={styles.control}
+            className={SELECT_CLASSES}
           >
             <option value="">Choose a category</option>
             {(categories.data ?? []).map((category) => (
@@ -293,14 +314,14 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
           </select>
         )}
       </Field>
-      <div className={styles.field}>
-        <button type="submit" disabled={pending} className={styles.button}>
+      <div className="flex flex-wrap gap-2 md:col-span-2">
+        <Button type="submit" disabled={pending}>
           {editing ? (pending ? 'Saving...' : 'Save changes') : pending ? 'Adding...' : 'Add transaction'}
-        </button>
-        {editing ? (
-          <button type="button" onClick={onCancel} className={styles.button}>
+        </Button>
+        {editing || onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>
@@ -314,81 +335,70 @@ interface DeleteTransactionProps {
 }
 
 /**
- * Delete with a confirm step. The confirm group takes focus when it opens, Escape or Cancel closes it
- * and focus goes back to the Delete button; every control is a real button, so it is keyboard operable.
+ * Delete with a confirm step on the kit AlertDialog: focus starts on Cancel, Escape or Cancel closes it and
+ * focus goes back to the Delete button. The row stays until the api confirms, so a failure keeps the dialog open.
  */
 export function DeleteTransaction({ transaction, onDeleted }: DeleteTransactionProps) {
   const remove = useDeleteTransaction();
-  const [confirming, setConfirming] = useState(false);
+  const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const cancelRef = useRef<HTMLButtonElement | null>(null);
-
-  const returnFocus = useRef(false);
-
-  useEffect(() => {
-    if (confirming) cancelRef.current?.focus();
-    else if (returnFocus.current) {
-      returnFocus.current = false;
-      triggerRef.current?.focus();
-    }
-  }, [confirming]);
-
-  function close() {
-    returnFocus.current = true;
-    setConfirming(false);
-    setFailed(false);
-  }
+  const deleted = useRef(false);
 
   function confirm() {
     setFailed(false);
     remove.mutate(transaction.id, {
       onSuccess: () => {
-        returnFocus.current = true;
-        setConfirming(false);
+        deleted.current = true;
+        setOpen(false);
         onDeleted?.();
       },
       onError: () => setFailed(true),
     });
   }
 
-  if (!confirming) {
-    return (
-      <button
-        type="button"
-        ref={triggerRef}
-        className={styles.button}
-        aria-label={`Delete ${transaction.description}`}
-        onClick={() => setConfirming(true)}
-      >
-        Delete
-      </button>
-    );
-  }
-
   return (
-    <div
-      role="alertdialog"
-      aria-modal="false"
-      aria-labelledby={`delete-${transaction.id}-title`}
-      className={styles.field}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') close();
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setFailed(false);
       }}
     >
-      <p id={`delete-${transaction.id}-title`}>Delete “{transaction.description}”? This cannot be undone.</p>
-      {failed ? (
-        <p role="alert" className={styles.error}>
-          <span aria-hidden="true">⚠ </span>
-          Could not delete the transaction right now. Try again.
-        </p>
-      ) : null}
-      <button type="button" className={styles.button} onClick={confirm} disabled={remove.isPending}>
-        {remove.isPending ? 'Deleting...' : 'Confirm delete'}
-      </button>
-      <button type="button" ref={cancelRef} className={styles.button} onClick={close}>
-        Cancel
-      </button>
-    </div>
+      <AlertDialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm" aria-label={`Delete ${transaction.description}`}>
+          Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent
+        onCloseAutoFocus={(event) => {
+          // The row is gone: the page moves focus to the list heading instead.
+          if (deleted.current) event.preventDefault();
+        }}
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete “{transaction.description}”?</AlertDialogTitle>
+          <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+        </AlertDialogHeader>
+        {failed ? (
+          <p role="alert" className={ERROR_CLASSES}>
+            <span aria-hidden="true">⚠ </span>
+            Could not delete the transaction right now. Try again.
+          </p>
+        ) : null}
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={remove.isPending}
+            onClick={(event) => {
+              // Keep the dialog open until the api answers.
+              event.preventDefault();
+              confirm();
+            }}
+          >
+            {remove.isPending ? 'Deleting...' : 'Confirm delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

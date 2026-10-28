@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -314,15 +314,17 @@ describe('TransactionsPage', () => {
     expect(screen.getByRole('navigation', { name: 'Pages' })).toBeInTheDocument();
   });
 
-  it('T-034 the stylesheet is one column by default, uses tokens and shows keyboard focus', () => {
-    const css = readFileSync(resolve(here, 'TransactionsPage.module.css'), 'utf8');
-    expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/);
-    expect(css).toMatch(/:focus-visible/);
-    const [base, wide] = css.split('@media (min-width: 768px)');
-    expect(wide).toBeDefined();
-    expect(base).toMatch(/\.filters\s*\{[^}]*grid-template-columns:\s*1fr;/);
-    expect(base).not.toMatch(/grid-template-columns:\s*1fr 1fr/);
-    expect(wide).toMatch(/grid-template-columns:\s*1fr 1fr 1fr/);
+  it('T-034 the layout is one column by default, uses tokens only and shows keyboard focus', () => {
+    expect(existsSync(resolve(here, 'TransactionsPage.module.css'))).toBe(false);
+    const page = readFileSync(resolve(here, 'TransactionsPage.tsx'), 'utf8');
+    const form = readFileSync(resolve(here, 'TransactionForm.tsx'), 'utf8');
+    for (const text of [page, form]) {
+      expect(text).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/);
+      expect(text).not.toMatch(/style=\{\{/);
+    }
+    // Filters: one column, three from the md breakpoint. Controls carry the kit focus ring.
+    expect(page).toMatch(/grid-cols-1[^'"`]*md:grid-cols-3/);
+    expect(form).toMatch(/focus-visible:ring-/);
   });
 });
 
@@ -406,24 +408,21 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     // The list was fetched again: the new row is in the table and the form was reset.
     expect(await screen.findByRole('rowheader', { name: 'Coffee beans' })).toBeInTheDocument();
     expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(3);
-    await waitFor(() => expect(within(form).getByLabelText('Description')).toHaveValue(''));
+    // The dialog closes once the transaction is saved.
+    await waitFor(() => expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument());
   });
 
-  it('T-035 the add form can be closed again from the page', async () => {
+  it('T-035 the add dialog closes with Escape and focus returns to the Add transaction button', async () => {
     mockCrudApi([tx(1)]);
     renderPage();
     await screen.findByRole('table');
-    // A real click focuses the button; fireEvent does not, so focus it first. The toggle stays in the DOM
-    // while the form opens and closes, so focus never leaves it.
-    const toggle = screen.getByRole('button', { name: 'Add transaction' });
-    toggle.focus();
-    fireEvent.click(toggle);
-    await screen.findByRole('form', { name: 'Add a transaction' });
-    expect(toggle).toHaveTextContent('Close add form');
-    fireEvent.click(toggle);
-    expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument();
-    expect(toggle).toHaveTextContent('Add transaction');
-    expect(toggle).toHaveFocus();
+    const trigger = screen.getByRole('button', { name: 'Add transaction' });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const dialog = await screen.findByRole('dialog', { name: 'Add a transaction' });
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 
   it('T-035 with no rows the empty state points at a real Add transaction control', async () => {
@@ -470,19 +469,21 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     await within(form).findByRole('option', { name: 'Main' });
     fireEvent.click(within(form).getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByRole('form', { name: /^Edit transaction/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Edit Weekly shop' })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Edit Weekly shop' })).toHaveFocus());
     expect(api.writes).toHaveLength(0);
   });
 
-  it('T-038 only one row is edited at a time', async () => {
+  it('T-038 only one row is edited at a time: the open dialog makes the other rows inert, and another row opens after closing', async () => {
     mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
     renderPage();
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
     await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    expect(screen.queryByRole('button', { name: 'Edit Bus' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('form', { name: /^Edit transaction/ })).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Edit Bus' }));
     expect(await screen.findByRole('form', { name: 'Edit transaction Bus' })).toBeInTheDocument();
-    expect(screen.queryByRole('form', { name: 'Edit transaction Weekly shop' })).not.toBeInTheDocument();
   });
 
   it('T-039 Delete and confirm removes the row from the list; focus moves to the list heading', async () => {
@@ -505,7 +506,7 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     fireEvent.click(screen.getByRole('button', { name: 'Delete Weekly shop' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.getByRole('rowheader', { name: 'Weekly shop' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Delete Weekly shop' })).toHaveFocus());
     expect(api.writes).toHaveLength(0);
   });
 
@@ -518,17 +519,26 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     expect(screen.queryByRole('form', { name: 'Add a transaction' })).not.toBeInTheDocument();
   });
 
-  it('T-041 axe finds no serious or critical violation with the add form, an edit form and a delete confirm open', async () => {
+  it('T-041 axe finds no serious or critical violation with the add dialog, an edit dialog and a delete confirm open, one at a time', async () => {
     mockCrudApi([tx(1, { description: 'Weekly shop' }), tx(2, { description: 'Bus' })]);
-    const { container } = renderPage();
+    renderPage();
     await screen.findByRole('table');
+
     fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
-    const add = await screen.findByRole('form', { name: 'Add a transaction' });
+    const add = await screen.findByRole('dialog', { name: 'Add a transaction' });
     await within(add).findByRole('option', { name: 'Main' });
+    expect(await serious(add)).toEqual([]);
+    fireEvent.click(within(add).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
     fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
-    const edit = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
+    const edit = await screen.findByRole('dialog', { name: 'Edit Weekly shop' });
     await within(edit).findByRole('option', { name: 'Main' });
+    expect(await serious(edit)).toEqual([]);
+    fireEvent.click(within(edit).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
     fireEvent.click(screen.getByRole('button', { name: 'Delete Bus' }));
-    expect(await serious(container)).toEqual([]);
+    expect(await serious(await screen.findByRole('alertdialog'))).toEqual([]);
   });
 });
