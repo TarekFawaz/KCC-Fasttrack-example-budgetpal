@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Transaction } from './api';
@@ -65,13 +65,24 @@ function renderUi(ui: React.ReactElement) {
   return { ...view, invalidate };
 }
 
+/** Opens a kit Select (Radix) from its combobox trigger and picks the option with this name. */
+async function choose(trigger: HTMLElement, option: string) {
+  fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+  const listbox = await screen.findByRole('listbox');
+  fireEvent.click(within(listbox).getByRole('option', { name: option }));
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+}
+
+const accountSelect = () => screen.getByRole('combobox', { name: 'Account' });
+const categorySelect = () => screen.getByRole('combobox', { name: 'Category' });
+
 async function fillAdd(amount = '12.50') {
-  await screen.findByRole('option', { name: 'Main' });
+  await screen.findByRole('combobox', { name: 'Account' });
   fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-04-02' } });
   fireEvent.change(screen.getByLabelText('Amount'), { target: { value: amount } });
   fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Coffee beans' } });
-  fireEvent.change(screen.getByLabelText('Account'), { target: { value: '1' } });
-  fireEvent.change(screen.getByLabelText('Category'), { target: { value: '10' } });
+  await choose(accountSelect(), 'Main');
+  await choose(categorySelect(), 'Groceries');
 }
 
 afterEach(() => {
@@ -118,7 +129,8 @@ describe('TransactionForm add (AC-1..AC-3)', () => {
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['transactions'] }));
     await waitFor(() => expect(screen.getByLabelText('Amount')).toHaveValue(''));
     expect(screen.getByLabelText('Description')).toHaveValue('');
-    expect(screen.getByLabelText('Account')).toHaveValue('');
+    expect(accountSelect()).toHaveTextContent('Choose an account');
+    expect(categorySelect()).toHaveTextContent('Choose a category');
   });
 
   it('T-036 shows an inline error for invalid amount text and sends nothing', async () => {
@@ -151,14 +163,15 @@ describe('TransactionForm add (AC-1..AC-3)', () => {
     await fillAdd('12.50');
     fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
 
-    const account = screen.getByLabelText('Account');
+    const account = accountSelect();
     await waitFor(() => expect(account).toHaveAttribute('aria-invalid', 'true'));
     expect(account).toHaveAccessibleDescription('Account not found');
     expect(screen.getByLabelText('Description')).toHaveAccessibleDescription('Description is required');
     expect(screen.getByLabelText('Amount')).toHaveValue('12.50');
     expect(screen.getByLabelText('Description')).toHaveValue('Coffee beans');
     expect(screen.getByLabelText('Date')).toHaveValue('2026-04-02');
-    expect(screen.getByLabelText('Category')).toHaveValue('10');
+    expect(categorySelect()).toHaveTextContent('Groceries');
+    expect(account).toHaveTextContent('Main');
   });
 
   it('T-037 maps an amountMinor server error onto the Amount input', async () => {
@@ -192,12 +205,14 @@ describe('TransactionForm edit (AC-4)', () => {
     const calls = mockApi();
     const onSaved = vi.fn();
     const { invalidate } = renderUi(<TransactionForm transaction={existing} onSaved={onSaved} />);
-    await screen.findByRole('option', { name: 'Main' });
+    await screen.findByRole('combobox', { name: 'Account' });
     expect(screen.getByLabelText('Amount')).toHaveValue('12.50');
     expect(screen.getByLabelText('Description')).toHaveValue('Weekly shop');
+    expect(accountSelect()).toHaveTextContent('Main');
+    expect(categorySelect()).toHaveTextContent('Groceries');
 
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '20' } });
-    fireEvent.change(screen.getByLabelText('Category'), { target: { value: '11' } });
+    await choose(categorySelect(), 'Salary');
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
@@ -213,7 +228,7 @@ describe('TransactionForm edit (AC-4)', () => {
     const calls = mockApi();
     const onCancel = vi.fn();
     renderUi(<TransactionForm transaction={existing} onCancel={onCancel} />);
-    await screen.findByRole('option', { name: 'Main' });
+    await screen.findByRole('combobox', { name: 'Account' });
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onCancel).toHaveBeenCalledTimes(1);
     expect(writes(calls)).toHaveLength(0);
@@ -296,7 +311,7 @@ describe('TransactionForm accessibility (AC-7)', () => {
   it('T-041 axe finds no serious or critical violation in the add form, with errors shown', async () => {
     mockApi();
     const { container } = renderUi(<TransactionForm />);
-    await screen.findByRole('option', { name: 'Main' });
+    await screen.findByRole('combobox', { name: 'Account' });
     expect(await violations(container)).toEqual([]);
     fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
     await screen.findByText('Enter the date of the transaction.');
@@ -306,7 +321,7 @@ describe('TransactionForm accessibility (AC-7)', () => {
   it('T-041 axe is clean for the edit form and the open delete confirm', async () => {
     mockApi();
     const edit = renderUi(<TransactionForm transaction={existing} />);
-    await screen.findByRole('option', { name: 'Main' });
+    await screen.findByRole('combobox', { name: 'Account' });
     expect(await violations(edit.container)).toEqual([]);
     edit.unmount();
 
@@ -318,12 +333,71 @@ describe('TransactionForm accessibility (AC-7)', () => {
   it('T-041 every control has a visible label', async () => {
     mockApi();
     renderUi(<TransactionForm />);
-    await screen.findByRole('option', { name: 'Main' });
+    await screen.findByRole('combobox', { name: 'Account' });
     for (const label of ['Date', 'Amount', 'Description', 'Account', 'Category']) {
       const control = screen.getByLabelText(label);
       const visible = document.querySelector(`label[for="${control.id}"]`);
       expect(visible, label).not.toBeNull();
       expect(visible?.textContent).toBe(label);
     }
+  });
+});
+
+describe('SPEC-010 TransactionForm uses the kit Select (Bug-001)', () => {
+  it('SPEC-010 T-030 Account and Category are kit Select comboboxes (labelled buttons), not native selects', async () => {
+    mockApi();
+    renderUi(<TransactionForm />);
+    const account = await screen.findByRole('combobox', { name: 'Account' });
+    const category = categorySelect();
+    for (const trigger of [account, category]) {
+      expect(trigger.tagName).toBe('BUTTON');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    }
+    expect(account).toHaveTextContent('Choose an account');
+    expect(category).toHaveTextContent('Choose a category');
+    fireEvent.keyDown(account, { key: 'ArrowDown' });
+    const listbox = await screen.findByRole('listbox');
+    expect(within(listbox).getAllByRole('option').map((option) => option.textContent)).toEqual(['Main', 'Wallet']);
+  });
+
+  it('SPEC-010 T-030 an empty Account and Category give inline errors tied to the Selects, focus goes to the first', async () => {
+    const calls = mockApi();
+    renderUi(<TransactionForm />);
+    await screen.findByRole('combobox', { name: 'Account' });
+    fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-04-02' } });
+    fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Snack' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+
+    expect(await screen.findByText('Choose an account.')).toBeInTheDocument();
+    expect(screen.getByText('Choose a category.')).toBeInTheDocument();
+    expect(accountSelect()).toHaveAttribute('aria-invalid', 'true');
+    expect(accountSelect()).toHaveAccessibleDescription('Choose an account.');
+    expect(categorySelect()).toHaveAttribute('aria-invalid', 'true');
+    expect(categorySelect()).toHaveAccessibleDescription('Choose a category.');
+    await waitFor(() => expect(accountSelect()).toHaveFocus());
+    expect(writes(calls)).toHaveLength(0);
+    // Choosing an option and sending again clears the error and posts the chosen ids.
+    await choose(accountSelect(), 'Wallet');
+    await choose(categorySelect(), 'Salary');
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    await waitFor(() => expect(writes(calls)).toHaveLength(1));
+    expect(writes(calls)[0]?.body).toEqual({
+      accountId: 2,
+      categoryId: 11,
+      occurredOn: '2026-04-02',
+      amountMinor: 500,
+      description: 'Snack',
+    });
+  });
+
+  it('SPEC-010 T-030 axe is clean with the Account list open', async () => {
+    mockApi();
+    const { baseElement } = renderUi(<TransactionForm />);
+    const account = await screen.findByRole('combobox', { name: 'Account' });
+    fireEvent.keyDown(account, { key: 'ArrowDown' });
+    await screen.findByRole('listbox');
+    const result = await axe.run(baseElement, { rules: { 'color-contrast': { enabled: false } } });
+    expect(result.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
   });
 });

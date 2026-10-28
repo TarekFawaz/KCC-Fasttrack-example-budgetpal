@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ApiProblem,
   useAccountOptions,
@@ -31,9 +32,8 @@ export const ERROR_CLASSES = 'm-0 text-sm font-semibold text-destructive';
 /** An empty or blocked state: a dashed box with plain words. */
 export const EMPTY_CLASSES = 'm-0 rounded-md border border-dashed p-4 text-muted-foreground';
 
-/** Native selects keep their role, label and keyboard behaviour; they are dressed like the kit Input. */
-export const SELECT_CLASSES =
-  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive md:text-sm';
+/** The kit Select trigger shows its placeholder (nothing chosen yet) in the muted token colour. */
+const PLACEHOLDER_CLASSES = 'data-[placeholder]:text-muted-foreground';
 
 type FieldName = 'occurredOn' | 'amount' | 'description' | 'accountId' | 'categoryId';
 export type FieldErrors = Partial<Record<FieldName, string>>;
@@ -102,7 +102,8 @@ interface TransactionFormProps {
   onCancel?: () => void;
 }
 
-type ControlElement = HTMLInputElement | HTMLSelectElement;
+/** An input, or the button a kit Select renders as its trigger. */
+type ControlElement = HTMLInputElement | HTMLButtonElement;
 
 /**
  * Add or edit form. Decimal text becomes integer minor units by string math before it is sent; an existing
@@ -274,44 +275,46 @@ export function TransactionForm({ transaction, onSaved, onCancel }: TransactionF
       </Field>
       <Field idPrefix={idPrefix} name="accountId" label="Account" error={errors.accountId}>
         {({ id, describedBy, invalid }) => (
-          <select
-            id={id}
-            name="accountId"
-            value={accountId}
-            onChange={(event) => setAccountId(event.target.value)}
-            ref={setRef('accountId')}
-            aria-invalid={invalid}
-            aria-describedby={describedBy}
-            className={SELECT_CLASSES}
-          >
-            <option value="">Choose an account</option>
-            {(accounts.data ?? []).map((account) => (
-              <option key={account.id} value={String(account.id)}>
-                {account.name}
-              </option>
-            ))}
-          </select>
+          <Select name="accountId" value={accountId} onValueChange={setAccountId}>
+            <SelectTrigger
+              id={id}
+              ref={setRef('accountId')}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              className={PLACEHOLDER_CLASSES}
+            >
+              <SelectValue placeholder="Choose an account" />
+            </SelectTrigger>
+            <SelectContent>
+              {(accounts.data ?? []).map((account) => (
+                <SelectItem key={account.id} value={String(account.id)}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </Field>
       <Field idPrefix={idPrefix} name="categoryId" label="Category" error={errors.categoryId}>
         {({ id, describedBy, invalid }) => (
-          <select
-            id={id}
-            name="categoryId"
-            value={categoryId}
-            onChange={(event) => setCategoryId(event.target.value)}
-            ref={setRef('categoryId')}
-            aria-invalid={invalid}
-            aria-describedby={describedBy}
-            className={SELECT_CLASSES}
-          >
-            <option value="">Choose a category</option>
-            {(categories.data ?? []).map((category) => (
-              <option key={category.id} value={String(category.id)}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <Select name="categoryId" value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger
+              id={id}
+              ref={setRef('categoryId')}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              className={PLACEHOLDER_CLASSES}
+            >
+              <SelectValue placeholder="Choose a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {(categories.data ?? []).map((category) => (
+                <SelectItem key={category.id} value={String(category.id)}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </Field>
       <div className="flex flex-wrap gap-2 md:col-span-2">

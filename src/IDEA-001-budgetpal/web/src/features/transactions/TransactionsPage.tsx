@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   PAGE_SIZE,
@@ -20,7 +21,7 @@ import {
   type CategoryKind,
   type TransactionFilters,
 } from './api';
-import { DeleteTransaction, EMPTY_CLASSES, ERROR_CLASSES, SELECT_CLASSES, TransactionForm } from './TransactionForm';
+import { DeleteTransaction, EMPTY_CLASSES, ERROR_CLASSES, TransactionForm } from './TransactionForm';
 
 /**
  * Display helpers. Money is formatted here (not through another feature, GR-006) from integer minor
@@ -57,6 +58,13 @@ export function directionOf(kind: CategoryKind | undefined): { label: string; ic
 }
 
 const INITIAL: TransactionFilters = { month: '', accountId: '', categoryId: '', limit: PAGE_SIZE, offset: 0 };
+
+/**
+ * The kit Select (Radix) refuses an empty item value, so "no filter" travels as this sentinel and is
+ * turned back into the empty string the filters (and the api query) use. Account and category ids are
+ * numeric text, so they can never equal it.
+ */
+const ANY = 'any';
 
 /**
  * Transactions page: the add control, filters (month, account, category), the table with Edit and Delete
@@ -161,35 +169,41 @@ export function TransactionsPage() {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="filter-account">Account</Label>
-          <select
-            id="filter-account"
-            className={SELECT_CLASSES}
-            value={filters.accountId}
-            onChange={(event) => change({ accountId: event.target.value })}
+          <Select
+            value={filters.accountId === '' ? ANY : filters.accountId}
+            onValueChange={(value) => change({ accountId: value === ANY ? '' : value })}
           >
-            <option value="">All accounts</option>
-            {(accounts.data ?? []).map((account) => (
-              <option key={account.id} value={String(account.id)}>
-                {account.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="filter-account">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ANY}>All accounts</SelectItem>
+              {(accounts.data ?? []).map((account) => (
+                <SelectItem key={account.id} value={String(account.id)}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="filter-category">Category</Label>
-          <select
-            id="filter-category"
-            className={SELECT_CLASSES}
-            value={filters.categoryId}
-            onChange={(event) => change({ categoryId: event.target.value })}
+          <Select
+            value={filters.categoryId === '' ? ANY : filters.categoryId}
+            onValueChange={(value) => change({ categoryId: value === ANY ? '' : value })}
           >
-            <option value="">All categories</option>
-            {(categories.data ?? []).map((category) => (
-              <option key={category.id} value={String(category.id)}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="filter-category">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ANY}>All categories</SelectItem>
+              {(categories.data ?? []).map((category) => (
+                <SelectItem key={category.id} value={String(category.id)}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </form>
 

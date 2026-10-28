@@ -93,6 +93,26 @@ const serious = async (container: HTMLElement) => {
   return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id);
 };
 
+/** Opens a kit Select (Radix) from its combobox trigger and picks the option with this name. */
+async function choose(trigger: HTMLElement, option: string) {
+  fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+  const listbox = await screen.findByRole('listbox');
+  fireEvent.click(within(listbox).getByRole('option', { name: option }));
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+}
+
+/** The option names a kit Select offers; the listbox is closed again afterwards. */
+async function optionsOf(trigger: HTMLElement) {
+  fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+  const listbox = await screen.findByRole('listbox');
+  const names = within(listbox)
+    .getAllByRole('option')
+    .map((option) => option.textContent);
+  fireEvent.keyDown(listbox, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+  return names;
+}
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe('transactions feature registration', () => {
@@ -185,7 +205,7 @@ describe('TransactionsPage', () => {
     expect(screen.queryByText(/You have no transactions yet/)).not.toBeInTheDocument();
   });
 
-  it('T-031 labelled selects are fed from the list endpoints; changing a filter refetches with its params', async () => {
+  it('T-031 labelled kit Selects are fed from the list endpoints; changing a filter refetches with its params', async () => {
     const urls = mockApi({ rows: [tx(1)] });
     renderPage();
     await screen.findByRole('table');
@@ -193,25 +213,25 @@ describe('TransactionsPage', () => {
     expect(urls).toContain('/api/categories');
     expect(listUrls(urls)[0]).toBe('/api/transactions?limit=50&offset=0');
 
-    const account = screen.getByLabelText('Account');
-    const category = screen.getByLabelText('Category');
-    expect(within(account).getAllByRole('option').map((option) => option.textContent)).toEqual(['All accounts', 'Main', 'Wallet']);
-    expect(within(category).getAllByRole('option').map((option) => option.textContent)).toEqual([
-      'All categories',
-      'Groceries',
-      'Salary',
-    ]);
+    const account = screen.getByRole('combobox', { name: 'Account' });
+    const category = screen.getByRole('combobox', { name: 'Category' });
+    expect(account).toHaveTextContent('All accounts');
+    expect(category).toHaveTextContent('All categories');
+    expect(await optionsOf(account)).toEqual(['All accounts', 'Main', 'Wallet']);
+    expect(await optionsOf(category)).toEqual(['All categories', 'Groceries', 'Salary']);
 
     fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2026-03' } });
     await waitFor(() => expect(listUrls(urls).at(-1)).toBe('/api/transactions?month=2026-03&limit=50&offset=0'));
-    fireEvent.change(account, { target: { value: '2' } });
+    await choose(account, 'Wallet');
     await waitFor(() => expect(listUrls(urls).at(-1)).toBe('/api/transactions?month=2026-03&accountId=2&limit=50&offset=0'));
-    fireEvent.change(category, { target: { value: '11' } });
+    expect(account).toHaveTextContent('Wallet');
+    await choose(category, 'Salary');
     await waitFor(() =>
       expect(listUrls(urls).at(-1)).toBe('/api/transactions?month=2026-03&accountId=2&categoryId=11&limit=50&offset=0'),
     );
-    fireEvent.change(account, { target: { value: '' } });
+    await choose(account, 'All accounts');
     await waitFor(() => expect(listUrls(urls).at(-1)).toBe('/api/transactions?month=2026-03&categoryId=11&limit=50&offset=0'));
+    expect(account).toHaveTextContent('All accounts');
   });
 
   it('T-032 Previous and Next move the offset by the limit and the range and total are shown', async () => {
@@ -241,7 +261,7 @@ describe('TransactionsPage', () => {
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     await screen.findByText('Showing 51-100 of 120');
-    fireEvent.change(screen.getByLabelText('Account'), { target: { value: '1' } });
+    await choose(screen.getByRole('combobox', { name: 'Account' }), 'Main');
     await waitFor(() => expect(listUrls(urls).at(-1)).toBe('/api/transactions?accountId=1&limit=50&offset=0'));
   });
 
@@ -257,7 +277,7 @@ describe('TransactionsPage', () => {
     mockApi({ rows: [] });
     renderPage();
     await screen.findByText(/You have no transactions yet/);
-    fireEvent.change(screen.getByLabelText('Account'), { target: { value: '2' } });
+    await choose(screen.getByRole('combobox', { name: 'Account' }), 'Wallet');
     expect(await screen.findByText(/No transactions match these filters/)).toBeInTheDocument();
   });
 
@@ -295,14 +315,14 @@ describe('TransactionsPage', () => {
     expect(await serious(third.container)).toEqual([]);
   });
 
-  it('T-034 filters and pager are labelled native controls in tab order, none with a positive tabindex', async () => {
+  it('T-034 filters and pager are labelled controls in tab order, none with a positive tabindex', async () => {
     mockApi({ rows: [tx(1)] });
     const { container } = renderPage();
     await screen.findByRole('table');
     const controls = [
       screen.getByLabelText('Month'),
-      screen.getByLabelText('Account'),
-      screen.getByLabelText('Category'),
+      screen.getByRole('combobox', { name: 'Account' }),
+      screen.getByRole('combobox', { name: 'Category' }),
       screen.getByRole('button', { name: 'Previous' }),
       screen.getByRole('button', { name: 'Next' }),
     ];
@@ -322,9 +342,160 @@ describe('TransactionsPage', () => {
       expect(text).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/);
       expect(text).not.toMatch(/style=\{\{/);
     }
-    // Filters: one column, three from the md breakpoint. Controls carry the kit focus ring.
+    // Filters: one column, three from the md breakpoint. The kit Select trigger carries the focus ring.
     expect(page).toMatch(/grid-cols-1[^'"`]*md:grid-cols-3/);
-    expect(form).toMatch(/focus-visible:ring-/);
+    expect(readFileSync(resolve(here, '../../components/ui/select.tsx'), 'utf8')).toMatch(/focus-visible:ring-/);
+  });
+});
+
+describe('SPEC-010 transactions use the kit Select (Bug-001)', () => {
+  it('SPEC-010 T-029 neither the page nor the form renders a native select; both import the kit Select', () => {
+    for (const file of ['TransactionsPage.tsx', 'TransactionForm.tsx']) {
+      const text = readFileSync(resolve(here, file), 'utf8');
+      expect(text, file).not.toMatch(/<select\b/);
+      expect(text, file).not.toContain('SELECT_CLASSES');
+      expect(text, file).toMatch(/from '@\/components\/ui\/select'/);
+    }
+  });
+
+  it('SPEC-010 T-029 the Account and Category filters are comboboxes named by their labels, in a labelled filter form', async () => {
+    mockApi({ rows: [tx(1)] });
+    renderPage();
+    await screen.findByRole('table');
+    const filters = screen.getByRole('form', { name: 'Filter transactions' });
+    for (const name of ['Account', 'Category']) {
+      const trigger = within(filters).getByRole('combobox', { name });
+      expect(trigger.tagName).toBe('BUTTON');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      expect(document.querySelector(`label[for="${trigger.id}"]`)).toHaveTextContent(name);
+    }
+  });
+
+  it('SPEC-010 T-029 the rows sit in their own horizontal scroll container, with a Badge per row and paging Buttons', async () => {
+    mockApi({ rows: [tx(1)], total: 120 });
+    renderPage();
+    const table = await screen.findByRole('table');
+    expect(table.parentElement?.className).toContain('overflow-x-auto');
+    expect(within(within(table).getAllByRole('row')[1]!).getByText('Expense')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
+  });
+
+  it('SPEC-010 T-029 a filter Select opens on the keyboard, closes with Escape and keeps its value', async () => {
+    mockApi({ rows: [tx(1)] });
+    renderPage();
+    await screen.findByRole('table');
+    const account = screen.getByRole('combobox', { name: 'Account' });
+    account.focus();
+    fireEvent.keyDown(account, { key: 'ArrowDown' });
+    expect(await screen.findByRole('listbox')).toBeInTheDocument();
+    expect(account).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    expect(account).toHaveTextContent('All accounts');
+    await waitFor(() => expect(account).toHaveFocus());
+  });
+
+  it('SPEC-010 T-030 the add dialog offers Account and Category as kit Selects; the chosen options are posted', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop' })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add a transaction' });
+    expect(dialog).toHaveAccessibleDescription('Enter the date, amount, description, account and category.');
+    const account = await within(dialog).findByRole('combobox', { name: 'Account' });
+    const category = within(dialog).getByRole('combobox', { name: 'Category' });
+    expect(account).toHaveTextContent('Choose an account');
+    expect(category).toHaveTextContent('Choose a category');
+
+    fireEvent.change(within(dialog).getByLabelText('Date'), { target: { value: '2026-04-02' } });
+    fireEvent.change(within(dialog).getByLabelText('Amount'), { target: { value: '8.25' } });
+    fireEvent.change(within(dialog).getByLabelText('Description'), { target: { value: 'Lunch' } });
+    await choose(account, 'Wallet');
+    await choose(category, 'Salary');
+    expect(account).toHaveTextContent('Wallet');
+    expect(category).toHaveTextContent('Salary');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add transaction' }));
+
+    await waitFor(() =>
+      expect(api.writes).toEqual([
+        {
+          url: '/api/transactions',
+          method: 'POST',
+          body: { accountId: 2, categoryId: 11, occurredOn: '2026-04-02', amountMinor: 825, description: 'Lunch' },
+        },
+      ]),
+    );
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('SPEC-010 T-030 submitting the add dialog with no Account or Category shows inline errors on the Selects and focuses the first', async () => {
+    const api = mockCrudApi([tx(1)]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add a transaction' });
+    await within(dialog).findByRole('combobox', { name: 'Account' });
+    fireEvent.change(within(dialog).getByLabelText('Date'), { target: { value: '2026-04-02' } });
+    fireEvent.change(within(dialog).getByLabelText('Amount'), { target: { value: '5' } });
+    fireEvent.change(within(dialog).getByLabelText('Description'), { target: { value: 'Snack' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add transaction' }));
+
+    const account = within(dialog).getByRole('combobox', { name: 'Account' });
+    const category = within(dialog).getByRole('combobox', { name: 'Category' });
+    expect(await within(dialog).findByText('Choose an account.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Choose a category.')).toBeInTheDocument();
+    expect(account).toHaveAttribute('aria-invalid', 'true');
+    expect(account).toHaveAccessibleDescription('Choose an account.');
+    expect(category).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(account).toHaveFocus());
+    expect(api.writes).toHaveLength(0);
+  });
+
+  it('SPEC-010 T-030 the edit dialog shows the stored account and category in the kit Selects and saves a changed one', async () => {
+    const api = mockCrudApi([tx(1, { description: 'Weekly shop', accountId: 2, categoryId: 11 })]);
+    renderPage();
+    await screen.findByRole('table');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit Weekly shop' });
+    expect(dialog).toHaveAccessibleDescription('Change the details, then save.');
+    const account = await within(dialog).findByRole('combobox', { name: 'Account' });
+    const category = within(dialog).getByRole('combobox', { name: 'Category' });
+    expect(account).toHaveTextContent('Wallet');
+    expect(category).toHaveTextContent('Salary');
+
+    await choose(account, 'Main');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+    await waitFor(() =>
+      expect(api.writes).toEqual([
+        {
+          url: '/api/transactions/1',
+          method: 'PATCH',
+          body: { accountId: 1, categoryId: 11, occurredOn: '2026-03-15', amountMinor: 1250, description: 'Weekly shop' },
+        },
+      ]),
+    );
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Edit Weekly shop' })).toHaveFocus());
+  });
+
+  it('SPEC-010 T-030 Escape on the open Select list closes only the list; Escape again closes the dialog and focus returns to the trigger', async () => {
+    mockCrudApi([tx(1)]);
+    renderPage();
+    await screen.findByRole('table');
+    const trigger = screen.getByRole('button', { name: 'Add transaction' });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const dialog = await screen.findByRole('dialog', { name: 'Add a transaction' });
+    const account = await within(dialog).findByRole('combobox', { name: 'Account' });
+
+    fireEvent.keyDown(account, { key: 'ArrowDown' });
+    fireEvent.keyDown(await screen.findByRole('listbox'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    expect(screen.getByRole('dialog', { name: 'Add a transaction' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });
 
@@ -388,12 +559,12 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
 
     fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
     const form = await screen.findByRole('form', { name: 'Add a transaction' });
-    await within(form).findByRole('option', { name: 'Main' });
+    const account = await within(form).findByRole('combobox', { name: 'Account' });
     fireEvent.change(within(form).getByLabelText('Date'), { target: { value: '2026-04-02' } });
     fireEvent.change(within(form).getByLabelText('Amount'), { target: { value: '12.50' } });
     fireEvent.change(within(form).getByLabelText('Description'), { target: { value: 'Coffee beans' } });
-    fireEvent.change(within(form).getByLabelText('Account'), { target: { value: '1' } });
-    fireEvent.change(within(form).getByLabelText('Category'), { target: { value: '10' } });
+    await choose(account, 'Main');
+    await choose(within(form).getByRole('combobox', { name: 'Category' }), 'Groceries');
     fireEvent.click(within(form).getByRole('button', { name: 'Add transaction' }));
 
     await waitFor(() =>
@@ -440,7 +611,7 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     fireEvent.click(within(table).getByRole('button', { name: 'Edit Weekly shop' }));
 
     const form = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
-    await within(form).findByRole('option', { name: 'Main' });
+    await within(form).findByRole('combobox', { name: 'Account' });
     expect(within(form).getByLabelText('Amount')).toHaveValue('12.50');
     fireEvent.change(within(form).getByLabelText('Description'), { target: { value: 'Weekly shop (big)' } });
     fireEvent.change(within(form).getByLabelText('Amount'), { target: { value: '20' } });
@@ -466,7 +637,7 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
     await screen.findByRole('table');
     fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
     const form = await screen.findByRole('form', { name: 'Edit transaction Weekly shop' });
-    await within(form).findByRole('option', { name: 'Main' });
+    await within(form).findByRole('combobox', { name: 'Account' });
     fireEvent.click(within(form).getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByRole('form', { name: /^Edit transaction/ })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Edit Weekly shop' })).toHaveFocus());
@@ -526,14 +697,14 @@ describe('TransactionsPage mounts the add, edit and delete UI (Bug-002)', () => 
 
     fireEvent.click(screen.getByRole('button', { name: 'Add transaction' }));
     const add = await screen.findByRole('dialog', { name: 'Add a transaction' });
-    await within(add).findByRole('option', { name: 'Main' });
+    await within(add).findByRole('combobox', { name: 'Account' });
     expect(await serious(add)).toEqual([]);
     fireEvent.click(within(add).getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit Weekly shop' }));
     const edit = await screen.findByRole('dialog', { name: 'Edit Weekly shop' });
-    await within(edit).findByRole('option', { name: 'Main' });
+    await within(edit).findByRole('combobox', { name: 'Account' });
     expect(await serious(edit)).toEqual([]);
     fireEvent.click(within(edit).getByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
