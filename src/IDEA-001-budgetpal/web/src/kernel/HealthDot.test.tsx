@@ -145,8 +145,11 @@ describe('HealthDot in the guarded shell', () => {
   it('T-028 the signed-in shell footer holds the dot; there is no /health route and no nav entry for it', async () => {
     const stub = mockSession('authenticated', (url) => (url === '/api/health' ? okResponse() : undefined));
     renderGate('/');
-    const footer = await screen.findByRole('contentinfo');
-    expect(await within(footer).findByRole('status', { name: 'API status: ok' })).toBeInTheDocument();
+    const dot = await screen.findByRole('status', { name: 'API status: ok' });
+    // SPEC-010 Story-004: the dot lives in the sidebar footer (the shell has no footer landmark any more).
+    const footer = dot.closest('[data-sidebar="footer"]');
+    expect(footer).not.toBeNull();
+    expect(within(footer as HTMLElement).getByRole('status', { name: 'API status: ok' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Main' });
     expect(within(nav).queryByText(/status|health/i)).not.toBeInTheDocument();
     expect(registry.some((feature) => /health/.test(feature.path))).toBe(false);

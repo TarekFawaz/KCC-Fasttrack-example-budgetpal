@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { HealthDot } from './HealthDot';
 import { Shell } from './Shell';
 import { isPublic, type Feature } from './registry';
 import { useSession, useSignOut } from './session';
+
+/** The bare container of the guard states and the sign-in pages (no sidebar, no top bar). */
+const GATE_MAIN_CLASSES = 'mx-auto w-full max-w-3xl p-4 md:p-8';
 
 /** The only pages an anonymous visitor may open; every other URL goes to `/login`. */
 const ANONYMOUS_PATHS = ['/login', '/signup'];
@@ -41,30 +44,6 @@ interface AuthGateProps {
   features: Feature[];
 }
 
-function LogOutControl() {
-  const signOut = useSignOut();
-  const navigate = useNavigate();
-  const [failed, setFailed] = useState(false);
-
-  const onClick = () => {
-    setFailed(false);
-    // The promise form still resolves after this control unmounts (the session turns anonymous first).
-    signOut.mutateAsync().then(
-      () => navigate('/login', { replace: true }),
-      () => setFailed(true),
-    );
-  };
-
-  return (
-    <>
-      <button type="button" className="gate-button" onClick={onClick} disabled={signOut.isPending}>
-        Log out
-      </button>
-      {failed ? <p role="alert">Log out failed. Try again.</p> : null}
-    </>
-  );
-}
-
 /**
  * The UX guard in front of the shell. It decides from the session what to show; the API stays the
  * authority (a bypassed page still gets 401, which the query client turns into an anonymous
@@ -72,11 +51,12 @@ function LogOutControl() {
  */
 export function AuthGate({ features }: AuthGateProps) {
   const session = useSession();
+  const signOut = useSignOut();
   const location = useLocation();
 
   if (session.status === 'loading') {
     return (
-      <main className="gate-main">
+      <main className={GATE_MAIN_CLASSES}>
         <p role="status">Loading...</p>
       </main>
     );
@@ -84,12 +64,12 @@ export function AuthGate({ features }: AuthGateProps) {
 
   if (session.status === 'error') {
     return (
-      <main className="gate-main">
+      <main className={GATE_MAIN_CLASSES}>
         <div role="alert">
           <p>We could not check your session. Please try again.</p>
-          <button type="button" className="gate-button" onClick={session.retry}>
+          <Button type="button" variant="outline" onClick={session.retry}>
             Retry
-          </button>
+          </Button>
         </div>
       </main>
     );
@@ -106,7 +86,7 @@ export function AuthGate({ features }: AuthGateProps) {
             key={feature.id}
             path={feature.path}
             element={
-              <main className="gate-main">
+              <main className={GATE_MAIN_CLASSES}>
                 <feature.component />
               </main>
             }
@@ -140,14 +120,24 @@ export function AuthGate({ features }: AuthGateProps) {
             key={feature.id}
             path={feature.path}
             element={
-              <main className="gate-main">
+              <main className={GATE_MAIN_CLASSES}>
                 <feature.component />
               </main>
             }
           />
         ),
       )}
-      <Route path="*" element={<Shell features={protectedFeatures} actions={<LogOutControl />} footer={<HealthDot />} />} />
+      <Route
+        path="*"
+        element={
+          <Shell
+            features={protectedFeatures}
+            user={session.user}
+            onSignOut={() => signOut.mutateAsync()}
+            footer={<HealthDot />}
+          />
+        }
+      />
     </Routes>
   );
 }

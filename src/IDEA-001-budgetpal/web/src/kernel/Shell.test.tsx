@@ -1,5 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { ReactNode } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { MemoryRouter } from 'react-router-dom';
@@ -8,10 +9,10 @@ import { Shell } from './Shell';
 import { buildRegistry } from './registry';
 
 function Fake() {
-  return <p>fake feature content</p>;
+  return <h1>Fake heading</h1>;
 }
 function Other() {
-  return <p>other feature content</p>;
+  return <h1>Other heading</h1>;
 }
 
 const registry = buildRegistry({
@@ -21,71 +22,95 @@ const registry = buildRegistry({
 
 const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true } as const;
 
-function renderShell(path = '/') {
+function renderShell(path = '/', footer?: ReactNode) {
   return render(
     <MemoryRouter initialEntries={[path]} future={routerFuture}>
-      <Shell features={registry} />
+      <Shell features={registry} footer={footer} />
     </MemoryRouter>,
   );
 }
 
-describe('Shell with a fake feature', () => {
-  it('T-013 shows the nav link in order and the route content with no shared-file edit', () => {
+const kernelDir = __dirname;
+const webDir = resolve(__dirname, '..', '..');
+
+describe('Shell with fake features', () => {
+  it('SPEC-010 T-036 shows the nav in registry order and the route content with no shared-file edit', () => {
     renderShell('/');
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    const links = within(nav).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Fake', 'Other']);
-    expect(links[0]).toHaveAttribute('href', '/');
-    expect(links[1]).toHaveAttribute('href', '/other');
-    expect(screen.getByText('fake feature content')).toBeInTheDocument();
+    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual(['Fake', 'Other']);
+    expect(screen.getByRole('heading', { name: 'Fake heading' })).toBeInTheDocument();
   });
 
-  it('T-013 renders the second feature on its own path and a not-found page elsewhere', () => {
+  it('SPEC-010 T-036 renders the second feature on its own path and a not-found page elsewhere', () => {
     const { unmount } = renderShell('/other');
-    expect(screen.getByText('other feature content')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Other heading' })).toBeInTheDocument();
     unmount();
     renderShell('/missing');
     expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
   });
+});
 
-  it('T-014 has header, nav and main landmarks and no serious or critical axe violation', async () => {
+describe('Shell top bar', () => {
+  it('SPEC-010 T-039 shows the current page title as plain text and the page keeps exactly one h1', () => {
+    renderShell('/other');
+    const banner = screen.getByRole('banner');
+    const title = within(banner).getByText('Other');
+    expect(title.tagName).toBe('SPAN');
+    expect(within(banner).queryByRole('heading')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  });
+
+  it('SPEC-010 T-039 follows the route and falls back to the app name on an unknown page', () => {
+    const first = renderShell('/');
+    expect(within(screen.getByRole('banner')).getByText('Fake')).toBeInTheDocument();
+    first.unmount();
+    renderShell('/missing');
+    expect(within(screen.getByRole('banner')).getByText('BudgetPal')).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  });
+
+  it('SPEC-010 T-039 renders no user menu without a user and puts the footer slot in the sidebar', () => {
+    renderShell('/', <span>footer content</span>);
+    expect(within(screen.getByRole('banner')).queryByRole('button')).not.toBeInTheDocument();
+    const footer = document.querySelector('[data-sidebar="footer"]');
+    expect(footer).not.toBeNull();
+    expect(within(footer as HTMLElement).getByText('footer content')).toBeInTheDocument();
+  });
+
+  it('SPEC-010 T-039 renders no sidebar footer when no footer content is given', () => {
+    renderShell('/');
+    expect(document.querySelector('[data-sidebar="footer"]')).toBeNull();
+  });
+});
+
+describe('Shell landmarks and files', () => {
+  it('SPEC-010 T-042 has the skip link, nav, main#main and banner, and no serious or critical axe violation', async () => {
     const { container } = renderShell('/');
+    expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(within(screen.getByRole('banner')).getByRole('navigation')).toBeInTheDocument();
-    expect(screen.getByRole('main')).toBeInTheDocument();
+    const main = screen.getByRole('main');
+    expect(main).toHaveAttribute('id', 'main');
+    expect(screen.getAllByRole('main')).toHaveLength(1);
 
-    // jsdom has no layout engine, so colour contrast is checked visually by the verifier.
+    // jsdom has no layout engine, so colour contrast is proven by the token-pair test (SPEC-010 T-008).
     const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
     const blocking = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     expect(blocking.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
   });
-});
 
-describe('Shell optional slots', () => {
-  it('T-017 renders the actions in the banner and the footer content in a footer landmark', () => {
-    render(
-      <MemoryRouter future={routerFuture}>
-        <Shell features={registry} actions={<button type="button">Log out</button>} footer={<span>footer content</span>} />
-      </MemoryRouter>,
-    );
-    expect(within(screen.getByRole('banner')).getByRole('button', { name: 'Log out' })).toBeInTheDocument();
-    expect(within(screen.getByRole('contentinfo')).getByText('footer content')).toBeInTheDocument();
+  it('SPEC-010 T-042 deletes shell.css and main.tsx imports index.css in its place', () => {
+    expect(existsSync(resolve(kernelDir, 'shell.css'))).toBe(false);
+    const main = readFileSync(resolve(webDir, 'src', 'main.tsx'), 'utf8');
+    expect(main).toMatch(/import\s+['"]\.\/index\.css['"]/);
+    expect(main).not.toContain('shell.css');
   });
 
-  it('T-017 renders no actions and no footer landmark when the slots are not given', () => {
-    renderShell('/');
-    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-  });
-});
-
-describe('shell.css', () => {
-  const css = readFileSync(resolve(__dirname, 'shell.css'), 'utf8');
-
-  it('T-014 has a visible focus style, dark-scheme tokens and a 768 px breakpoint', () => {
-    expect(css).toMatch(/:focus-visible\s*\{[^}]*outline:\s*3px/);
-    expect(css).toMatch(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{[^@]*--bg:/);
-    expect(css).toMatch(/@media\s*\(min-width:\s*768px\)/);
-    expect(css).toMatch(/:root\s*\{[^}]*--bg:[^}]*--text:/);
+  it('SPEC-010 T-042 no kernel source keeps a shell.css class or an inline style object', () => {
+    for (const name of ['Shell.tsx', 'AppSidebar.tsx', 'AuthGate.tsx']) {
+      const text = readFileSync(resolve(kernelDir, name), 'utf8');
+      expect(text, name).not.toMatch(/shell\.css|gate-main|gate-button|shell-header|skip-link/);
+      expect(text, name).not.toMatch(/style=\{\{/);
+    }
   });
 });

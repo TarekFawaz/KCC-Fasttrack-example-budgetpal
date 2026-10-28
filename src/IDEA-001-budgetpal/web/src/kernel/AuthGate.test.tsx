@@ -203,7 +203,7 @@ describe('AuthGate signed-in user', () => {
     expect(locationText()).toBe('/logout|no-from');
   });
 
-  it('T-017 shows the header, the nav of non-public features in registry order, the routes and the log-out control', async () => {
+  it('SPEC-010 T-041 shows the banner, the nav of non-public features in registry order, the routes and no separate log-out control', async () => {
     mockSession('authenticated');
     renderGate('/budgets');
     const nav = await screen.findByRole('navigation', { name: 'Main' });
@@ -211,7 +211,10 @@ describe('AuthGate signed-in user', () => {
     expect(links.map((link) => link.textContent)).toEqual(['Dashboard', 'Budgets']);
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/', '/budgets']);
     expect(within(nav).queryByText(/log in|sign up|log out/i)).not.toBeInTheDocument();
-    expect(within(screen.getByRole('banner')).getByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    // The SPEC-009 log-out button is gone: Log out only exists inside the user menu, which starts closed.
+    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Log out' })).not.toBeInTheDocument();
+    expect(within(screen.getByRole('banner')).getByRole('button', { name: TEST_USER.email })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Budgets page' })).toBeInTheDocument();
   });
 
@@ -222,24 +225,74 @@ describe('AuthGate signed-in user', () => {
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
   });
 
-  it('T-017 the log-out control ends the session and lands on /login without a remembered target', async () => {
+  async function openUserMenu() {
+    const trigger = await screen.findByRole('button', { name: TEST_USER.email });
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    return screen.findByRole('menu');
+  }
+
+  it('SPEC-010 T-040 the user menu button is named by the email and the menu shows the email and Log out', async () => {
+    mockSession('authenticated');
+    renderGate('/budgets');
+    const menu = await openUserMenu();
+    expect(within(menu).getByText(TEST_USER.email)).toBeInTheDocument();
+    expect(within(menu).getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument();
+  });
+
+  it('SPEC-010 T-040 Escape closes the menu and the arrow keys move between items', async () => {
+    mockSession('authenticated');
+    renderGate('/budgets');
+    const menu = await openUserMenu();
+    const item = within(menu).getByRole('menuitem', { name: 'Log out' });
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    await waitFor(() => expect(item).toHaveFocus());
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: TEST_USER.email })).toBeInTheDocument();
+  });
+
+  it('SPEC-010 T-040 Enter on Log out ends the session and lands on /login without a remembered target', async () => {
     const stub = mockSession('authenticated', (url, init) =>
       url === '/api/auth/logout' && init?.method === 'POST' ? new Response(null, { status: 204 }) : undefined,
     );
     const { client } = renderGate('/budgets');
-    fireEvent.click(await screen.findByRole('button', { name: 'Log out' }));
+    const menu = await openUserMenu();
+    const item = within(menu).getByRole('menuitem', { name: 'Log out' });
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Enter' });
     await waitFor(() => expect(locationText()).toBe('/login|no-from'));
     expect(screen.getByRole('heading', { name: 'Login page' })).toBeInTheDocument();
     expect(client.getQueryData(SESSION_KEY)).toBeNull();
     expect(stub.mock.calls.some(([url, init]) => url === '/api/auth/logout' && init?.method === 'POST')).toBe(true);
   });
 
-  it('T-017 a failed log-out keeps the user signed in and says so', async () => {
+  it('SPEC-010 T-040 a failed log-out keeps the user signed in and says so', async () => {
     mockSession('authenticated', (url) => (url === '/api/auth/logout' ? new Response(null, { status: 500 }) : undefined));
     const { client } = renderGate('/budgets');
-    fireEvent.click(await screen.findByRole('button', { name: 'Log out' }));
+    const menu = await openUserMenu();
+    const item = within(menu).getByRole('menuitem', { name: 'Log out' });
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Enter' });
     expect(await screen.findByRole('alert')).toHaveTextContent('Log out failed');
     expect(client.getQueryData(SESSION_KEY)).toEqual(TEST_USER);
+    expect(locationText()).toBe('/budgets|no-from');
+  });
+
+  it('SPEC-010 T-041 the API status dot sits in the sidebar footer, not in the top bar', async () => {
+    mockSession('authenticated', (url) => (url === '/api/health' ? new Response('{}', { status: 200 }) : undefined));
+    renderGate('/');
+    const dot = await screen.findByRole('status', { name: /API status/ });
+    expect(dot.closest('[data-sidebar="footer"]')).not.toBeNull();
+    expect(within(screen.getByRole('banner')).queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('SPEC-010 T-041 the guard states render no sidebar, banner or user menu', async () => {
+    mockSession('failing');
+    renderGate('/');
+    await screen.findByRole('alert');
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: TEST_USER.email })).not.toBeInTheDocument();
+    expect(document.querySelector('[data-sidebar]')).toBeNull();
   });
 });
 

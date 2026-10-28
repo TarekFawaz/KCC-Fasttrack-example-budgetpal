@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthGate } from './kernel/AuthGate';
 import { queryClient } from './kernel/queryClient';
 import { features } from './kernel/registry';
-import './kernel/shell.css';
+import './index.css';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element in index.html');

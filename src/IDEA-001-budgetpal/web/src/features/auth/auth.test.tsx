@@ -10,7 +10,7 @@ import { AuthGate, safeTarget } from '../../kernel/AuthGate';
 import { createAppQueryClient } from '../../kernel/queryClient';
 import { buildRegistry, features, isPublic, type Feature } from '../../kernel/registry';
 import { SESSION_KEY } from '../../kernel/session';
-import { mockSession } from '../../test/session';
+import { mockSession, TEST_USER } from '../../test/session';
 import { LOGIN_FAILED_MESSAGE, LoginPage, LogOutPage } from './LoginPage';
 import { SignUpPage } from './SignUpPage';
 import { features as authFeatures } from './feature';
@@ -449,6 +449,12 @@ describe('return to the target after sign-in', () => {
   });
 });
 
+/** SPEC-010 Story-004: Log out lives in the top-bar user menu (button named by the email), not in a separate button. */
+async function logOutFromMenu() {
+  fireEvent.keyDown(await screen.findByRole('button', { name: TEST_USER.email }), { key: 'Enter' });
+  fireEvent.click(await screen.findByRole('menuitem', { name: 'Log out' }));
+}
+
 describe('log out inside the guarded app', () => {
   it('T-024 the shell control posts logout, clears the cache, makes the session anonymous and lands on /login', async () => {
     const stub = mockSession('authenticated', (url, init) =>
@@ -457,7 +463,7 @@ describe('log out inside the guarded app', () => {
     const { client } = renderGuarded('/');
     expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
     client.setQueryData(['budgets', 'month'], { secret: 'previous user data' });
-    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    await logOutFromMenu();
     expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument();
     expect(where()).toBe('/login');
     expect(client.getQueryData(SESSION_KEY)).toBeNull();
@@ -482,7 +488,7 @@ describe('log out inside the guarded app', () => {
     mockSession('authenticated', expired);
     const control = renderGuarded('/');
     expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    await logOutFromMenu();
     expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument();
     expect(where()).toBe('/login');
     control.unmount();
